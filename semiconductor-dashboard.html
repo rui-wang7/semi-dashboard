@@ -1,0 +1,2032 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Semiconductor Supply Chain Dashboard</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    :root {
+      --bg: #f1f5f9;
+      --header: #0f172a;
+      --accent: #3b82f6;
+      --accent-lt: #dbeafe;
+      --panel: #ffffff;
+      --line: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --good: #10b981;
+      --warn: #f59e0b;
+      --bad: #ef4444;
+      --radius: 14px;
+      --shadow: 0 4px 16px rgba(15,23,42,0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; font-size: 14px; line-height: 1.5; }
+    button { cursor: pointer; font: inherit; }
+    input, select { font: inherit; }
+
+    /* ── HEADER ─────────────────────────────────────────────────── */
+    .app-header {
+      position: sticky; top: 0; z-index: 30;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%);
+      border-bottom: 2px solid rgba(59,130,246,0.4);
+      padding: 0 24px;
+      display: flex; align-items: center; gap: 24px;
+      min-height: 64px;
+      flex-wrap: wrap;
+    }
+    .app-header::before {
+      content: '';
+      position: absolute; inset: 0 0 auto 0; height: 2px;
+      background: linear-gradient(90deg, transparent, #3b82f6 30%, #60a5fa 70%, transparent);
+    }
+    .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; flex-shrink: 0; }
+    .logo-icon { font-size: 22px; }
+    .logo-text { color: #f1f5f9; font-size: 16px; font-weight: 700; letter-spacing: -0.3px; }
+    .logo-sub { color: #94a3b8; font-size: 11px; font-weight: 400; }
+
+    .tab-nav { display: flex; gap: 4px; align-items: center; }
+    .tab-btn {
+      padding: 7px 16px; border-radius: 8px; border: 1px solid transparent;
+      background: transparent; color: #94a3b8; font-size: 13px; font-weight: 500;
+      transition: all 0.15s;
+    }
+    .tab-btn:hover { color: #e2e8f0; background: rgba(255,255,255,0.06); }
+    .tab-btn.active { background: rgba(59,130,246,0.18); color: #60a5fa; border-color: rgba(59,130,246,0.35); }
+
+    .china-toggle {
+      margin-left: auto; display: flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 20px; padding: 3px; flex-shrink: 0;
+    }
+    .toggle-opt {
+      padding: 5px 14px; border-radius: 16px; border: none; background: transparent;
+      color: #94a3b8; font-size: 12px; font-weight: 500; transition: all 0.15s;
+    }
+    .toggle-opt.active { background: #3b82f6; color: #fff; }
+
+    /* ── SUPPLY CHAIN FLOW ──────────────────────────────────────── */
+    .flow-bar {
+      background: #1e293b;
+      border-bottom: 1px solid #334155;
+      padding: 16px 24px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .flow-bar::-webkit-scrollbar { height: 4px; }
+    .flow-bar::-webkit-scrollbar-track { background: #1e293b; }
+    .flow-bar::-webkit-scrollbar-thumb { background: #475569; border-radius: 2px; }
+    #flowSvg { display: block; min-width: 1100px; }
+
+    /* ── VIEWS ──────────────────────────────────────────────────── */
+    .view { display: none; padding: 24px; max-width: 1400px; margin: 0 auto; }
+    .view.active { display: block; }
+
+    /* ── STAT CARDS ─────────────────────────────────────────────── */
+    .stat-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 14px; margin-bottom: 24px; }
+    @media (max-width: 1100px) { .stat-row { grid-template-columns: repeat(3, 1fr); } }
+    @media (max-width: 600px) { .stat-row { grid-template-columns: repeat(2, 1fr); } }
+    .stat-card {
+      background: var(--panel); border-radius: var(--radius); padding: 16px 18px;
+      box-shadow: var(--shadow); border: 1px solid var(--line);
+    }
+    .stat-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+    .stat-value { font-size: 24px; font-weight: 700; color: var(--text); line-height: 1.1; }
+    .stat-sub { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+    /* ── CHART CARDS ────────────────────────────────────────────── */
+    .chart-card {
+      background: var(--panel); border-radius: var(--radius); padding: 20px;
+      box-shadow: var(--shadow); border: 1px solid var(--line);
+    }
+    .chart-title { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 16px; text-transform: uppercase; letter-spacing: 0.4px; }
+
+    /* ── SEGMENT DETAIL ─────────────────────────────────────────── */
+    .seg-header {
+      border-radius: var(--radius); padding: 20px 24px; margin-bottom: 20px;
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid #334155;
+    }
+    .seg-icon { font-size: 32px; }
+    .seg-name { font-size: 22px; font-weight: 700; color: #f1f5f9; }
+    .seg-desc { font-size: 13px; color: #94a3b8; margin-top: 2px; }
+    .seg-badges { display: flex; gap: 8px; flex-wrap: wrap; margin-left: auto; }
+    .badge {
+      padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;
+    }
+    .badge-blue { background: rgba(59,130,246,0.2); color: #60a5fa; border: 1px solid rgba(59,130,246,0.3); }
+    .badge-green { background: rgba(16,185,129,0.15); color: #34d399; border: 1px solid rgba(16,185,129,0.3); }
+    .badge-red { background: rgba(239,68,68,0.15); color: #f87171; border: 1px solid rgba(239,68,68,0.3); }
+    .badge-amber { background: rgba(245,158,11,0.15); color: #fbbf24; border: 1px solid rgba(245,158,11,0.3); }
+    .badge-gray { background: rgba(100,116,139,0.15); color: #94a3b8; border: 1px solid rgba(100,116,139,0.3); }
+
+    .detail-grid { display: grid; grid-template-columns: 1fr 380px; gap: 20px; margin-bottom: 20px; }
+    @media (max-width: 900px) { .detail-grid { grid-template-columns: 1fr; } }
+
+    /* ── PLAYER CARDS ───────────────────────────────────────────── */
+    .player-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .player-card {
+      background: var(--panel); border-radius: 10px; padding: 14px 16px;
+      border: 1px solid var(--line); box-shadow: 0 2px 8px rgba(15,23,42,0.05);
+      transition: box-shadow 0.15s, transform 0.15s;
+    }
+    .player-card:hover { box-shadow: 0 6px 20px rgba(15,23,42,0.12); transform: translateY(-1px); }
+    .player-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+    .player-name { font-size: 14px; font-weight: 700; color: var(--text); }
+    .player-hq { font-size: 11px; color: var(--muted); }
+    .player-ticker { font-size: 10px; color: var(--muted); background: #f1f5f9; padding: 2px 6px; border-radius: 4px; }
+    .player-role { font-size: 12px; color: var(--muted); margin-bottom: 10px; line-height: 1.4; }
+    .share-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+    .share-label { font-size: 11px; color: var(--muted); }
+    .share-pct { font-size: 13px; font-weight: 700; }
+    .share-bar-bg { height: 5px; background: #e2e8f0; border-radius: 3px; overflow: hidden; }
+    .share-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+    .rev-row { display: flex; justify-content: space-between; align-items: center; margin-top: 8px; padding-top: 8px; border-top: 1px solid #f1f5f9; }
+    .rev-val { font-size: 13px; font-weight: 600; color: var(--text); }
+    .china-chip {
+      font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+    }
+    .china-high { background: #fee2e2; color: #991b1b; }
+    .china-medium { background: #fef3c7; color: #92400e; }
+    .china-low { background: #d1fae5; color: #065f46; }
+
+    /* ── ROADMAP ─────────────────────────────────────────────────── */
+    .roadmap-wrap {
+      background: var(--panel); border-radius: var(--radius); padding: 20px 24px;
+      box-shadow: var(--shadow); border: 1px solid var(--line); margin-bottom: 20px;
+      overflow-x: auto;
+    }
+    .roadmap-timeline {
+      display: flex; align-items: flex-start; gap: 0;
+      min-width: 700px; padding: 10px 0 0;
+    }
+    .roadmap-item { display: flex; flex-direction: column; align-items: center; flex: 1; min-width: 120px; }
+    .roadmap-connector { flex: 1; height: 2px; margin-top: 12px; }
+    .roadmap-dot { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+    .roadmap-dot-past { background: #e2e8f0; color: #64748b; }
+    .roadmap-dot-now { background: #3b82f6; color: #fff; box-shadow: 0 0 0 4px rgba(59,130,246,0.2); }
+    .roadmap-dot-future { background: #d1fae5; color: #065f46; border: 2px dashed #10b981; }
+    .roadmap-year { font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 8px; }
+    .roadmap-text { font-size: 11px; color: var(--text); text-align: center; margin-top: 4px; line-height: 1.4; max-width: 110px; }
+
+    /* ── CHINA PANEL ────────────────────────────────────────────── */
+    .china-panel {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border-radius: var(--radius); padding: 20px 24px;
+      border: 1px solid #334155; margin-bottom: 20px;
+    }
+    .china-panel h3 { font-size: 13px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 12px; }
+    .china-summary { font-size: 13px; color: #e2e8f0; margin-bottom: 12px; line-height: 1.6; }
+    .china-initiatives { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+    .china-initiatives li { font-size: 13px; color: #cbd5e1; display: flex; align-items: flex-start; gap: 8px; }
+    .china-initiatives li::before { content: '›'; color: #f59e0b; font-weight: 700; flex-shrink: 0; }
+
+    /* ── ANALYTICS ──────────────────────────────────────────────── */
+    .analytics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    @media (max-width: 900px) { .analytics-grid { grid-template-columns: 1fr; } }
+
+    /* ── MISC ───────────────────────────────────────────────────── */
+    .section-title {
+      font-size: 13px; font-weight: 700; color: var(--muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin: 0 0 14px; padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+    .asp-box {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+      padding: 12px 16px; margin-bottom: 16px; font-size: 12px; color: var(--muted);
+    }
+    .asp-box strong { color: var(--text); }
+
+    .empty-state {
+      text-align: center; padding: 60px 24px; color: var(--muted);
+    }
+    .empty-state .big-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* ── SEGMENT SUB-TABS ───────────────────────────────────────── */
+    .seg-tabs { display: flex; gap: 4px; margin-bottom: 20px; }
+    .seg-tab-btn {
+      padding: 8px 18px; border-radius: 8px; border: 1px solid var(--line);
+      background: var(--panel); color: var(--muted); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.15s;
+    }
+    .seg-tab-btn:hover { background: #f8fafc; color: var(--text); }
+    .seg-tab-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .seg-tab-panel { display: none; }
+    .seg-tab-panel.active { display: block; }
+
+    /* ── TECH COMPARE TABLE ─────────────────────────────────────── */
+    .tech-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }
+    .tech-table th { background: #f8fafc; padding: 10px 12px; text-align: left; font-weight: 600; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.4px; border-bottom: 2px solid var(--line); }
+    .tech-table td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: top; line-height: 1.5; }
+    .tech-table tr:hover td { background: #f8fafc; }
+    .tech-winner { background: #f0fdf4; border-left: 3px solid #10b981; }
+    .pros-list, .cons-list { list-style: none; padding: 0; margin: 0; }
+    .pros-list li::before { content: '✓ '; color: #10b981; font-weight: 700; }
+    .cons-list li::before { content: '✗ '; color: #ef4444; font-weight: 700; }
+    .share-forecast { display: flex; flex-direction: column; gap: 3px; }
+    .share-forecast-bar { height: 6px; border-radius: 3px; margin-top: 2px; }
+    .tech-screenshots { display: flex; flex-wrap: wrap; gap: 16px; margin-bottom: 20px; }
+    .tech-screenshot-card {
+      background: var(--panel); border: 1px solid var(--line); border-radius: 10px;
+      overflow: hidden; flex: 1 1 340px; max-width: 520px;
+      box-shadow: var(--shadow);
+    }
+    .tech-screenshot-card img { width: 100%; height: auto; display: block; }
+    .tech-screenshot-caption { padding: 10px 14px; font-size: 11px; color: var(--muted); border-top: 1px solid var(--line); }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════ HEADER ═══════════════════════════════════ -->
+<header class="app-header">
+  <div class="logo">
+    <span class="logo-icon">⚙️</span>
+    <div>
+      <div class="logo-text">Semiconductor Dashboard</div>
+      <div class="logo-sub">Global Supply Chain Intelligence · 2024</div>
+    </div>
+  </div>
+
+  <nav class="tab-nav">
+    <button class="tab-btn active" onclick="showView('overview')">📊 Overview</button>
+    <button class="tab-btn" onclick="showView('chain')">🔗 Supply Chain</button>
+    <button class="tab-btn" onclick="showView('analytics')">📈 Analytics</button>
+  </nav>
+
+  <div class="china-toggle">
+    <button class="toggle-opt active" id="toggleGlobal" onclick="setMode('global')">🌍 Global</button>
+    <button class="toggle-opt" id="toggleChina" onclick="setMode('china')">🇨🇳 China Focus</button>
+  </div>
+</header>
+
+<!-- ═══════════════════════ SUPPLY CHAIN FLOW ══════════════════════════ -->
+<div class="flow-bar">
+  <svg id="flowSvg" height="110"></svg>
+</div>
+
+<!-- ═══════════════════════ VIEW: OVERVIEW ════════════════════════════ -->
+<div id="view-overview" class="view active">
+  <div class="stat-row" id="overviewStats"></div>
+
+  <!-- Historical TAM + WFE charts -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px">
+    <div class="chart-card">
+      <div class="chart-title">Global Semiconductor Market 1987–2030e ($B)
+        <span style="font-weight:400;color:#94a3b8;font-size:10px;margin-left:8px">Sources: WSTS, SIA Factbook 2025, Gartner</span>
+      </div>
+      <canvas id="chartTAMHistory" height="220"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Global WFE Spending 2015–2030e ($B) + China Share %
+        <span style="font-weight:400;color:#94a3b8;font-size:10px;margin-left:8px">Sources: SEMI WFE Report, VLSI Research</span>
+      </div>
+      <canvas id="chartWFEHistory" height="220"></canvas>
+    </div>
+  </div>
+
+  <!-- Segment TAM breakdown + China donut -->
+  <div style="display:grid;grid-template-columns:2fr 1fr;gap:20px;margin-bottom:24px">
+    <div class="chart-card">
+      <div class="chart-title">TAM by Segment ($B, 2024)</div>
+      <canvas id="chartOverviewBar" height="260"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">China vs Global TAM Split</div>
+      <canvas id="chartChinaDonut" height="200"></canvas>
+    </div>
+  </div>
+
+  <div class="chart-card">
+    <div class="chart-title">Supply Chain Snapshot — All Segments</div>
+    <div id="overviewTable"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ VIEW: SUPPLY CHAIN ═══════════════════════ -->
+<div id="view-chain" class="view">
+  <div id="segmentDetail">
+    <div class="empty-state">
+      <div class="big-icon">👆</div>
+      <p>Click a segment in the supply chain flow above to explore market data, players, and technology roadmap.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════ VIEW: ANALYTICS ══════════════════════════ -->
+<div id="view-analytics" class="view">
+
+  <!-- ── Stock Monitor ─────────────────────────────────────────── -->
+  <div class="chart-card" style="margin-bottom:20px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+      <div>
+        <div class="chart-title" style="margin-bottom:0">📈 Semiconductor Stock Monitor — Weekly Spike Alerts</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:3px">Flags: large-cap ≥±5% · others ≥±10% · <span id="stockLastUpdated">Loading...</span></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select id="stockGroupFilter" onchange="filterStockTable()" style="padding:5px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:12px;background:#fff">
+          <option value="">All Groups</option>
+        </select>
+        <button onclick="loadStockData(true)" style="padding:6px 14px;background:#3b82f6;color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600">↻ Refresh</button>
+      </div>
+    </div>
+    <div id="stockSummaryRow" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div id="stockSpikeTable"></div>
+    <div id="stockPriceGrid" style="margin-top:20px"></div>
+  </div>
+
+  <!-- ── Market Analytics Charts ───────────────────────────────── -->
+  <div class="analytics-grid">
+    <div class="chart-card">
+      <div class="chart-title">TAM vs. CAGR by Segment (bubble size = China share %)</div>
+      <canvas id="chartBubble" height="320"></canvas>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">China vs. Rest-of-World Revenue Split ($B)</div>
+      <canvas id="chartStackedBar" height="320"></canvas>
+    </div>
+  </div>
+  <div style="margin-top:20px" class="chart-card">
+    <div class="chart-title">Competitive Landscape — Revenue of Top Players per Segment ($B)</div>
+    <canvas id="chartMultiBar" height="300"></canvas>
+  </div>
+</div>
+
+<!-- ═══════════════════════ JAVASCRIPT ══════════════════════════════ -->
+<script>
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  DATA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const SEGMENTS = [
+  {
+    id: 'eda',
+    name: 'EDA Tools',
+    shortName: 'EDA',
+    icon: '🛠',
+    color: '#6366f1',
+    position: 1,
+    tam_usd_bn: 14.5,
+    cagr_pct: 8.2,
+    tam_china_usd_bn: 1.8,
+    china_share_pct: 12,
+    asp_note: '$1M–$5M/yr per enterprise EDA suite license',
+    volume_note: '~500 major design centers globally',
+    description: 'Software tools used by chip designers for RTL, simulation, synthesis, place-and-route, and verification.',
+    players: [
+      { name: 'Synopsys', hq: '🇺🇸 USA', revenue_usd_bn: 5.84, market_share_pct: 32, role: 'Full EDA suite, IP library, security tools, AI-assisted PnR', china_exposure: 'high', ticker: 'SNPS' },
+      { name: 'Cadence Design', hq: '🇺🇸 USA', revenue_usd_bn: 4.09, market_share_pct: 28, role: 'Virtuoso analog, Innovus digital, Palladium emulation', china_exposure: 'high', ticker: 'CDNS' },
+      { name: 'Siemens EDA (Mentor)', hq: '🇩🇪 Germany', revenue_usd_bn: 2.61, market_share_pct: 18, role: 'PCB, IC packaging, Calibre DRC/LVS signoff', china_exposure: 'medium', ticker: 'SIEGY' },
+      { name: 'Ansys', hq: '🇺🇸 USA', revenue_usd_bn: 1.16, market_share_pct: 8, role: 'Structural & thermal simulation, power integrity', china_exposure: 'medium', ticker: 'ANSS' },
+      { name: 'Empyrean (华大九天)', hq: '🇨🇳 China', revenue_usd_bn: 0.32, market_share_pct: 2, role: 'Domestic EDA for mature nodes; backed by national funds', china_exposure: 'low', ticker: 'SZ301261' },
+      { name: 'Others', hq: '—', revenue_usd_bn: 1.45, market_share_pct: 10, role: 'Niche tools: formal verification, DSPF extraction, etc.', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2018, milestone: '7nm process nodes fully supported in major EDA suites' },
+      { year: 2020, milestone: 'Cloud-native EDA pilots on AWS/GCP — elastic compute for simulation' },
+      { year: 2022, milestone: 'AI-assisted place-and-route (Synopsys DSO.ai, Cadence Cerebrus) go mainstream' },
+      { year: 2024, milestone: '3D-IC multi-die co-simulation; EDA tools extended for chiplet design' },
+      { year: 2026, milestone: 'LLM-assisted RTL generation; generative AI for schematic entry (preview)' },
+      { year: 2028, milestone: 'Autonomous silicon design loop — AI closes the loop from spec to GDS' },
+    ],
+    china: {
+      summary: 'China EDA market ~12% of global ($1.8B). Heavily dependent on Synopsys and Cadence for advanced nodes. US export controls since 2022 restrict access to EDA tools for sub-7nm processes in China.',
+      initiatives: [
+        'Empyrean Software (华大九天) — largest domestic EDA vendor; covers analog, PDK, IC layout for mature nodes',
+        'National IC Design Center (ICCAD) funding ~¥10B+ for domestic EDA ecosystem development',
+        'Huawei\'s internal EDA tools rumored for self-use at advanced nodes',
+        'Restrictions: BIS rules block US EDA vendors from supplying certain advanced-node tools to Chinese fabs/IDMs',
+      ],
+      risk_level: 'high',
+    },
+  },
+  {
+    id: 'ip',
+    name: 'IP Cores',
+    shortName: 'IP',
+    icon: '🧩',
+    color: '#8b5cf6',
+    position: 2,
+    tam_usd_bn: 8.5,
+    cagr_pct: 7.5,
+    tam_china_usd_bn: 0.9,
+    china_share_pct: 10,
+    asp_note: '$0.5M–$10M up-front license + $0.01–$0.10 royalty/chip',
+    volume_note: '~15 billion chips shipped annually using ARM cores',
+    description: 'Pre-designed, pre-verified silicon logic blocks (CPU cores, interfaces, memory controllers) licensed to chip designers.',
+    players: [
+      { name: 'ARM Holdings', hq: '🇬🇧 UK', revenue_usd_bn: 3.83, market_share_pct: 45, role: 'CPU/GPU IP for mobile, server, IoT, automotive (Cortex, Neoverse)', china_exposure: 'medium', ticker: 'ARM' },
+      { name: 'Synopsys IP', hq: '🇺🇸 USA', revenue_usd_bn: 1.70, market_share_pct: 20, role: 'Interface IP (PCIe, USB, DDR), embedded memories, security IP', china_exposure: 'high', ticker: 'SNPS' },
+      { name: 'Cadence IP', hq: '🇺🇸 USA', revenue_usd_bn: 1.02, market_share_pct: 12, role: 'PHY IP, verification IP, NoC interconnect IP', china_exposure: 'high', ticker: 'CDNS' },
+      { name: 'CEVA', hq: '🇺🇸 USA', revenue_usd_bn: 0.43, market_share_pct: 5, role: 'DSP IP, Bluetooth/WiFi IP, AI inference engines', china_exposure: 'medium', ticker: 'CEVA' },
+      { name: 'Imagination Technologies', hq: '🇬🇧 UK', revenue_usd_bn: 0.34, market_share_pct: 4, role: 'PowerVR GPU IP for mobile and embedded; Apple former licensee', china_exposure: 'medium', ticker: 'Private' },
+      { name: 'SiFive / RISC-V Others', hq: '🇺🇸 USA', revenue_usd_bn: 0.59, market_share_pct: 7, role: 'Open-ISA RISC-V cores gaining ground in China and IoT', china_exposure: 'low', ticker: 'Private' },
+      { name: 'Others', hq: '—', revenue_usd_bn: 0.59, market_share_pct: 7, role: 'Niche IP: display, image sensor, crypto accelerators', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2020, milestone: 'ARMv8.x ubiquitous — Neoverse N1 targets cloud servers; Apple M1 launches' },
+      { year: 2022, milestone: 'ARMv9 introduced with Realm security extensions; RISC-V momentum builds in China' },
+      { year: 2023, milestone: 'ARM IPO on NASDAQ; China ARM JV governance dispute resolved' },
+      { year: 2025, milestone: 'Compute Subsystems (CSS): pre-integrated IP bundles accelerate SoC design starts' },
+      { year: 2027, milestone: 'AI inference IP blocks become standard in every SoC — integrated NPU IP dominant' },
+      { year: 2029, milestone: 'RISC-V ecosystem matures with certified safety-ready cores for automotive' },
+    ],
+    china: {
+      summary: 'RISC-V is the strategic alternative to ARM for China. Alibaba T-Head (玄铁), SiFive China partnerships, and government mandates are accelerating RISC-V adoption to reduce dependency on UK/US-controlled IP.',
+      initiatives: [
+        'Alibaba T-Head (平头哥) XuanTie RISC-V cores — open-sourced, widely deployed in IoT and automotive',
+        'China RISC-V Alliance — industry body promoting domestic RISC-V ecosystem standardization',
+        'ARM China JV (安谋科技) operates independently; ARM retains brand but faces governance friction',
+        'Government procurement guidelines increasingly mandate RISC-V or domestic CPU IP in state systems',
+      ],
+      risk_level: 'medium',
+    },
+  },
+  {
+    id: 'fabless',
+    name: 'Chip Design',
+    shortName: 'Fabless',
+    icon: '💡',
+    color: '#3b82f6',
+    position: 3,
+    tam_usd_bn: 280,
+    cagr_pct: 12,
+    tam_china_usd_bn: 45,
+    china_share_pct: 16,
+    asp_note: 'GPU H100: $25K–$40K | Mobile SoC: $20–$80 | Network ASIC: $500–$5K',
+    volume_note: 'Qualcomm ships ~800M SoCs/yr; Nvidia ships ~3.5M data-center GPUs/yr (2024)',
+    description: 'Companies that design chips but outsource fabrication entirely to foundries (fabless model). Includes the largest semiconductor companies by revenue.',
+    players: [
+      { name: 'Nvidia', hq: '🇺🇸 USA', revenue_usd_bn: 96.3, market_share_pct: 34, role: 'Data center GPU (H100/H200/B200), AI accelerators, automotive DRIVE', china_exposure: 'high', ticker: 'NVDA' },
+      { name: 'Qualcomm', hq: '🇺🇸 USA', revenue_usd_bn: 42.0, market_share_pct: 15, role: 'Snapdragon mobile SoC, 5G modems, automotive Snapdragon Ride', china_exposure: 'high', ticker: 'QCOM' },
+      { name: 'Broadcom', hq: '🇺🇸 USA', revenue_usd_bn: 36.0, market_share_pct: 13, role: 'Custom ASICs (Google TPU, Meta MTIA), network switching, storage', china_exposure: 'medium', ticker: 'AVGO' },
+      { name: 'AMD', hq: '🇺🇸 USA', revenue_usd_bn: 22.7, market_share_pct: 8, role: 'EPYC CPUs, Instinct MI300 AI GPUs, Ryzen client', china_exposure: 'medium', ticker: 'AMD' },
+      { name: 'Apple Silicon', hq: '🇺🇸 USA', revenue_usd_bn: 20.0, market_share_pct: 7, role: 'A-series mobile, M-series PC/server SoCs (internal use only)', china_exposure: 'low', ticker: 'AAPL' },
+      { name: 'MediaTek', hq: '🇹🇼 Taiwan', revenue_usd_bn: 17.1, market_share_pct: 6, role: 'Dimensity 5G SoCs, TV/IoT chips, Wi-Fi chipsets', china_exposure: 'high', ticker: '2454.TW' },
+      { name: 'Marvell', hq: '🇺🇸 USA', revenue_usd_bn: 5.9, market_share_pct: 2, role: 'Custom AI ASIC (Amazon Trainium/Inferentia), optical DSPs', china_exposure: 'low', ticker: 'MRVL' },
+      { name: 'Others (HiSilicon, Unisoc, Biren…)', hq: '🇨🇳 China', revenue_usd_bn: 42.0, market_share_pct: 15, role: 'HiSilicon cut off at 7nm+; Unisoc entry-level; Biren GPU nascent', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2020, milestone: 'Apple M1 launches on TSMC 5nm — performance/watt benchmark reset' },
+      { year: 2022, milestone: 'Nvidia H100 on TSMC 4N — transformer AI workload dominates roadmap' },
+      { year: 2024, milestone: 'Nvidia B200 Blackwell (3nm), AMD MI300X; custom silicon (Google, Meta) mainstream' },
+      { year: 2025, milestone: 'TSMC 2nm (N2) GAA in production — Apple A19, Nvidia Rubin sampling' },
+      { year: 2027, milestone: 'TSMC 1.4nm (A14) backside power; 3D-stacked die chiplet ecosystem matures' },
+      { year: 2029, milestone: 'Optical interconnect on-die; CXL memory pooling standard across cloud silicon' },
+    ],
+    china: {
+      summary: 'HiSilicon (Huawei) remains at 7nm-equivalent (SMIC N+1) after 2020 US entity listing cut off TSMC access. Emerging GPU designers Biren and Iluvatar face equipment and EDA access restrictions limiting progress beyond 14nm.',
+      initiatives: [
+        'HiSilicon Kirin 9000S (2023) — SMIC 7nm workaround; limited volume, high cost vs. competitors',
+        'Biren BR100 GPU — PCIe GPU aimed at domestic AI training market; SMIC N+1 fabricated',
+        'Unisoc (紫光展锐) — strong in 5G cat-1 and entry-level mobile; supplied to domestic OEMs',
+        'Cambricon (寒武纪) — NPU/AI accelerator for edge and cloud; domestic data center alternative',
+        'National IC Fund (大基金) Phase III — $47B+ mobilized for advanced chip design and ecosystem',
+      ],
+      risk_level: 'high',
+    },
+  },
+  {
+    id: 'wafers',
+    name: 'Silicon Wafers',
+    shortName: 'Wafers',
+    icon: '🔵',
+    color: '#06b6d4',
+    position: 4,
+    tam_usd_bn: 18.2,
+    cagr_pct: 5.5,
+    tam_china_usd_bn: 2.0,
+    china_share_pct: 11,
+    asp_note: '300mm prime wafer: $125–$180 | 200mm: $40–$60 | SiC 150mm: $800–$1,500',
+    volume_note: '~180 million 300mm wafer-starts/yr globally',
+    description: 'Polished monocrystalline silicon discs (200mm, 300mm) that serve as the substrate for all chip fabrication. Also includes emerging SiC and GaN substrates for power electronics.',
+    players: [
+      { name: 'Shin-Etsu Chemical', hq: '🇯🇵 Japan', revenue_usd_bn: 5.46, market_share_pct: 30, role: 'Largest supplier; 300mm, SOI wafers; also photoresist leader', china_exposure: 'medium', ticker: 'SHI.T' },
+      { name: 'SUMCO', hq: '🇯🇵 Japan', revenue_usd_bn: 4.18, market_share_pct: 23, role: 'Premium 300mm prime and polished wafers for leading-edge fabs', china_exposure: 'medium', ticker: '3436.T' },
+      { name: 'GlobalWafers', hq: '🇹🇼 Taiwan', revenue_usd_bn: 3.28, market_share_pct: 18, role: '300mm & 200mm; acquired Siltronic attempt blocked by EU (2022)', china_exposure: 'medium', ticker: '6488.TW' },
+      { name: 'Siltronic', hq: '🇩🇪 Germany', revenue_usd_bn: 2.18, market_share_pct: 12, role: '300mm prime for TSMC/Samsung; EPI wafers for power devices', china_exposure: 'low', ticker: 'WAF.DE' },
+      { name: 'SK Siltron', hq: '🇰🇷 Korea', revenue_usd_bn: 1.82, market_share_pct: 10, role: '300mm for Samsung; SiC wafer division growing rapidly for EVs', china_exposure: 'low', ticker: 'Private' },
+      { name: 'Zhonghuan (TCL)', hq: '🇨🇳 China', revenue_usd_bn: 0.91, market_share_pct: 5, role: 'Largest domestic wafer maker; scaling 300mm; solar wafers pivot', china_exposure: 'low', ticker: '002129.SZ' },
+      { name: 'Others', hq: '—', revenue_usd_bn: 0.37, market_share_pct: 2, role: 'Niche: SiC substrates (Wolfspeed), GaN-on-Si, sapphire', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2019, milestone: '300mm dominates leading-edge fabs; 450mm development indefinitely stalled' },
+      { year: 2022, milestone: 'SiC 150mm wafers scale for EV power electronics — SK Siltron, Wolfspeed ramp' },
+      { year: 2024, milestone: 'High-resistivity 300mm RF SOI wafers for 5G power amplifiers mainstream' },
+      { year: 2026, milestone: 'Intel Glass Substrates program — glass core instead of organic for advanced packages' },
+      { year: 2027, milestone: 'SiC 200mm wafer pilot production — 3x cost reduction for power semiconductor supply chain' },
+      { year: 2029, milestone: 'GaN-on-Si 300mm for data center power converters approaching commercial readiness' },
+    ],
+    china: {
+      summary: 'China domestic wafer production covers roughly 11% of its own consumption. Zhonghuan (TCL subsidiary) is the leading domestic player but still imports majority of 300mm prime wafers from Japan and Taiwan.',
+      initiatives: [
+        'Zhonghuan Semiconductor — scaling 300mm capacity; 2023 capacity ~300K wspm, targeting 1M+ by 2026',
+        'National SOI wafer initiative — SIMGUI (上海新昇) developing SOI wafers for domestic RF/IoT fabs',
+        'SiC wafer push — Sanan Optoelectronics, TY SemiConductor entering SiC substrate market for NEV sector',
+        'Import dependency: ~89% of prime 300mm wafers still imported; Japanese supply is single largest risk',
+      ],
+      risk_level: 'medium',
+    },
+  },
+  {
+    id: 'masks',
+    name: 'Photomasks',
+    shortName: 'Masks',
+    icon: '🎭',
+    color: '#14b8a6',
+    position: 5,
+    tam_usd_bn: 5.2,
+    cagr_pct: 6.0,
+    tam_china_usd_bn: 0.68,
+    china_share_pct: 13,
+    asp_note: 'ArF immersion reticle set: $100K–$300K | EUV mask set: $300K–$1M+',
+    volume_note: '~300,000 mask plates/yr globally; ~3,000+ distinct tape-outs/yr',
+    description: 'Quartz plates with patterned chrome or absorber layers used in photolithography as templates to print circuit patterns onto wafers.',
+    players: [
+      { name: 'Photronics', hq: '🇺🇸 USA', revenue_usd_bn: 1.30, market_share_pct: 25, role: 'Leading EUV and ArF immersion masks; serves TSMC, Samsung, Intel', china_exposure: 'medium', ticker: 'PLAB' },
+      { name: 'Toppan', hq: '🇯🇵 Japan', revenue_usd_bn: 1.14, market_share_pct: 22, role: 'Advanced masks; also large-format display masks', china_exposure: 'medium', ticker: '7911.T' },
+      { name: 'DNP (Dai Nippon Printing)', hq: '🇯🇵 Japan', revenue_usd_bn: 1.04, market_share_pct: 20, role: 'EUV pellicle development; advanced IC masks for Japan fabs', china_exposure: 'low', ticker: '7912.T' },
+      { name: 'Hoya', hq: '🇯🇵 Japan', revenue_usd_bn: 0.78, market_share_pct: 15, role: 'Mask blanks supplier (critical monopoly for EUV blanks); IC masks', china_exposure: 'low', ticker: '7741.T' },
+      { name: 'SK-Electronics', hq: '🇰🇷 Korea', revenue_usd_bn: 0.52, market_share_pct: 10, role: 'Masks for Samsung and SK Hynix advanced logic and DRAM', china_exposure: 'low', ticker: 'Private' },
+      { name: 'Others', hq: '—', revenue_usd_bn: 0.42, market_share_pct: 8, role: 'Domestic Chinese shops (SMEE-adjacent), legacy node masks', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2019, milestone: 'EUV masks (13.5nm wavelength) enter volume production at TSMC N7+' },
+      { year: 2022, milestone: 'EUV pellicle (by Mitsui, IMEC) enables defect protection in HVM — critical for yield' },
+      { year: 2024, milestone: 'High-NA EUV (0.55 NA) requires new reticle size — larger 6-inch blank standard' },
+      { year: 2025, milestone: 'AI-powered mask defect inspection (KLA, Applied Materials) reduces escapes at 2nm' },
+      { year: 2027, milestone: 'High-NA EUV masks in volume production; new absorber materials (Ta-based) qualified' },
+      { year: 2029, milestone: 'Directed Self-Assembly (DSA) as complementary patterning reduces mask layer count' },
+    ],
+    china: {
+      summary: 'China can produce photomasks for mature nodes (28nm and above) domestically, but is entirely dependent on Japanese (Hoya/AGC) mask blanks. Advanced EUV masks cannot be supplied to China due to export controls, preventing domestic fabs from advancing to sub-7nm via EUV.',
+      initiatives: [
+        'SMEE mask operations — domestic mask production for ≥28nm nodes at domestic fabs',
+        'Changguang Huaxin — emerging domestic mask shop with government investment',
+        'Hoya mask blanks dependency — no domestic alternative for EUV-grade blanks; critical strategic gap',
+        'EUV access blocked: even if SMIC acquired EUV scanners (which it cannot), masks cannot be supplied',
+      ],
+      risk_level: 'high',
+    },
+  },
+  {
+    id: 'equipment',
+    name: 'Equipment',
+    shortName: 'Equipment',
+    icon: '🏭',
+    color: '#f59e0b',
+    position: 6,
+    tam_usd_bn: 109,
+    cagr_pct: 9.0,
+    tam_china_usd_bn: 30,
+    china_share_pct: 28,
+    asp_note: 'EUV scanner: $200M–$380M | Etch system: $5M–$15M | CVD/PVD cluster: $3M–$10M',
+    volume_note: '~3,000 EUV systems installed globally (all from ASML); ~20,000+ etch tools in service',
+    description: 'Machines used in wafer fabrication: lithography (ASML), deposition (AMAT, Lam), etch (Lam), inspection (KLA), cleaning (SCREEN), CMP, thermal, and ion implant.',
+    players: [
+      { name: 'ASML', hq: '🇳🇱 Netherlands', revenue_usd_bn: 27.6, market_share_pct: 25, role: 'Sole EUV lithography supplier globally; also DUV (ArF, KrF) scanners', china_exposure: 'high', ticker: 'ASML' },
+      { name: 'Applied Materials', hq: '🇺🇸 USA', revenue_usd_bn: 21.9, market_share_pct: 20, role: 'CVD, PVD, CMP, ion implant, epitaxy — broadest portfolio', china_exposure: 'high', ticker: 'AMAT' },
+      { name: 'Lam Research', hq: '🇺🇸 USA', revenue_usd_bn: 16.4, market_share_pct: 15, role: 'Plasma etch (leading market share), ALD, PECVD, clean', china_exposure: 'high', ticker: 'LRCX' },
+      { name: 'KLA', hq: '🇺🇸 USA', revenue_usd_bn: 10.9, market_share_pct: 10, role: 'Wafer inspection, reticle inspection, metrology — process control monopoly', china_exposure: 'high', ticker: 'KLAC' },
+      { name: 'Tokyo Electron (TEL)', hq: '🇯🇵 Japan', revenue_usd_bn: 9.81, market_share_pct: 9, role: 'Coater/developer (track), CVD, etch; second-largest in Japan', china_exposure: 'high', ticker: '8035.T' },
+      { name: 'SCREEN Holdings', hq: '🇯🇵 Japan', revenue_usd_bn: 4.36, market_share_pct: 4, role: 'Wet cleaning equipment (critical for EUV); bake/chill modules', china_exposure: 'medium', ticker: '7735.T' },
+      { name: 'Others (NAURA, AMEC…)', hq: '🇨🇳 China', revenue_usd_bn: 18.5, market_share_pct: 17, role: 'NAURA & AMEC growing domestic etch/CVD for mature nodes (≥28nm)', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2019, milestone: 'EUV (0.33 NA) enters high-volume manufacturing at TSMC N7+' },
+      { year: 2022, milestone: 'ALD (Atomic Layer Deposition) essential for gate-all-around (GAA) transistor formation' },
+      { year: 2023, milestone: 'BIS expands export controls — DUV (sub-28nm), advanced etch and metrology restricted for China' },
+      { year: 2025, milestone: 'ASML High-NA EUV (0.55 NA, NXE:5000) ships to Intel/TSMC/Samsung for 2nm/A14 nodes' },
+      { year: 2026, milestone: 'Cryo-etch and atomic-precision etch tools qualify for sub-2nm processes' },
+      { year: 2028, milestone: 'Photonic lithography alternatives (nano-imprint, maskless e-beam) explore volume readiness' },
+    ],
+    china: {
+      summary: 'China accounted for ~28% of global equipment spending in 2023 as fabs stockpiled DUV tools ahead of export controls. NAURA and AMEC are the primary domestic equipment makers, competitive only at 28nm and above. ASML EUV completely blocked since 2019; DUV further restricted in Oct 2023.',
+      initiatives: [
+        'NAURA Technology (北方华创) — domestic CVD, etch, cleaning tools; covering 28nm processes',
+        'AMEC (中微公司) — leading domestic plasma etch; comparable to Lam Research at ≥28nm',
+        'Kingsemi (华海清科) — CMP equipment; growing share at mature nodes',
+        'China 2023 equipment spend $30B+ — front-running sanctions; building 28nm capacity at scale',
+        'ASML block: EUV fully blocked since 2019; DUV ArF-i restricted Oct 2023 (Netherlands aligned with US)',
+      ],
+      risk_level: 'high',
+    },
+  },
+  {
+    id: 'chemicals',
+    name: 'Chemicals',
+    shortName: 'Chemicals',
+    icon: '⚗️',
+    color: '#84cc16',
+    position: 7,
+    tam_usd_bn: 72,
+    cagr_pct: 6.5,
+    tam_china_usd_bn: 15.0,
+    china_share_pct: 21,
+    asp_note: 'EUV photoresist: $5,000–$10,000/liter | NF3 etch gas: $300–$800/kg | CMP slurry: $50–$200/liter',
+    volume_note: '~800 chemical/material inputs per advanced wafer; EUV resist volume tiny but ultra-high-purity',
+    description: 'Photoresists, CMP slurries, specialty gases, wet chemicals, dopants, precursors, and filter/purification systems used throughout the fab process.',
+    players: [
+      { name: 'Shin-Etsu Chemical', hq: '🇯🇵 Japan', revenue_usd_bn: 9.0, market_share_pct: 12, role: 'ArF & EUV photoresists; silicone materials; wafers (dual role)', china_exposure: 'medium', ticker: 'SHI.T' },
+      { name: 'JSR Corporation', hq: '🇯🇵 Japan', revenue_usd_bn: 7.2, market_share_pct: 10, role: 'EUV CAR resists; acquired by Japanese government (2023) for strategic control', china_exposure: 'low', ticker: 'Private (nationalized)' },
+      { name: 'DuPont', hq: '🇺🇸 USA', revenue_usd_bn: 5.76, market_share_pct: 8, role: 'CMP slurry, photoresists, interconnect materials, cleaning chemicals', china_exposure: 'medium', ticker: 'DD' },
+      { name: 'Merck KGaA', hq: '🇩🇪 Germany', revenue_usd_bn: 5.04, market_share_pct: 7, role: 'Specialty gases, liquid crystals (displays), photoresist and ALD precursors', china_exposure: 'medium', ticker: 'MRK.DE' },
+      { name: 'Entegris', hq: '🇺🇸 USA', revenue_usd_bn: 3.6, market_share_pct: 5, role: 'Purity/filtration systems, gas delivery, CMP pads — ultra-high-purity focus', china_exposure: 'high', ticker: 'ENTG' },
+      { name: 'Air Products', hq: '🇺🇸 USA', revenue_usd_bn: 3.6, market_share_pct: 5, role: 'Bulk gases (N₂, H₂, O₂, Ar), specialty gases (NF₃, WF₆) for fabs', china_exposure: 'medium', ticker: 'APD' },
+      { name: 'Others', hq: '—', revenue_usd_bn: 37.8, market_share_pct: 53, role: 'Hundreds of specialty chemical suppliers; highly fragmented long tail', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2019, milestone: 'EUV Chemically Amplified Resists (CAR) enter HVM — extreme purity requirements' },
+      { year: 2022, milestone: 'Metal-Oxide Resists (MOR, Inpria/Merck) qualify for EUV — 4x resolution improvement' },
+      { year: 2023, milestone: 'JSR nationalized by Japan — government treats EUV resists as strategic national asset' },
+      { year: 2025, milestone: 'High-NA EUV demands new resist formulations — under-resolved stochastic defects challenge' },
+      { year: 2027, milestone: 'Directed Self-Assembly (DSA) block copolymer materials for sub-2nm auxiliary patterning' },
+      { year: 2029, milestone: '2D material precursors (MoS₂, hBN) enter pilot for beyond-silicon transistor channels' },
+    ],
+    china: {
+      summary: 'China can produce ~60% of bulk chemicals and commodity gases domestically, but remains critically dependent on Japan (JSR, Shin-Etsu, Tokyo Ohka) for photoresists and US (Entegris) for ultra-high-purity filtration at leading-edge nodes.',
+      initiatives: [
+        'Nanda Optoelectronics (南大光电) — ArF photoresist domestic production; limited to 28nm maturity',
+        'FineStar (飞凯材料) — developing EUV-grade photoresist; several years behind Japan/US',
+        'Hubei Bixin Chemical — NF₃ specialty gas; domestic production growing',
+        'JSR supply risk: nationalization means any export decision is now a Japanese government policy decision',
+        'China has ~70% coverage of mature-node chemicals; EUV-grade materials remain >95% import-dependent',
+      ],
+      risk_level: 'medium',
+    },
+  },
+  {
+    id: 'foundry',
+    name: 'Foundry',
+    shortName: 'Foundry',
+    icon: '🔥',
+    color: '#ef4444',
+    position: 8,
+    tam_usd_bn: 135,
+    cagr_pct: 10.0,
+    tam_china_usd_bn: 17.6,
+    china_share_pct: 13,
+    asp_note: '3nm wafer (TSMC N3): $20K–$25K | 5nm: $16K | 28nm: $3K–$4K | 200mm mature: $800–$1,200',
+    volume_note: 'TSMC processes ~14M 300mm wafer-equivalents/yr; global foundry ~40M wafer-starts/yr',
+    description: 'Contract chip manufacturers that fabricate wafers for fabless designers. The most capital-intensive segment — a leading-edge fab costs $20B+ to build.',
+    players: [
+      { name: 'TSMC', hq: '🇹🇼 Taiwan', revenue_usd_bn: 83.6, market_share_pct: 62, role: 'World\'s most advanced foundry; sole supplier of Apple, Nvidia, AMD at leading nodes', china_exposure: 'high', ticker: '2330.TW' },
+      { name: 'Samsung Foundry', hq: '🇰🇷 Korea', revenue_usd_bn: 17.6, market_share_pct: 13, role: '3nm GAA SF3E; major customer: Qualcomm, IBM; competes with TSMC at leading edge', china_exposure: 'medium', ticker: '005930.KS' },
+      { name: 'SMIC', hq: '🇨🇳 China', revenue_usd_bn: 9.5, market_share_pct: 7, role: 'China\'s leading foundry; max ~7nm (N+1/N+2); primarily mature nodes 28nm–180nm', china_exposure: 'low', ticker: '981.HK' },
+      { name: 'GlobalFoundries', hq: '🇺🇸 USA', revenue_usd_bn: 8.1, market_share_pct: 6, role: 'Specialty nodes: FDX (22nm FDSOI), RF, analog, automotive; US CHIPS Act beneficiary', china_exposure: 'low', ticker: 'GFS' },
+      { name: 'UMC', hq: '🇹🇼 Taiwan', revenue_usd_bn: 6.75, market_share_pct: 5, role: '28nm/40nm specialty; display drivers, PMIC; focus on mature differentiated', china_exposure: 'medium', ticker: '2303.TW' },
+      { name: 'Intel Foundry (IFS)', hq: '🇺🇸 USA', revenue_usd_bn: 4.05, market_share_pct: 3, role: 'Intel 18A (1.8nm class, 2025); CHIPS Act flagship; Microsoft early customer', china_exposure: 'low', ticker: 'INTC' },
+      { name: 'Tower Semiconductor', hq: '🇮🇱 Israel', revenue_usd_bn: 2.7, market_share_pct: 2, role: 'Analog, RF, SiGe, power — specialty analog foundry', china_exposure: 'low', ticker: 'TSEM' },
+      { name: 'HUA HONG / Others', hq: '🇨🇳 China', revenue_usd_bn: 2.7, market_share_pct: 2, role: 'Hua Hong Semi (华虹半导体) power semis, analog at mature nodes', china_exposure: 'low', ticker: '1347.HK' },
+    ],
+    roadmap: [
+      { year: 2020, milestone: 'TSMC N5 enters HVM (Apple A14 Bionic) — 5nm era begins' },
+      { year: 2022, milestone: 'TSMC N3 (3nm FinFET) HVM; Samsung SF3 GAA first — gate-all-around transition' },
+      { year: 2024, milestone: 'TSMC N3E high-volume; Intel 20A/18A test chips; backside power delivery (PowerVia) demos' },
+      { year: 2025, milestone: 'TSMC N2 (2nm GAA) volume production — Apple A19, Nvidia Rubin; Intel 18A ramp' },
+      { year: 2027, milestone: 'TSMC A14 (1.4nm) with backside power; stacked CFET transistor architecture research' },
+      { year: 2029, milestone: '3D monolithic integration — logic-on-logic stacking at transistor level; CFET in pilot HVM' },
+    ],
+    china: {
+      summary: 'SMIC is China\'s crown-jewel foundry but capped at ~7nm equivalent without EUV. China\'s government targets 70% chip self-sufficiency by 2030 — current estimate is ~16%. TSMC\'s Arizona fabs provide US supply-chain security but at ~20% cost premium vs. Taiwan.',
+      initiatives: [
+        'SMIC N+1/N+2 — achieved 7nm class using multi-patterning DUV; very low yield, high cost vs. TSMC N7',
+        'SMIC capacity expansion — $7.5B fab in Shanghai (2024); targeting 28nm volume scale for mature-node self-sufficiency',
+        'CXMT (长鑫存储) — DRAM foundry; DDR4 in production; DDR5 in development; HBM not yet feasible',
+        'YMTC (长江存储) — NAND flash; 232-layer 3D NAND; entity-listed by BIS Oct 2022; domestic sales continue',
+        'TSMC geopolitical risk: ~90% of sub-5nm chips made in Taiwan; TSMC AZ N4 fab (2025), N2 fab (2028)',
+      ],
+      risk_level: 'high',
+    },
+  },
+  {
+    id: 'osat',
+    name: 'OSAT / Packaging',
+    shortName: 'OSAT',
+    icon: '📦',
+    color: '#f97316',
+    position: 9,
+    tam_usd_bn: 42,
+    cagr_pct: 11.0,
+    tam_china_usd_bn: 12.2,
+    china_share_pct: 29,
+    asp_note: 'Wire bond: $0.05–$0.30/unit | Flip-chip BGA: $0.50–$5 | CoWoS (advanced): $500–$2,000/pkg',
+    volume_note: '~150 billion semiconductor units packaged annually; AI CoWoS demand growing 100%+ yr/yr',
+    description: 'Outsourced Semiconductor Assembly and Test — companies that cut wafers into dies, package them, and test final devices. Advanced packaging (CoWoS, SoIC, HBM) is the fastest-growing sub-segment.',
+    players: [
+      { name: 'ASE Group', hq: '🇹🇼 Taiwan', revenue_usd_bn: 10.5, market_share_pct: 25, role: 'Largest OSAT; wire bond, flip-chip, advanced fan-out; also substrate supply (USI)', china_exposure: 'medium', ticker: '3711.TW' },
+      { name: 'Amkor Technology', hq: '🇺🇸 USA (ops Korea/Malaysia)', revenue_usd_bn: 8.4, market_share_pct: 20, role: 'Flip-chip, WLCSP, SiP; key Apple partner; US CHIPS Act fab in Arizona', china_exposure: 'medium', ticker: 'AMKR' },
+      { name: 'JCET Group (长电科技)', hq: '🇨🇳 China', revenue_usd_bn: 5.5, market_share_pct: 13, role: 'China\'s largest OSAT; flip-chip, WLCSP, eWLB (fan-out) packaging', china_exposure: 'low', ticker: '600584.SS' },
+      { name: 'Powertech (PTI)', hq: '🇹🇼 Taiwan', revenue_usd_bn: 3.36, market_share_pct: 8, role: 'Memory packaging specialist (DRAM, NAND) for Micron/SK Hynix/Samsung', china_exposure: 'medium', ticker: '6239.TW' },
+      { name: 'Tianshui Huatian (华天科技)', hq: '🇨🇳 China', revenue_usd_bn: 1.68, market_share_pct: 4, role: 'Wire bond, SiP packages; second-largest domestic OSAT in China', china_exposure: 'low', ticker: '002185.SZ' },
+      { name: 'UTAC Group', hq: '🇸🇬 Singapore', revenue_usd_bn: 1.26, market_share_pct: 3, role: 'Analog, MCU, mixed-signal packaging; Southeast Asia presence', china_exposure: 'low', ticker: 'Private' },
+      { name: 'Others', hq: '—', revenue_usd_bn: 11.3, market_share_pct: 27, role: 'Includes TSMC CoWoS (captive), Intel EMIB, Samsung I-Cube (captive advanced pkg)', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2020, milestone: 'TSMC CoWoS-S (Chip-on-Wafer-on-Substrate) for AMD GPUs — 2.5D interposer mainstream' },
+      { year: 2022, milestone: 'HBM3 + GPU CoWoS packages for AI — CoWoS capacity becomes the key AI supply constraint' },
+      { year: 2024, milestone: 'TSMC CoWoS-L (local Si bridge), SoIC-X (3D face-to-face bonding) in volume for Apple/NVIDIA' },
+      { year: 2025, milestone: 'UCIe standard ratified — chiplet interconnect interoperability across vendors enabled' },
+      { year: 2027, milestone: 'High-density hybrid bonding (<1µm pitch) enables logic-on-memory monolithic 3D stacking' },
+      { year: 2029, milestone: 'Photonic I/O in packages — optical chiplet interconnects for 100Tb/s bandwidth in AI clusters' },
+    ],
+    china: {
+      summary: 'China has ~29% share of global OSAT revenue, primarily via JCET, Huatian, and Tongfu Microelectronics. However, advanced packaging (CoWoS, HBM bonding) is controlled by TSMC and SK Hynix with export compliance limiting China access for AI chip packaging.',
+      initiatives: [
+        'JCET — acquired Singapore\'s STATS ChipPAC; working on fan-out advanced packaging; targeting CoWoS equivalent',
+        'Tongfu Microelectronics (通富微电) — AMD packaging partner; also transitioning to advanced formats',
+        'SiP module capability — domestic players strong in smartphone SiP; weaker in server/HPC advanced packaging',
+        'CoWoS bottleneck: TSMC\'s CoWoS capacity for AI chips (Nvidia H100/H200/B200) is ~95% non-China allocated',
+        'HBM supply: SK Hynix and Samsung HBM memory supply to Chinese AI chip customers blocked by US controls',
+      ],
+      risk_level: 'medium',
+    },
+  },
+  {
+    id: 'idm',
+    name: 'IDM / Systems',
+    shortName: 'IDM',
+    icon: '🖥️',
+    color: '#64748b',
+    position: 10,
+    tam_usd_bn: 210,
+    cagr_pct: 6.0,
+    tam_china_usd_bn: 21.0,
+    china_share_pct: 10,
+    asp_note: 'Server CPU (Intel Xeon): $1,500–$15,000 | Analog IC (TI): $0.50–$10 | Automotive MCU: $1–$50',
+    volume_note: 'Intel ships ~70M CPUs/yr; TI ships ~25B analog chips/yr; automotive semi market $70B+',
+    description: 'Integrated Device Manufacturers — companies that design AND fabricate their own chips. Includes memory giants (Samsung), CPU leaders (Intel), and analog/power specialists (TI, Infineon, NXP).',
+    players: [
+      { name: 'Samsung Electronics', hq: '🇰🇷 Korea', revenue_usd_bn: 85.0, market_share_pct: 40, role: 'DRAM (#1 global), NAND (#1), Exynos SoC, foundry; largest semi company by revenue', china_exposure: 'high', ticker: '005930.KS' },
+      { name: 'Intel', hq: '🇺🇸 USA', revenue_usd_bn: 54.2, market_share_pct: 26, role: 'x86 server/PC CPUs, Xeon; Intel Foundry 18A; Gaudi AI accelerators', china_exposure: 'medium', ticker: 'INTC' },
+      { name: 'Texas Instruments', hq: '🇺🇸 USA', revenue_usd_bn: 17.5, market_share_pct: 8, role: 'Analog ICs (op-amps, ADC/DAC, power mgmt), embedded processors (Sitara, C2000)', china_exposure: 'medium', ticker: 'TXN' },
+      { name: 'STMicroelectronics', hq: '🇫🇷🇮🇹 EU', revenue_usd_bn: 17.3, market_share_pct: 8, role: 'SiC power (automotive EV), STM32 MCU, automotive sensors, IoT', china_exposure: 'medium', ticker: 'STM' },
+      { name: 'Infineon', hq: '🇩🇪 Germany', revenue_usd_bn: 16.3, market_share_pct: 8, role: 'Power semiconductors (IGBT, SiC MOSFET), automotive MCU, security chips', china_exposure: 'medium', ticker: 'IFX.DE' },
+      { name: 'NXP Semiconductors', hq: '🇳🇱 Netherlands', revenue_usd_bn: 13.3, market_share_pct: 6, role: 'Automotive MCU, i.MX application processors, V2X, secure element', china_exposure: 'medium', ticker: 'NXPI' },
+      { name: 'Others (Renesas, Microchip, SK Hynix…)', hq: '—', revenue_usd_bn: 8.4, market_share_pct: 4, role: 'Renesas automotive MCU; SK Hynix DRAM/HBM; Microchip MCU/PIC', china_exposure: 'low', ticker: '' },
+    ],
+    roadmap: [
+      { year: 2020, milestone: 'Intel misses 10nm, cedes process leadership to TSMC; AMD EPYC surges in data center' },
+      { year: 2022, milestone: 'SiC power semiconductor boom — EV adoption drives ST/Infineon SiC wafer shortages' },
+      { year: 2024, milestone: 'Intel 18A (1.8nm class) test chips; Intel Foundry Services targets external customers' },
+      { year: 2025, milestone: 'Intel 18A process ramp; GAAFET (RibbonFET) transistors; backside power (PowerVia) in products' },
+      { year: 2027, milestone: 'SiC 200mm wafers lower EV power cost 30%; Samsung 2nm yields improve post-SF3 learnings' },
+      { year: 2029, milestone: 'In-Memory Computing (IMC) silicon for AI inference reduces power 10x vs. von Neumann; CFET pilot' },
+    ],
+    china: {
+      summary: 'YMTC (NAND) and CXMT (DRAM) are China\'s domestic memory IDMs. Both face export controls and equipment restrictions limiting their ability to advance to HBM or leading-edge DRAM. In power semis, BYD Semiconductor and Sanan are competitive in SiC for domestic EV supply chain.',
+      initiatives: [
+        'YMTC (长江存储) — 232-layer 3D NAND comparable to SK Hynix/Micron; entity-listed 2022; ~100K wspm capacity',
+        'CXMT (长鑫存储) — DDR4/LPDDR4 DRAM in production; DDR5 under development; limited to mature DRAM nodes',
+        'BYD Semiconductor — IGBT and SiC for EV powertrains; captive supply for BYD\'s own EVs; growing third-party sales',
+        'Sanan Optoelectronics — SiC and GaN power devices; LED chips; competing globally at 6-inch SiC',
+        'CRRC (中车) — power semiconductors for rail; IGBT at 3.3kV class; domestic rail self-sufficiency achieved',
+      ],
+      risk_level: 'medium',
+    },
+  },
+];
+
+const SEGMENT_MAP = Object.fromEntries(SEGMENTS.map(s => [s.id, s]));
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  STATE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const state = {
+  activeView: 'overview',
+  activeSegment: null,
+  chinaMode: false,
+  chartInstances: {},
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  HELPERS
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function fmt(n, d = 1) {
+  if (n >= 1000) return (n / 1000).toFixed(1) + 'T';
+  if (n >= 1) return n.toFixed(d) + 'B';
+  return (n * 1000).toFixed(0) + 'M';
+}
+function fmtB(n) { return '$' + fmt(n); }
+
+function makeChart(id, config) {
+  if (state.chartInstances[id]) {
+    state.chartInstances[id].destroy();
+    delete state.chartInstances[id];
+  }
+  const el = document.getElementById(id);
+  if (!el) return;
+  state.chartInstances[id] = new Chart(el, config);
+}
+
+function riskBadge(level) {
+  const map = { high: 'badge-red', medium: 'badge-amber', low: 'badge-green' };
+  const label = { high: '🔴 High China Risk', medium: '🟡 Medium Risk', low: '🟢 Low Risk' };
+  return `<span class="badge ${map[level] || 'badge-gray'}">${label[level] || level}</span>`;
+}
+function chinaChip(level) {
+  const map = { high: 'china-high', medium: 'china-medium', low: 'china-low' };
+  const label = { high: '🇨🇳 High', medium: '🇨🇳 Med', low: '🇨🇳 Low' };
+  return `<span class="china-chip ${map[level]}">${label[level]}</span>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  VIEW SWITCHING
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function showView(name) {
+  state.activeView = name;
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    const views = ['overview', 'chain', 'analytics'];
+    b.classList.toggle('active', views[i] === name);
+  });
+  if (name === 'overview') renderOverview();
+  if (name === 'analytics') renderAnalytics();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  CHINA TOGGLE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function setMode(mode) {
+  state.chinaMode = (mode === 'china');
+  document.getElementById('toggleGlobal').classList.toggle('active', !state.chinaMode);
+  document.getElementById('toggleChina').classList.toggle('active', state.chinaMode);
+  if (state.activeView === 'overview') renderOverview();
+  if (state.activeView === 'chain' && state.activeSegment) renderSegmentDetail();
+  if (state.activeView === 'analytics') renderAnalytics();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SUPPLY CHAIN FLOW SVG
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderFlow() {
+  const svg = document.getElementById('flowSvg');
+  const N = SEGMENTS.length;
+  const nodeW = 90, nodeH = 58, gap = 24, arrowW = 20;
+  const totalW = N * nodeW + (N - 1) * (gap + arrowW) + 40;
+  svg.setAttribute('width', totalW);
+  svg.setAttribute('viewBox', `0 0 ${totalW} 110`);
+
+  let html = '';
+  SEGMENTS.forEach((seg, i) => {
+    const x = 20 + i * (nodeW + gap + arrowW);
+    const isActive = seg.id === state.activeSegment;
+    const stroke = isActive ? seg.color : 'rgba(255,255,255,0.15)';
+    const strokeW = isActive ? 2 : 1;
+    const fill = isActive ? seg.color + '33' : 'rgba(255,255,255,0.05)';
+    const textCol = isActive ? '#f1f5f9' : '#94a3b8';
+    const filter = isActive ? `filter: drop-shadow(0 0 8px ${seg.color}80);` : '';
+
+    html += `<g onclick="selectSegment('${seg.id}')" style="cursor:pointer; ${filter}" class="flow-node">
+      <rect x="${x}" y="10" width="${nodeW}" height="${nodeH}" rx="10"
+        fill="${fill}" stroke="${stroke}" stroke-width="${strokeW}"/>
+      <text x="${x + nodeW/2}" y="34" text-anchor="middle" font-size="18">${seg.icon}</text>
+      <text x="${x + nodeW/2}" y="52" text-anchor="middle" font-size="10" fill="${textCol}" font-weight="${isActive ? '700' : '400'}">${seg.shortName}</text>
+      <text x="${x + nodeW/2}" y="64" text-anchor="middle" font-size="9" fill="${isActive ? seg.color : '#64748b'}">${fmtB(seg.tam_usd_bn)}</text>
+    </g>`;
+
+    // arrow
+    if (i < N - 1) {
+      const ax = x + nodeW + 4;
+      html += `<g>
+        <line x1="${ax}" y1="39" x2="${ax + arrowW - 6}" y2="39" stroke="rgba(255,255,255,0.2)" stroke-width="1.5"/>
+        <polygon points="${ax+arrowW-6},35 ${ax+arrowW},39 ${ax+arrowW-6},43" fill="rgba(255,255,255,0.2)"/>
+      </g>`;
+    }
+  });
+  svg.innerHTML = html;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SEGMENT SELECTION
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function selectSegment(id) {
+  state.activeSegment = id;
+  renderFlow();
+  showView('chain');
+  renderSegmentDetail();
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  SEGMENT DETAIL RENDERER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderSegmentDetail() {
+  const seg = SEGMENT_MAP[state.activeSegment];
+  if (!seg) return;
+  const CM = state.chinaMode;
+
+  const tamDisplay = CM ? seg.tam_china_usd_bn : seg.tam_usd_bn;
+  const tamLabel = CM ? 'China TAM' : 'Global TAM';
+
+  // player cards
+  const playerCards = seg.players.map(p => {
+    const highlight = CM && (p.china_exposure === 'low' || p.hq.includes('🇨🇳'));
+    const dimStyle = CM && p.china_exposure === 'high' && !p.hq.includes('🇨🇳') ? 'opacity:0.5;' : '';
+    return `<div class="player-card" style="${dimStyle}">
+      <div class="player-top">
+        <div>
+          <div class="player-name">${p.name}</div>
+          <div class="player-hq">${p.hq}${p.ticker ? ` · <span class="player-ticker">${p.ticker}</span>` : ''}</div>
+        </div>
+        ${chinaChip(p.china_exposure)}
+      </div>
+      <div class="player-role">${p.role}</div>
+      <div class="share-row">
+        <span class="share-label">Market Share</span>
+        <span class="share-pct" style="color:${seg.color}">${p.market_share_pct}%</span>
+      </div>
+      <div class="share-bar-bg">
+        <div class="share-bar" style="width:${p.market_share_pct}%;background:${seg.color}"></div>
+      </div>
+      <div class="rev-row">
+        <span style="font-size:11px;color:var(--muted)">Revenue</span>
+        <span class="rev-val">${fmtB(p.revenue_usd_bn)}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  // roadmap
+  const now = 2024;
+  const roadmapItems = seg.roadmap.map((r, i) => {
+    const era = r.year < now ? 'past' : r.year === now ? 'now' : 'future';
+    const lineColor = era === 'past' ? '#e2e8f0' : era === 'now' ? '#3b82f6' : '#d1fae5';
+    const dotClass = `roadmap-dot roadmap-dot-${era}`;
+    return `<div class="roadmap-item">
+      <div class="${dotClass}">${r.year >= now ? '★' : '✓'}</div>
+      <div class="roadmap-year">${r.year}</div>
+      <div class="roadmap-text">${r.milestone}</div>
+    </div>${i < seg.roadmap.length - 1 ? `<div class="roadmap-connector" style="background:${lineColor}"></div>` : ''}`;
+  }).join('');
+
+  // china initiatives
+  const initiatives = seg.china.initiatives.map(i => `<li>${i}</li>`).join('');
+
+  const activeTab = segTabState[seg.id] || 'market';
+
+  const html = `
+    <div class="seg-header">
+      <div class="seg-icon">${seg.icon}</div>
+      <div>
+        <div class="seg-name">${seg.name}</div>
+        <div class="seg-desc">${seg.description}</div>
+      </div>
+      <div class="seg-badges">
+        <span class="badge badge-blue">TAM ${fmtB(seg.tam_usd_bn)}</span>
+        <span class="badge badge-green">CAGR ${seg.cagr_pct}%</span>
+        <span class="badge badge-blue" style="background:rgba(6,182,212,0.15);color:#22d3ee;border-color:rgba(6,182,212,0.3)">China ${fmtB(seg.tam_china_usd_bn)} (${seg.china_share_pct}%)</span>
+        ${riskBadge(seg.china.risk_level)}
+      </div>
+    </div>
+
+    <div class="stat-row" style="grid-template-columns:repeat(4,1fr)">
+      <div class="stat-card">
+        <div class="stat-label">Global TAM (2024)</div>
+        <div class="stat-value" style="color:${seg.color}">${fmtB(seg.tam_usd_bn)}</div>
+        <div class="stat-sub">CAGR ${seg.cagr_pct}% (5-yr)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">China TAM</div>
+        <div class="stat-value">${fmtB(seg.tam_china_usd_bn)}</div>
+        <div class="stat-sub">${seg.china_share_pct}% of global</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Price / Volume</div>
+        <div class="stat-value" style="font-size:16px">${seg.asp_note.split('|')[0].trim()}</div>
+        <div class="stat-sub">${seg.volume_note}</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Players Tracked</div>
+        <div class="stat-value">${seg.players.length}</div>
+        <div class="stat-sub">China Risk: <strong style="color:${seg.china.risk_level==='high'?'#ef4444':seg.china.risk_level==='medium'?'#f59e0b':'#10b981'}">${seg.china.risk_level.toUpperCase()}</strong></div>
+      </div>
+    </div>
+
+    <!-- Sub-tab nav -->
+    <div class="seg-tabs">
+      <button class="seg-tab-btn ${activeTab==='market'?'active':''}" data-tab="market"
+        onclick="setSegTab('${seg.id}','market')">📊 Market & Players</button>
+      <button class="seg-tab-btn ${activeTab==='tech'?'active':''}" data-tab="tech"
+        onclick="setSegTab('${seg.id}','tech')">⚗️ Technology Deep-Dive</button>
+    </div>
+
+    <!-- Market & Players tab -->
+    <div class="seg-tab-panel ${activeTab==='market'?'active':''}" data-tab="market">
+      <div class="asp-box">
+        <strong>ASP × Volume:</strong> ${seg.asp_note} &nbsp;·&nbsp; ${seg.volume_note}
+      </div>
+      <div class="detail-grid">
+        <div>
+          <div class="section-title">Major Players ${CM ? '— China Focus Mode' : ''}</div>
+          <div class="player-grid">${playerCards}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="chart-card" style="flex:0 0 auto">
+            <div class="chart-title">Market Share</div>
+            <canvas id="chartSegDonut" height="200"></canvas>
+          </div>
+          <div class="chart-card" style="flex:0 0 auto">
+            <div class="chart-title">Revenue Comparison ($B)</div>
+            <canvas id="chartSegBar" height="200"></canvas>
+          </div>
+        </div>
+      </div>
+      <div class="roadmap-wrap">
+        <div class="section-title">Technology Roadmap Timeline</div>
+        <div class="roadmap-timeline">${roadmapItems}</div>
+      </div>
+      <div class="china-panel">
+        <h3>🇨🇳 China Strategy & Exposure</h3>
+        <div class="china-summary">${seg.china.summary}</div>
+        <ul class="china-initiatives">${initiatives}</ul>
+      </div>
+    </div>
+
+    <!-- Technology Deep-Dive tab -->
+    <div class="seg-tab-panel ${activeTab==='tech'?'active':''}" data-tab="tech">
+      ${renderTechTab(seg)}
+    </div>
+  `;
+
+  document.getElementById('segmentDetail').innerHTML = html;
+
+  // donut chart
+  const donutData = seg.players.map(p => p.market_share_pct);
+  const donutLabels = seg.players.map(p => p.name);
+  const donutColors = seg.players.map((p, i) => {
+    if (CM && p.hq.includes('🇨🇳')) return '#ef4444';
+    const palette = ['#3b82f6','#8b5cf6','#10b981','#f59e0b','#ef4444','#06b6d4','#84cc16','#f97316','#64748b','#ec4899'];
+    return palette[i % palette.length];
+  });
+  makeChart('chartSegDonut', {
+    type: 'doughnut',
+    data: { labels: donutLabels, datasets: [{ data: donutData, backgroundColor: donutColors, borderWidth: 2, borderColor: '#fff' }] },
+    options: { plugins: { legend: { position: 'bottom', labels: { font: { size: 10 }, padding: 8 } } }, cutout: '60%' },
+  });
+
+  // bar chart
+  const barPlayers = seg.players.filter(p => p.revenue_usd_bn > 0).sort((a,b) => b.revenue_usd_bn - a.revenue_usd_bn);
+  makeChart('chartSegBar', {
+    type: 'bar',
+    data: {
+      labels: barPlayers.map(p => p.name.split(' ')[0]),
+      datasets: [{
+        data: barPlayers.map(p => p.revenue_usd_bn),
+        backgroundColor: barPlayers.map(p => CM && p.hq.includes('🇨🇳') ? '#ef4444' : seg.color + 'cc'),
+        borderRadius: 6,
+      }],
+    },
+    options: {
+      indexAxis: 'y',
+      plugins: { legend: { display: false } },
+      scales: {
+        x: { ticks: { callback: v => '$' + v + 'B', font: { size: 10 } }, grid: { color: '#f1f5f9' } },
+        y: { ticks: { font: { size: 10 } }, grid: { display: false } },
+      },
+    },
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  OVERVIEW RENDERER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderOverview() {
+  const totalTAM = SEGMENTS.reduce((s, x) => s + x.tam_usd_bn, 0);
+  const totalChinaTAM = SEGMENTS.reduce((s, x) => s + x.tam_china_usd_bn, 0);
+  const totalPlayers = SEGMENTS.reduce((s, x) => s + x.players.length, 0);
+  const fastest = SEGMENTS.reduce((a, b) => a.cagr_pct > b.cagr_pct ? a : b);
+  const largest = SEGMENTS.reduce((a, b) => a.tam_usd_bn > b.tam_usd_bn ? a : b);
+  const highRisk = SEGMENTS.filter(s => s.china.risk_level === 'high').length;
+
+  document.getElementById('overviewStats').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-label">Total Supply Chain TAM</div>
+      <div class="stat-value" style="color:#3b82f6">${fmtB(totalTAM)}</div>
+      <div class="stat-sub">10 segments tracked</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Companies Tracked</div>
+      <div class="stat-value">${totalPlayers}</div>
+      <div class="stat-sub">Across all segments</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Fastest Growing</div>
+      <div class="stat-value" style="color:#10b981;font-size:18px">${fastest.icon} ${fastest.shortName}</div>
+      <div class="stat-sub">CAGR ${fastest.cagr_pct}% (5-yr)</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Largest Segment</div>
+      <div class="stat-value" style="font-size:18px">${largest.icon} ${largest.shortName}</div>
+      <div class="stat-sub">${fmtB(largest.tam_usd_bn)} TAM</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">China TAM Exposure</div>
+      <div class="stat-value" style="color:#ef4444">${fmtB(totalChinaTAM)}</div>
+      <div class="stat-sub">${((totalChinaTAM/totalTAM)*100).toFixed(0)}% of total</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">High China Risk</div>
+      <div class="stat-value" style="color:#f59e0b">${highRisk}</div>
+      <div class="stat-sub">Segments with high exposure</div>
+    </div>
+  `;
+
+  // ── Historical TAM chart (1987–2030e) ──────────────────────────────
+  const TAM_HISTORY = {
+    years:  [1987,1988,1989,1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,
+             2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,
+             2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,
+             2025,2026,2027,2028,2029,2030],
+    actual: [28,35,35,37,35,39,46,58,76,68,72,63,
+             71,98,64,62,66,85,90,93,98,95,73,105,
+             107,104,104,111,106,107,122,132,115,122,148,574,527,628,
+             null,null,null,null,null,null],
+    forecast:[null,null,null,null,null,null,null,null,null,null,null,null,
+              null,null,null,null,null,null,null,null,null,null,null,null,
+              null,null,null,null,null,null,null,null,null,null,null,null,null,null,
+              796,900,1000,1110,1230,1400],
+  };
+  const tamAnnotations = {
+    2001: 'Dot-com bust', 2009: 'GFC', 2019: 'Trade war',
+    2021: 'COVID boom', 2024: 'AI supercycle',
+  };
+  makeChart('chartTAMHistory', {
+    type: 'bar',
+    data: {
+      labels: TAM_HISTORY.years,
+      datasets: [
+        {
+          label: 'Actual ($B)', data: TAM_HISTORY.actual,
+          backgroundColor: TAM_HISTORY.years.map(y => y <= 2024 ? '#3b82f6bb' : 'transparent'),
+          borderRadius: 3, order: 2,
+        },
+        {
+          label: 'Forecast ($B)', data: TAM_HISTORY.forecast,
+          backgroundColor: '#3b82f633',
+          borderColor: '#3b82f6', borderWidth: 1.5,
+          borderDash: [4, 3],
+          borderRadius: 3, order: 2,
+        },
+        {
+          label: 'Trend', type: 'line',
+          data: TAM_HISTORY.years.map((y, i) => TAM_HISTORY.actual[i] || TAM_HISTORY.forecast[i]),
+          borderColor: '#f59e0b', borderWidth: 2, pointRadius: 0,
+          tension: 0.35, fill: false, order: 1,
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: { position: 'top', labels: { font: { size: 10 }, padding: 8 } },
+        tooltip: { callbacks: { label: ctx => `$${ctx.raw}B` } },
+      },
+      scales: {
+        x: { ticks: { font: { size: 9 }, maxTicksLimit: 15 }, grid: { display: false } },
+        y: { ticks: { callback: v => '$' + v + 'B', font: { size: 9 } }, grid: { color: '#f8fafc' } },
+      },
+    },
+  });
+
+  // ── WFE History chart (2015–2030e) ────────────────────────────────
+  const WFE_HISTORY = {
+    years:   [2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025,2026,2027,2028,2029,2030],
+    wfe:     [37,  40,  55,  62,  58,  71,  95, 107,  91, 109, 120, 130, 145, 158, 172, 190],
+    forecast:[null,null,null,null,null,null,null,null,null,null, 120, 130, 145, 158, 172, 190],
+    chinaShare:[null,null,null,null,null,17,  28,  26,  30,  28, null,null,null,null,null,null],
+  };
+  makeChart('chartWFEHistory', {
+    type: 'bar',
+    data: {
+      labels: WFE_HISTORY.years,
+      datasets: [
+        {
+          label: 'WFE Actual ($B)', data: WFE_HISTORY.wfe.map((v,i) => WFE_HISTORY.forecast[i] ? null : v),
+          backgroundColor: '#f59e0bbb', borderRadius: 3, order: 2, yAxisID: 'y',
+        },
+        {
+          label: 'WFE Forecast ($B)', data: WFE_HISTORY.forecast,
+          backgroundColor: '#f59e0b33', borderColor: '#f59e0b', borderWidth: 1.5,
+          borderRadius: 3, order: 2, yAxisID: 'y',
+        },
+        {
+          label: 'China Share %', type: 'line',
+          data: WFE_HISTORY.chinaShare,
+          borderColor: '#ef4444', borderWidth: 2, pointRadius: 4,
+          pointBackgroundColor: '#ef4444',
+          tension: 0.3, fill: false, order: 1, yAxisID: 'y2',
+        },
+      ],
+    },
+    options: {
+      plugins: {
+        legend: { position: 'top', labels: { font: { size: 10 }, padding: 8 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === 'y2' ? `${ctx.raw}%` : `$${ctx.raw}B` } },
+      },
+      scales: {
+        x: { ticks: { font: { size: 9 } }, grid: { display: false } },
+        y: { position: 'left', ticks: { callback: v => '$' + v + 'B', font: { size: 9 } }, grid: { color: '#f8fafc' } },
+        y2: { position: 'right', min: 0, max: 50, ticks: { callback: v => v + '%', font: { size: 9 } }, grid: { display: false } },
+      },
+    },
+  });
+
+  // TAM bar chart
+  const sorted = [...SEGMENTS].sort((a, b) => b.tam_usd_bn - a.tam_usd_bn);
+  makeChart('chartOverviewBar', {
+    type: 'bar',
+    data: {
+      labels: sorted.map(s => s.shortName),
+      datasets: [
+        { label: 'Global TAM', data: sorted.map(s => s.tam_usd_bn), backgroundColor: sorted.map(s => s.color + 'cc'), borderRadius: 6 },
+        { label: 'China TAM', data: sorted.map(s => s.tam_china_usd_bn), backgroundColor: '#ef444488', borderRadius: 6 },
+      ],
+    },
+    options: {
+      plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } },
+      scales: {
+        y: { ticks: { callback: v => '$' + v + 'B', font: { size: 10 } }, grid: { color: '#f1f5f9' } },
+        x: { grid: { display: false } },
+      },
+    },
+  });
+
+  // China donut
+  makeChart('chartChinaDonut', {
+    type: 'doughnut',
+    data: {
+      labels: ['China', 'Rest of World'],
+      datasets: [{ data: [totalChinaTAM, totalTAM - totalChinaTAM], backgroundColor: ['#ef4444cc', '#3b82f6cc'], borderWidth: 2, borderColor: '#fff' }],
+    },
+    options: {
+      plugins: {
+        legend: { position: 'bottom', labels: { font: { size: 11 } } },
+        tooltip: { callbacks: { label: ctx => ` $${ctx.raw.toFixed(0)}B (${((ctx.raw/totalTAM)*100).toFixed(0)}%)` } },
+      },
+      cutout: '60%',
+    },
+  });
+
+  // Overview table
+  document.getElementById('overviewTable').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0">
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b">#</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b">Segment</th>
+          <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b">Global TAM</th>
+          <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b">CAGR</th>
+          <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b">China TAM</th>
+          <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b">China %</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b">Top Player</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b">China Risk</th>
+          <th style="text-align:center;padding:10px 12px;font-weight:600;color:#64748b">Detail</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${SEGMENTS.map(seg => {
+          const top = seg.players.reduce((a,b) => a.market_share_pct > b.market_share_pct ? a : b);
+          const riskColor = seg.china.risk_level === 'high' ? '#fef2f2' : seg.china.risk_level === 'medium' ? '#fffbeb' : '#f0fdf4';
+          return `<tr style="border-bottom:1px solid #f1f5f9;cursor:pointer" onclick="selectSegment('${seg.id}')" onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+            <td style="padding:10px 12px"><span style="background:${seg.color}22;color:${seg.color};padding:2px 8px;border-radius:12px;font-weight:700;font-size:12px">${seg.position}</span></td>
+            <td style="padding:10px 12px"><span style="font-size:16px;margin-right:6px">${seg.icon}</span><strong>${seg.name}</strong></td>
+            <td style="padding:10px 12px;text-align:right;font-weight:700;color:${seg.color}">${fmtB(seg.tam_usd_bn)}</td>
+            <td style="padding:10px 12px;text-align:right;color:#10b981;font-weight:600">${seg.cagr_pct}%</td>
+            <td style="padding:10px 12px;text-align:right;color:#ef4444;font-weight:600">${fmtB(seg.tam_china_usd_bn)}</td>
+            <td style="padding:10px 12px;text-align:right;color:#64748b">${seg.china_share_pct}%</td>
+            <td style="padding:10px 12px"><span style="font-weight:600">${top.name.split(' ')[0]}</span> <span style="color:#64748b;font-size:11px">${top.market_share_pct}%</span></td>
+            <td style="padding:10px 12px"><span style="background:${riskColor};padding:2px 10px;border-radius:10px;font-size:11px;font-weight:600;color:${seg.china.risk_level==='high'?'#991b1b':seg.china.risk_level==='medium'?'#92400e':'#065f46'}">${seg.china.risk_level.toUpperCase()}</span></td>
+            <td style="padding:10px 12px;text-align:center"><button onclick="event.stopPropagation();selectSegment('${seg.id}')" style="padding:4px 12px;background:${seg.color}22;color:${seg.color};border:1px solid ${seg.color}44;border-radius:6px;font-size:11px;font-weight:600">View →</button></td>
+          </tr>`;
+        }).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  STOCK MONITOR
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+let stockData = null;
+let expandedSpike = null;
+
+async function loadStockData(forceRefresh = false) {
+  const el = document.getElementById('stockLastUpdated');
+  el.textContent = 'Loading…';
+  try {
+    const url = forceRefresh
+      ? `data/stock_events.json?_=${Date.now()}`
+      : 'data/stock_events.json';
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    stockData = await r.json();
+    const dt = new Date(stockData.generated_at);
+    el.textContent = `Last updated: ${dt.toLocaleString()} · ${stockData.total_tickers} tickers · ${stockData.spike_count} spikes`;
+    renderStockPanel();
+  } catch(e) {
+    el.textContent = `Failed to load (${e.message}) — run: python3 scripts/update_stocks.py`;
+    document.getElementById('stockSpikeTable').innerHTML =
+      `<div style="text-align:center;padding:40px;color:#94a3b8">
+        <div style="font-size:32px;margin-bottom:8px">🐍</div>
+        <div>No data yet. Run the weekly script to populate:</div>
+        <code style="background:#f1f5f9;padding:4px 10px;border-radius:4px;margin-top:8px;display:inline-block">cd /Users/tony/Rui02 && python3 scripts/update_stocks.py</code>
+      </div>`;
+  }
+}
+
+function renderStockPanel() {
+  if (!stockData) return;
+  const spikes = stockData.spikes || [];
+  const allPrices = stockData.all_prices || {};
+
+  // populate group filter
+  const groups = [...new Set(spikes.map(s => s.group))].sort();
+  const sel = document.getElementById('stockGroupFilter');
+  sel.innerHTML = '<option value="">All Groups</option>' +
+    groups.map(g => `<option value="${g}">${g}</option>`).join('');
+
+  // summary chips
+  const upSpikes = spikes.filter(s => s.change_pct > 0).length;
+  const downSpikes = spikes.filter(s => s.change_pct < 0).length;
+  const biggestUp = spikes.filter(s=>s.change_pct>0).sort((a,b)=>b.change_pct-a.change_pct)[0];
+  const biggestDown = spikes.filter(s=>s.change_pct<0).sort((a,b)=>a.change_pct-b.change_pct)[0];
+  document.getElementById('stockSummaryRow').innerHTML = `
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 14px;font-size:12px">
+      📈 <strong style="color:#16a34a">${upSpikes}</strong> upside spikes this week
+    </div>
+    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:8px 14px;font-size:12px">
+      📉 <strong style="color:#dc2626">${downSpikes}</strong> downside spikes this week
+    </div>
+    ${biggestUp ? `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:8px 14px;font-size:12px">
+      🚀 Best: <strong>${biggestUp.ticker}</strong> <span style="color:#16a34a">+${biggestUp.change_pct.toFixed(1)}%</span> on ${biggestUp.date}
+    </div>` : ''}
+    ${biggestDown ? `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:8px 14px;font-size:12px">
+      💥 Worst: <strong>${biggestDown.ticker}</strong> <span style="color:#dc2626">${biggestDown.change_pct.toFixed(1)}%</span> on ${biggestDown.date}
+    </div>` : ''}
+  `;
+
+  renderSpikeTable(spikes);
+  renderPriceGrid(allPrices);
+}
+
+function filterStockTable() {
+  if (!stockData) return;
+  const group = document.getElementById('stockGroupFilter').value;
+  const spikes = group
+    ? stockData.spikes.filter(s => s.group === group)
+    : stockData.spikes;
+  renderSpikeTable(spikes);
+}
+
+function renderSpikeTable(spikes) {
+  if (!spikes.length) {
+    document.getElementById('stockSpikeTable').innerHTML =
+      `<div style="text-align:center;padding:32px;color:#94a3b8;font-size:13px">
+        ✅ No spikes detected this week (all stocks within thresholds).<br>
+        <span style="font-size:11px">Run script again Monday for fresh data.</span>
+      </div>`;
+    return;
+  }
+
+  const rows = spikes.map((s, idx) => {
+    const isUp = s.change_pct > 0;
+    const moveColor = isUp ? '#16a34a' : '#dc2626';
+    const moveBg = isUp ? '#f0fdf4' : '#fef2f2';
+    const moveBorder = isUp ? '#bbf7d0' : '#fecaca';
+    const arrow = isUp ? '▲' : '▼';
+    const hasExplanation = s.ai_explanation && s.ai_explanation.length > 0;
+    const isExpanded = expandedSpike === idx;
+
+    const newsHtml = isExpanded && s.news && s.news.length ? `
+      <tr id="spike-expand-${idx}">
+        <td colspan="8" style="padding:0 12px 16px 12px;background:#f8fafc">
+          <div style="border-left:3px solid ${moveColor};padding:12px 16px;background:#fff;border-radius:0 8px 8px 0;margin-top:4px">
+            ${hasExplanation ? `
+              <div style="margin-bottom:12px">
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">🤖 AI Analysis</div>
+                <div style="font-size:13px;color:#1e293b;line-height:1.7">${s.ai_explanation}</div>
+              </div>` : ''}
+            ${s.news && s.news.length ? `
+              <div>
+                <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:6px">📰 Related News</div>
+                ${s.news.map(n => `
+                  <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:6px;font-size:12px">
+                    <span style="color:#94a3b8;flex-shrink:0">${n.published ? n.published.substring(5,10) : ''}</span>
+                    <span style="color:#64748b;flex-shrink:0;font-weight:600">[${n.source}]</span>
+                    <a href="${n.url}" target="_blank" style="color:#3b82f6;text-decoration:none;line-height:1.4">${n.title}</a>
+                  </div>`).join('')}
+              </div>` : ''}
+            ${!hasExplanation && (!s.news || !s.news.length) ? `<div style="color:#94a3b8;font-size:12px">No news data captured. Re-run script to fetch news for this spike.</div>` : ''}
+          </div>
+        </td>
+      </tr>` : '';
+
+    return `
+      <tr onclick="toggleSpike(${idx})" style="border-bottom:1px solid #f1f5f9;cursor:pointer"
+          onmouseover="this.style.background='#f8fafc'" onmouseout="this.style.background=''">
+        <td style="padding:10px 12px;font-size:12px;color:#64748b">${s.date}</td>
+        <td style="padding:10px 12px">
+          <span style="font-weight:700;font-size:13px">${s.ticker}</span>
+          <div style="font-size:10px;color:#94a3b8">${s.group}</div>
+        </td>
+        <td style="padding:10px 12px;font-size:13px">${s.company}</td>
+        <td style="padding:10px 12px;text-align:right">
+          <span style="background:${moveBg};color:${moveColor};border:1px solid ${moveBorder};padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700">
+            ${arrow} ${isUp ? '+' : ''}${s.change_pct.toFixed(1)}%
+          </span>
+        </td>
+        <td style="padding:10px 12px;text-align:right;font-size:12px;color:#64748b">≥${s.threshold_pct.toFixed(0)}%</td>
+        <td style="padding:10px 12px;font-size:12px;color:#64748b">${s.close ? '$' + s.close.toFixed(2) : '—'}</td>
+        <td style="padding:10px 12px;font-size:11px">
+          ${s.news && s.news.length ? `<span style="color:#3b82f6">${s.news.length} news</span>` : '<span style="color:#cbd5e1">—</span>'}
+          ${hasExplanation ? ' · <span style="color:#8b5cf6">AI ✓</span>' : ''}
+        </td>
+        <td style="padding:10px 12px;text-align:center;font-size:12px;color:#94a3b8">${isExpanded ? '▲' : '▼'}</td>
+      </tr>
+      ${newsHtml}`;
+  }).join('');
+
+  document.getElementById('stockSpikeTable').innerHTML = `
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="background:#f8fafc;border-bottom:2px solid #e2e8f0">
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Date</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Ticker</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Company</th>
+          <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Move</th>
+          <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Threshold</th>
+          <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Close</th>
+          <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Data</th>
+          <th style="text-align:center;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Detail</th>
+        </tr>
+      </thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function toggleSpike(idx) {
+  expandedSpike = expandedSpike === idx ? null : idx;
+  const spikes = stockData ? stockData.spikes : [];
+  const group = document.getElementById('stockGroupFilter').value;
+  const filtered = group ? spikes.filter(s => s.group === group) : spikes;
+  renderSpikeTable(filtered);
+}
+
+function renderPriceGrid(allPrices) {
+  // Show mini sparklines for top 12 tickers by activity
+  const tickers = Object.keys(allPrices).filter(t => allPrices[t] && allPrices[t].length > 0).slice(0, 24);
+  if (!tickers.length) return;
+
+  const cards = tickers.map(ticker => {
+    const rows = allPrices[ticker];
+    const latest = rows[rows.length - 1];
+    const first = rows[0];
+    const totalChange = first ? ((latest.close - first.close) / first.close * 100).toFixed(1) : '—';
+    const isUp = parseFloat(totalChange) >= 0;
+    const prices = rows.map(r => r.close);
+    const minP = Math.min(...prices);
+    const maxP = Math.max(...prices);
+    const range = maxP - minP || 1;
+
+    // Build SVG sparkline
+    const svgW = 100, svgH = 30;
+    const pts = prices.map((p, i) => {
+      const x = (i / (prices.length - 1)) * svgW;
+      const y = svgH - ((p - minP) / range) * svgH;
+      return `${x},${y}`;
+    }).join(' ');
+    const lineColor = isUp ? '#16a34a' : '#dc2626';
+
+    return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;min-width:140px;flex:1">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div style="font-weight:700;font-size:12px">${ticker}</div>
+          <div style="font-size:10px;color:#94a3b8">$${latest ? latest.close.toFixed(2) : '—'}</div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${lineColor}">${isUp?'+':''}${totalChange}%</span>
+      </div>
+      <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">
+        <polyline points="${pts}" fill="none" stroke="${lineColor}" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </div>`;
+  }).join('');
+
+  document.getElementById('stockPriceGrid').innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">7-Day Price Overview (all tracked tickers)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">${cards}</div>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  ANALYTICS RENDERER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+function renderAnalytics() {
+  loadStockData();
+  // Bubble chart: x=TAM, y=CAGR, r=China share
+  makeChart('chartBubble', {
+    type: 'bubble',
+    data: {
+      datasets: SEGMENTS.map(seg => ({
+        label: seg.name,
+        data: [{ x: seg.tam_usd_bn, y: seg.cagr_pct, r: Math.sqrt(seg.china_share_pct) * 3 + 4 }],
+        backgroundColor: seg.color + '99',
+        borderColor: seg.color,
+        borderWidth: 2,
+      })),
+    },
+    options: {
+      plugins: {
+        legend: { position: 'right', labels: { font: { size: 10 }, padding: 6 } },
+        tooltip: {
+          callbacks: {
+            label: ctx => {
+              const seg = SEGMENTS.find(s => s.name === ctx.dataset.label);
+              return [`${seg.icon} ${seg.name}`, `TAM: $${ctx.raw.x}B`, `CAGR: ${ctx.raw.y}%`, `China: ${seg.china_share_pct}%`];
+            },
+          },
+        },
+      },
+      scales: {
+        x: { title: { display: true, text: 'Global TAM ($B)', font: { size: 11 } }, ticks: { callback: v => '$' + v + 'B', font: { size: 10 } } },
+        y: { title: { display: true, text: 'CAGR % (5-yr)', font: { size: 11 } }, ticks: { callback: v => v + '%', font: { size: 10 } } },
+      },
+    },
+  });
+
+  // Stacked bar: China vs RoW per segment
+  const sorted = [...SEGMENTS].sort((a, b) => b.tam_usd_bn - a.tam_usd_bn);
+  makeChart('chartStackedBar', {
+    type: 'bar',
+    data: {
+      labels: sorted.map(s => s.shortName),
+      datasets: [
+        { label: '🇨🇳 China', data: sorted.map(s => s.tam_china_usd_bn), backgroundColor: '#ef444499', borderRadius: 4 },
+        { label: '🌍 Rest of World', data: sorted.map(s => +(s.tam_usd_bn - s.tam_china_usd_bn).toFixed(1)), backgroundColor: '#3b82f699', borderRadius: 4 },
+      ],
+    },
+    options: {
+      plugins: { legend: { position: 'top', labels: { font: { size: 11 } } } },
+      scales: {
+        x: { stacked: true, grid: { display: false } },
+        y: { stacked: true, ticks: { callback: v => '$' + v + 'B', font: { size: 10 } }, grid: { color: '#f1f5f9' } },
+      },
+    },
+  });
+
+  // Multi-segment top-player revenue bar
+  const topPlayersData = SEGMENTS.map(seg => {
+    const top3 = [...seg.players].sort((a,b) => b.revenue_usd_bn - a.revenue_usd_bn).slice(0, 3);
+    return { seg, top3 };
+  });
+  const multiLabels = topPlayersData.flatMap(d => d.top3.map(p => p.name.split(' ')[0] + '\n(' + d.seg.shortName + ')'));
+  const multiData = topPlayersData.flatMap(d => d.top3.map(p => p.revenue_usd_bn));
+  const multiColors = topPlayersData.flatMap(d => d.top3.map(() => d.seg.color + 'bb'));
+
+  makeChart('chartMultiBar', {
+    type: 'bar',
+    data: {
+      labels: multiLabels,
+      datasets: [{ data: multiData, backgroundColor: multiColors, borderRadius: 4 }],
+    },
+    options: {
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `$${ctx.raw}B revenue` } } },
+      scales: {
+        y: { ticks: { callback: v => '$' + v + 'B', font: { size: 10 } }, grid: { color: '#f1f5f9' } },
+        x: { ticks: { font: { size: 9 }, maxRotation: 45 }, grid: { display: false } },
+      },
+    },
+  });
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  TECH COMPARISON DATA
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const TECH_DATA = {
+  eda: {
+    title: 'EDA Technology Landscape',
+    comparisons: [
+      {
+        name: 'Traditional RTL-to-GDS Flow',
+        pros: ['Proven, predictable results', 'Full designer control', 'Widely understood by engineers'],
+        cons: ['Manual iteration cycles take weeks', 'Sub-optimal PPA at advanced nodes', 'Requires deep expertise'],
+        users: 'All major design houses (legacy flows)',
+        share2025: 55, share2030: 25, color: '#94a3b8', winner: false,
+      },
+      {
+        name: 'AI-Assisted Place & Route (DSO.ai / Cerebrus)',
+        pros: ['10–20% better PPA vs. manual', 'Dramatically faster closure', 'Improves with each run'],
+        cons: ['Black-box — hard to debug', 'High compute cost (cloud GPU hours)', 'Requires large training data per design'],
+        users: 'Synopsys DSO.ai, Cadence Cerebrus, Google (internal)',
+        share2025: 35, share2030: 60, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'LLM / Generative AI for RTL',
+        pros: ['Accelerates RTL authoring 5–10x', 'Reduces verification burden', 'Democratizes chip design'],
+        cons: ['Hallucinations require human review', 'Not yet production-ready for complex SoCs', 'IP and confidentiality concerns'],
+        users: 'Synopsys (Copilot), Cadence (JedAI), startups (ChipNeMo, Nvida internal)',
+        share2025: 5, share2030: 30, color: '#8b5cf6', winner: false,
+      },
+      {
+        name: 'Cloud-Native EDA (AWS Silicon / GCP)',
+        pros: ['Elastic compute — burst capacity', 'No on-prem license servers', 'Faster regression cycles'],
+        cons: ['Data sovereignty / IP leakage risk', 'Latency on large block runs', 'Ongoing cloud cost vs. capex'],
+        users: 'AWS (Annapurna), Google TPU team, most major fabs evaluating',
+        share2025: 5, share2030: 15, color: '#06b6d4', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  ip: {
+    title: 'CPU / IP Architecture: ARM vs RISC-V',
+    comparisons: [
+      {
+        name: 'ARM Architecture (v8/v9)',
+        pros: ['Unmatched software ecosystem', 'Proven in 250B+ chips shipped', 'Compute Subsystems reduce SoC time-to-market'],
+        cons: ['Licensing fees & royalties', 'US/UK-controlled — geopolitical risk for China', 'Closed ISA — limited customization'],
+        users: 'Apple, Qualcomm, Samsung, MediaTek, AWS Graviton, Nvidia Grace',
+        share2025: 65, share2030: 52, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'RISC-V (Open ISA)',
+        pros: ['Royalty-free, fully open', 'Highly customizable extensions', 'China strategic alternative to ARM'],
+        cons: ['Fragmented ecosystem vs. ARM', 'Limited enterprise software support', 'Safety cert (ISO 26262) still maturing'],
+        users: 'Alibaba T-Head, SiFive, Western Digital (storage), RISC-V International',
+        share2025: 15, share2030: 28, color: '#10b981', winner: false,
+      },
+      {
+        name: 'x86 (Intel / AMD)',
+        pros: ['Dominant in PC and server installed base', 'Best backward compatibility', 'Strong ISV ecosystem'],
+        cons: ['Power-inefficient vs. ARM', 'Complex instruction decode', 'Losing ground to ARM in cloud'],
+        users: 'Intel (Xeon, Core), AMD (EPYC, Ryzen)',
+        share2025: 18, share2030: 16, color: '#f59e0b', winner: false,
+      },
+      {
+        name: 'Custom DSA (Domain-Specific)',
+        pros: ['10–100x efficiency for target workload', 'No licensing overhead', 'AI training/inference optimized'],
+        cons: ['No general-purpose use', 'High NRE cost ($50M+)', 'Narrow addressable market'],
+        users: 'Google TPU, AWS Trainium/Inferentia, Meta MTIA, Tesla Dojo',
+        share2025: 2, share2030: 4, color: '#ef4444', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  fabless: {
+    title: 'AI Chip Architecture Battle',
+    comparisons: [
+      {
+        name: 'GPU (Nvidia CUDA ecosystem)',
+        pros: ['Largest ML framework support (PyTorch, JAX)', 'NVLink bandwidth for scale-out', 'Dominant software moat (CUDA)'],
+        cons: ['High cost per chip ($25K–$40K)', 'High power (700W TDP)', 'US export-controlled for China'],
+        users: 'Nvidia H100/H200/B200, AMD MI300X/MI350',
+        share2025: 80, share2030: 62, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'Custom ASIC / XPU',
+        pros: ['2–5x better TCO for specific workload', 'Lower latency inference', 'Vendor differentiation'],
+        cons: ['3–5 year design cycle', 'High NRE ($500M+ at 3nm)', 'Inflexible — hard to pivot'],
+        users: 'Google TPU v5p, AWS Trainium2, Meta MTIA, Microsoft Maia, Tesla Dojo D1',
+        share2025: 12, share2030: 28, color: '#8b5cf6', winner: false,
+      },
+      {
+        name: 'NPU (Neural Processing Unit)',
+        pros: ['Ultra-low power for edge inference', 'On-device privacy', 'Integrated into SoCs'],
+        cons: ['Limited model size', 'Not suitable for training', 'Fragmented SDK support'],
+        users: 'Apple Neural Engine, Qualcomm Hexagon, MediaTek APU, Huawei Ascend',
+        share2025: 5, share2030: 7, color: '#10b981', winner: false,
+      },
+      {
+        name: 'FPGA',
+        pros: ['Reconfigurable — update post-deployment', 'Low latency for inference pipeline', 'Suitable for sparse models'],
+        cons: ['Low TOPS/W vs. ASIC', 'Hard to program', 'Niche market size'],
+        users: 'Intel Agilex, AMD Versal, used in HFT and telecom AI',
+        share2025: 3, share2030: 3, color: '#f59e0b', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  wafers: {
+    title: 'Substrate Technology: Si vs SiC vs GaN',
+    comparisons: [
+      {
+        name: '300mm Silicon (Prime)',
+        pros: ['Lowest cost per transistor', 'Mature supply chain', '180M wafer-starts/yr capacity'],
+        cons: ['Limited to ~1.2V breakdown for power', 'Not suitable for high-temp/RF power', 'Performance wall at sub-2nm'],
+        users: 'All logic (TSMC, Samsung), DRAM, NAND — universal substrate',
+        share2025: 82, share2030: 75, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'Silicon Carbide (SiC)',
+        pros: ['10x higher breakdown voltage vs. Si', 'High-temp operation (200°C)', 'Lower switching losses for EV inverters'],
+        cons: ['$800–$1,500 per 150mm wafer (vs. $150 Si)', 'Crystal defect challenges', 'Machining difficulty'],
+        users: 'STMicro, Wolfspeed, Infineon, onsemi — for EV inverters, charging, grid',
+        share2025: 8, share2030: 14, color: '#f59e0b', winner: false,
+      },
+      {
+        name: 'Gallium Nitride (GaN-on-Si)',
+        pros: ['Best RF power density (5G base station)', 'High frequency switching', '300mm Si-compatible process'],
+        cons: ['Epitaxial defects on Si substrate', 'Limited to medium breakdown voltage', 'GaN power still maturing'],
+        users: 'Wolfspeed, MACOM, Qorvo (RF); EPC, Navitas (power GaN)',
+        share2025: 5, share2030: 8, color: '#10b981', winner: false,
+      },
+      {
+        name: 'Glass Substrate (emerging)',
+        pros: ['Ultra-low signal loss for AI packages', 'Flat surface for fine-pitch chiplets', 'Enables much larger interposers'],
+        cons: ['Fragile — yield challenges', 'No volume supply chain yet', 'First production ~2026–2027 (Intel)'],
+        users: 'Intel EMIB on glass (2026+), Samsung, TSMC evaluating',
+        share2025: 0, share2030: 3, color: '#8b5cf6', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  masks: {
+    title: 'Photomask Technology: ArF vs EUV vs High-NA EUV',
+    comparisons: [
+      {
+        name: 'ArF Immersion (193nm multi-patterning)',
+        pros: ['Proven, mature supply chain', 'Available from multiple vendors', 'Cost-effective for ≥7nm with SADP/SAQP'],
+        cons: ['Complex multi-patterning (4–8 layers per level)', 'Overlay error accumulates across patterns', 'Reaching physical limits'],
+        users: 'All nodes ≥7nm; continued use for non-critical layers at 3nm/2nm',
+        share2025: 55, share2030: 40, color: '#94a3b8', winner: false,
+      },
+      {
+        name: 'EUV Lithography (13.5nm, 0.33 NA)',
+        pros: ['Single-exposure patterning', 'Fewer masking steps vs. multi-patterning', 'Proven at 7nm–2nm (N3, N2)'],
+        cons: ['Masks require ultra-clean vacuum (no pellicle defect escapes)', 'EUV blank supply monopoly (Hoya)', 'ASML sole supplier — $200M+ per tool'],
+        users: 'TSMC, Samsung, Intel — mandatory for sub-7nm',
+        share2025: 42, share2030: 48, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'High-NA EUV (0.55 NA)',
+        pros: ['2.9x density improvement vs. 0.33 NA', 'Enables 2nm gate pitch and below', 'Fewer EUV passes needed'],
+        cons: ['New reticle standard (larger 6" blank)', 'Tool cost $350M+; only ASML makes it', 'HVM readiness 2027–2028'],
+        users: 'Intel (first adopter), TSMC N2P/A16, Samsung SF2',
+        share2025: 2, share2030: 12, color: '#8b5cf6', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  equipment: {
+    title: 'Lithography & Equipment: Key Technology Battles',
+    comparisons: [
+      {
+        name: 'EUV (0.33 NA) — ASML NXE:3600',
+        pros: ['HVM-proven at 3nm/2nm nodes', 'Single-exposure — eliminates multi-patterning overlay', 'Up to 185 wph throughput'],
+        cons: ['$200M per tool', 'ASML monopoly — single source of failure', 'China export-blocked since 2019'],
+        users: 'TSMC (primary), Samsung, Intel — ~3,400 systems installed globally',
+        share2025: 25, share2030: 22, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'High-NA EUV (0.55 NA) — ASML EXE:5000',
+        pros: ['Sub-10nm half-pitch capability', 'Critical for gate-all-around at 2nm and below', 'Future-proof to 1.4nm (A14)'],
+        cons: ['$380M per tool', 'Low throughput early gen (~100 wph)', 'HVM ramp 2027–2028'],
+        users: 'Intel (EXE:5200B accepted Q4 2025), TSMC A16, Samsung SF2',
+        share2025: 1, share2030: 8, color: '#8b5cf6', winner: false,
+      },
+      {
+        name: 'ALD (Atomic Layer Deposition)',
+        pros: ['Angstrom-precise film control', 'Essential for GAA gate dielectric', 'Conformally coats 3D structures'],
+        cons: ['Slow throughput vs. CVD', 'Precursor cost and purity requirements', 'Reactor complexity'],
+        users: 'Lam Research, Applied Materials, ASM International — mandatory at 3nm+',
+        share2025: 15, share2030: 22, color: '#10b981', winner: false,
+      },
+      {
+        name: 'Advanced Etch (Cryogenic / ALE)',
+        pros: ['Atomic-precision material removal', 'Enables vertical GAA fin profiles', 'Cryo-etch improves selectivity 10x'],
+        cons: ['Throughput penalty vs. conventional RIE', 'Equipment cost 3–5x conventional plasma etch', 'Process recipes complex'],
+        users: 'Lam Research (Cryo), Applied Materials (ALE), Tokyo Electron — sub-3nm gate etch',
+        share2025: 12, share2030: 18, color: '#f59e0b', winner: false,
+      },
+    ],
+    screenshots: [
+      {src: 'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iOTAwIiBoZWlnaHQ9IjM0MCIgdmlld0JveD0iMCAwIDkwMCAzNDAiPgogIDxyZWN0IHdpZHRoPSI5MDAiIGhlaWdodD0iMzQwIiBmaWxsPSIjMGYxNzJhIiByeD0iMTIiLz4KICA8dGV4dCB4PSI0NTAiIHk9IjI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5FVVYgTGl0aG9ncmFwaHkgR2VuZXJhdGlvbnM8L3RleHQ+CiAgPHRleHQgeD0iNDUwIiB5PSI0NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5BU01MIG1vbm9wb2x5IOKAlCBldmVyeSBhZHZhbmNlZCBjaGlwIGluIHRoZSB3b3JsZCBkZXBlbmRzIG9uIHRoZXNlIG1hY2hpbmVzPC90ZXh0PgoKICA8IS0tIEVVViAwLjMzIE5BIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDYwLDcwKSI+CiAgICA8cmVjdCB4PSIwIiB5PSIwIiB3aWR0aD0iMzUwIiBoZWlnaHQ9IjI0MCIgZmlsbD0iIzFlMjkzYiIgcng9IjEwIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIvPgogICAgPHRleHQgeD0iMTc1IiB5PSIyNSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzYwYTVmYSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+RVVWIOKAlCAwLjMzIE5BPC90ZXh0PgogICAgPHRleHQgeD0iMTc1IiB5PSI0MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5OWEU6MzYwMEQgwrcgSW4gSFZNIHNpbmNlIDIwMTk8L3RleHQ+CgogICAgPCEtLSBzcGVjIHJvd3MgLS0+CiAgICA8cmVjdCB4PSIxNSIgeT0iNTUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjgiIGZpbGw9IiMwZjE3MmEiIHJ4PSI0Ii8+CiAgICA8dGV4dCB4PSIyNSIgeT0iNzQiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+V2F2ZWxlbmd0aDwvdGV4dD4KICAgIDx0ZXh0IHg9IjMyNSIgeT0iNzQiIHRleHQtYW5jaG9yPSJlbmQiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPjEzLjUgbm0gKEVVVik8L3RleHQ+CgogICAgPHJlY3QgeD0iMTUiIHk9Ijg4IiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMWUyOTNiIiByeD0iNCIvPgogICAgPHRleHQgeD0iMjUiIHk9IjEwNyIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5OdW1lcmljYWwgQXBlcnR1cmU8L3RleHQ+CiAgICA8dGV4dCB4PSIzMjUiIHk9IjEwNyIgdGV4dC1hbmNob3I9ImVuZCIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MC4zMyBOQTwvdGV4dD4KCiAgICA8cmVjdCB4PSIxNSIgeT0iMTIxIiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMGYxNzJhIiByeD0iNCIvPgogICAgPHRleHQgeD0iMjUiIHk9IjE0MCIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5NaW4uIGhhbGYtcGl0Y2g8L3RleHQ+CiAgICA8dGV4dCB4PSIzMjUiIHk9IjE0MCIgdGV4dC1hbmNob3I9ImVuZCIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+fjEzIG5tPC90ZXh0PgoKICAgIDxyZWN0IHg9IjE1IiB5PSIxNTQiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjgiIGZpbGw9IiMxZTI5M2IiIHJ4PSI0Ii8+CiAgICA8dGV4dCB4PSIyNSIgeT0iMTczIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjExIiBmb250LWZhbWlseT0iQXJpYWwiPlRocm91Z2hwdXQ8L3RleHQ+CiAgICA8dGV4dCB4PSIzMjUiIHk9IjE3MyIgdGV4dC1hbmNob3I9ImVuZCIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MTg1IHdwaDwvdGV4dD4KCiAgICA8cmVjdCB4PSIxNSIgeT0iMTg3IiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMGYxNzJhIiByeD0iNCIvPgogICAgPHRleHQgeD0iMjUiIHk9IjIwNiIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5Ub29sIHByaWNlPC90ZXh0PgogICAgPHRleHQgeD0iMzI1IiB5PSIyMDYiIHRleHQtYW5jaG9yPSJlbmQiIGZpbGw9IiNmYmJmMjQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPn4kMjAwTTwvdGV4dD4KCiAgICA8dGV4dCB4PSIxNzUiIHk9IjIzNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzEwYjk4MSIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj7inJMgMyw0MDArIHN5c3RlbXMgaW5zdGFsbGVkIMK3IFRTTUMgLyBTYW1zdW5nIC8gSW50ZWw8L3RleHQ+CiAgPC9nPgoKICA8IS0tIHZzIGxhYmVsIC0tPgogIDx0ZXh0IHg9IjQ1MCIgeT0iMTk1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjU5ZTBiIiBmb250LXNpemU9IjIyIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5WUzwvdGV4dD4KCiAgPCEtLSBIaWdoLU5BIEVVViAwLjU1IE5BIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDQ5MCw3MCkiPgogICAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjM1MCIgaGVpZ2h0PSIyNDAiIGZpbGw9IiMxZTI5M2IiIHJ4PSIxMCIgc3Ryb2tlPSIjOGI1Y2Y2IiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDx0ZXh0IHg9IjE3NSIgeT0iMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhNzhiZmEiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPkhpZ2gtTkEgRVVWIOKAlCAwLjU1IE5BPC90ZXh0PgogICAgPHRleHQgeD0iMTc1IiB5PSI0MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5FWEU6NTAwMC81MjAwIMK3IEhWTSAyMDI34oCTMjAyODwvdGV4dD4KCiAgICA8cmVjdCB4PSIxNSIgeT0iNTUiIHdpZHRoPSIzMjAiIGhlaWdodD0iMjgiIGZpbGw9IiMwZjE3MmEiIHJ4PSI0Ii8+CiAgICA8dGV4dCB4PSIyNSIgeT0iNzQiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+V2F2ZWxlbmd0aDwvdGV4dD4KICAgIDx0ZXh0IHg9IjMyNSIgeT0iNzQiIHRleHQtYW5jaG9yPSJlbmQiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPjEzLjUgbm0gKEVVVik8L3RleHQ+CgogICAgPHJlY3QgeD0iMTUiIHk9Ijg4IiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMWUyOTNiIiByeD0iNCIvPgogICAgPHRleHQgeD0iMjUiIHk9IjEwNyIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5OdW1lcmljYWwgQXBlcnR1cmU8L3RleHQ+CiAgICA8dGV4dCB4PSIzMjUiIHk9IjEwNyIgdGV4dC1hbmNob3I9ImVuZCIgZmlsbD0iI2E3OGJmYSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MC41NSBOQSDihpE8L3RleHQ+CgogICAgPHJlY3QgeD0iMTUiIHk9IjEyMSIgd2lkdGg9IjMyMCIgaGVpZ2h0PSIyOCIgZmlsbD0iIzBmMTcyYSIgcng9IjQiLz4KICAgIDx0ZXh0IHg9IjI1IiB5PSIxNDAiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TWluLiBoYWxmLXBpdGNoPC90ZXh0PgogICAgPHRleHQgeD0iMzI1IiB5PSIxNDAiIHRleHQtYW5jaG9yPSJlbmQiIGZpbGw9IiNhNzhiZmEiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPn44IG5tIOKGkTwvdGV4dD4KCiAgICA8cmVjdCB4PSIxNSIgeT0iMTU0IiB3aWR0aD0iMzIwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMWUyOTNiIiByeD0iNCIvPgogICAgPHRleHQgeD0iMjUiIHk9IjE3MyIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5UaHJvdWdocHV0PC90ZXh0PgogICAgPHRleHQgeD0iMzI1IiB5PSIxNzMiIHRleHQtYW5jaG9yPSJlbmQiIGZpbGw9IiNmYmJmMjQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPn4xNTAgd3BoIChnZW4gMSk8L3RleHQ+CgogICAgPHJlY3QgeD0iMTUiIHk9IjE4NyIgd2lkdGg9IjMyMCIgaGVpZ2h0PSIyOCIgZmlsbD0iIzBmMTcyYSIgcng9IjQiLz4KICAgIDx0ZXh0IHg9IjI1IiB5PSIyMDYiIGZpbGw9IiM5NGEzYjQiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+VG9vbCBwcmljZTwvdGV4dD4KICAgIDx0ZXh0IHg9IjMyNSIgeT0iMjA2IiB0ZXh0LWFuY2hvcj0iZW5kIiBmaWxsPSIjZmJiZjI0IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5+JDM4ME0g4oaRPC90ZXh0PgoKICAgIDx0ZXh0IHg9IjE3NSIgeT0iMjM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOGI1Y2Y2IiBmb250LXNpemU9IjExIiBmb250LWZhbWlseT0iQXJpYWwiPkludGVsIGZpcnN0IGFkb3B0ZXIgwrcgVFNNQyBBMTYgwrcgU2Ftc3VuZyBTRjI8L3RleHQ+CiAgPC9nPgoKICA8IS0tIGRlbnNpdHkgaW1wcm92ZW1lbnQgY2FsbG91dCAtLT4KICA8cmVjdCB4PSIzMzAiIHk9IjIyNSIgd2lkdGg9IjI0MCIgaGVpZ2h0PSI0NCIgZmlsbD0iIzc4MzUwZiIgcng9IjgiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgPHRleHQgeD0iNDUwIiB5PSIyNDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmYmJmMjQiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPjIuOcOXIERlbnNpdHkgSW1wcm92ZW1lbnQ8L3RleHQ+CiAgPHRleHQgeD0iNDUwIiB5PSIyNjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZGU2OGEiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+SGlnaC1OQSB2cy4gc3RhbmRhcmQgRVVWIGF0IHNhbWUgbm9kZTwvdGV4dD4KCiAgPCEtLSByb2FkbWFwIGxpbmUgLS0+CiAgPGxpbmUgeDE9IjgwIiB5MT0iMzE1IiB4Mj0iODIwIiB5Mj0iMzE1IiBzdHJva2U9IiMzMzQxNTUiIHN0cm9rZS13aWR0aD0iMiIvPgogIDx0ZXh0IHg9IjgwIiB5PSIzMzAiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MjAxOTwvdGV4dD4KICA8dGV4dCB4PSIyMDAiIHk9IjMzMCIgZmlsbD0iIzY0NzQ4YiIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj4yMDIyPC90ZXh0PgogIDx0ZXh0IHg9IjM2MCIgeT0iMzMwIiBmaWxsPSIjM2I4MmY2IiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPjIwMjUgKE4yKTwvdGV4dD4KICA8dGV4dCB4PSI1NDAiIHk9IjMzMCIgZmlsbD0iIzhiNWNmNiIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj4yMDI3IChIVk0gSGlnaC1OQSk8L3RleHQ+CiAgPHRleHQgeD0iNzAwIiB5PSIzMzAiIGZpbGw9IiM4YjVjZjYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MjAzMCAoQTE0KTwvdGV4dD4KICA8Y2lyY2xlIGN4PSI4MCIgY3k9IjMxNSIgcj0iNCIgZmlsbD0iIzNiODJmNiIvPgogIDxjaXJjbGUgY3g9IjM2MCIgY3k9IjMxNSIgcj0iNCIgZmlsbD0iIzNiODJmNiIvPgogIDxjaXJjbGUgY3g9IjU0MCIgY3k9IjMxNSIgcj0iNSIgZmlsbD0iIzhiNWNmNiIvPgogIDxjaXJjbGUgY3g9IjcwMCIgY3k9IjMxNSIgcj0iNCIgZmlsbD0iIzhiNWNmNiIvPgo8L3N2Zz4K', caption: 'EUV (0.33 NA) vs. High-NA EUV (0.55 NA) — Resolution and Market Position', source: 'Based on ASML Analyst Day 2023 & public disclosures'}
+    ],
+  },
+  chemicals: {
+    title: 'Photoresist Evolution: CAR → MOR → DSA',
+    comparisons: [
+      {
+        name: 'Chemically Amplified Resist (CAR)',
+        pros: ['High sensitivity — low EUV dose needed', 'Established supply chain (Shin-Etsu, JSR)', 'Works for DUV and EUV'],
+        cons: ['Stochastic defects at high resolution', 'Acid diffusion blurs small features', 'Approaching resolution limit'],
+        users: 'All ArF and current EUV nodes (TSMC N7–N3, Samsung)',
+        share2025: 72, share2030: 45, color: '#94a3b8', winner: false,
+      },
+      {
+        name: 'Metal-Oxide Resist (MOR)',
+        pros: ['4x better resolution than CAR', 'Low outgassing — EUV-friendly', 'Self-developing possible (dry develop)'],
+        cons: ['$5,000–$10,000/liter (vs. $300 for CAR)', 'Slow adoption — qualification cycle 3–5 years', 'Merck / Inpria supply limited'],
+        users: 'TSMC N2 qualification, Intel 18A, ASML EUV test vehicles — Inpria (Merck)',
+        share2025: 15, share2030: 40, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'Directed Self-Assembly (DSA)',
+        pros: ['Sub-5nm pitch patterning without EUV extra pass', 'Block copolymer — low material cost', 'Parallel patterning'],
+        cons: ['Limited pattern geometries (lines/holes only)', 'Integration complexity with existing process', 'Still in R&D / pilot'],
+        users: 'IMEC, SK Hynix (DRAM pilot), Brewer Science — 2028+ for volume',
+        share2025: 1, share2030: 8, color: '#10b981', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  foundry: {
+    title: 'Transistor Architecture: FinFET → GAA → CFET',
+    comparisons: [
+      {
+        name: 'FinFET (3D Fin Transistor)',
+        pros: ['Proven at 16nm–5nm in HVM', 'Good electrostatic control vs. planar', 'Mature process ecosystem'],
+        cons: ['Fin width scaling hitting physical limit at 3nm', 'Parasitic capacitance increases', 'Gate control degrades sub-3nm'],
+        users: 'TSMC N5/N4/N3 (still dominant), Samsung SF4, Intel 7',
+        share2025: 55, share2030: 22, color: '#94a3b8', winner: false,
+      },
+      {
+        name: 'Gate-All-Around / Nanosheet (GAA)',
+        pros: ['Better electrostatics — 4-sided gate control', 'Enables 2nm and below', 'Width-tunable nanosheets for power/performance'],
+        cons: ['Complex process — inner spacer, bottom dielectric isolation', 'Yield learning curve', 'New design rules needed'],
+        users: 'Samsung SF3 (first GAA in HVM 2022), TSMC N2 (2025), Intel 20A',
+        share2025: 40, share2030: 65, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'CFET (Complementary FET)',
+        pros: ['50% footprint reduction vs. GAA', 'N+P stacked on same footprint — ultra-dense', 'Enables 1nm and below'],
+        cons: ['Extremely complex process — 3D stacking of n- and p-type', 'No HVM readiness before 2028–2030', 'Thermal management challenge'],
+        users: 'IMEC, Intel (research), TSMC (research) — pilot ~2028+',
+        share2025: 0, share2030: 5, color: '#8b5cf6', winner: false,
+      },
+      {
+        name: '2D Materials (MoS₂, hBN)',
+        pros: ['1–3 atom thin channel — ultimate scaling', 'No dangling bonds — perfect interface', 'Beyond-Si transistors'],
+        cons: ['Lab-stage only — no volume synthesis', 'Contact resistance too high', '10+ years from production'],
+        users: 'MIT, Stanford, IMEC — research phase only',
+        share2025: 0, share2030: 0, color: '#64748b', winner: false,
+      },
+    ],
+    screenshots: [
+      {src: 'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iOTAwIiBoZWlnaHQ9IjMyMCIgdmlld0JveD0iMCAwIDkwMCAzMjAiPgogIDxyZWN0IHdpZHRoPSI5MDAiIGhlaWdodD0iMzIwIiBmaWxsPSIjMGYxNzJhIiByeD0iMTIiLz4KICA8dGV4dCB4PSI0NTAiIHk9IjMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5UcmFuc2lzdG9yIEFyY2hpdGVjdHVyZSBFdm9sdXRpb248L3RleHQ+CiAgPHRleHQgeD0iNDUwIiB5PSI1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5HYXRlIGNvbnRyb2wgaW1wcm92ZXMgd2l0aCBlYWNoIGdlbmVyYXRpb24g4oaSIGJldHRlciBlbGVjdHJvc3RhdGljcyDihpIgc21hbGxlciBub2RlIHBvc3NpYmxlPC90ZXh0PgoKICA8IS0tIEZpbkZFVCAobGVmdCkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODAsNzApIj4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+RmluRkVUPC90ZXh0PgogICAgPHRleHQgeD0iMTAwIiB5PSIxNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj4xNm5t4oCTM25tICgyMDE04oCTMjAyNSk8L3RleHQ+CiAgICA8IS0tIHNpbGljb24gc3Vic3RyYXRlIC0tPgogICAgPHJlY3QgeD0iMjAiIHk9IjE5MCIgd2lkdGg9IjE2MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzFlNDBhZiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMjEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYmZkYmZlIiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPlNpIFN1YnN0cmF0ZTwvdGV4dD4KICAgIDwhLS0gZmluICh2ZXJ0aWNhbCkgLS0+CiAgICA8cmVjdCB4PSI4NSIgeT0iODAiIHdpZHRoPSIzMCIgaGVpZ2h0PSIxMTUiIGZpbGw9IiMzYjgyZjYiIHJ4PSIyIi8+CiAgICA8dGV4dCB4PSIxMDAiIHk9IjE1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkZpbjwvdGV4dD4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMTYyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYmZkYmZlIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+KFNpIGNoYW5uZWwpPC90ZXh0PgogICAgPCEtLSBnYXRlIHdyYXBzIDMgc2lkZXMgLS0+CiAgICA8cmVjdCB4PSI2MCIgeT0iOTUiIHdpZHRoPSI4MCIgaGVpZ2h0PSI3MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZjU5ZTBiIiBzdHJva2Utd2lkdGg9IjMiIHJ4PSI0Ii8+CiAgICA8cmVjdCB4PSI2NSIgeT0iMTAwIiB3aWR0aD0iNzAiIGhlaWdodD0iNjAiIGZpbGw9IiNmNTllMGIyMiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9IjE3MCIgeT0iMTMwIiBmaWxsPSIjZmJiZjI0IiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPkdhdGU8L3RleHQ+CiAgICA8dGV4dCB4PSIxNzAiIHk9IjE0MyIgZmlsbD0iI2ZiYmYyNCIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj4oMy1zaWRlZCk8L3RleHQ+CiAgICA8bGluZSB4MT0iMTY3IiB5MT0iMTMwIiB4Mj0iMTQzIiB5Mj0iMTI1IiBzdHJva2U9IiNmYmJmMjQiIHN0cm9rZS13aWR0aD0iMSIgc3Ryb2tlLWRhc2hhcnJheT0iMywyIi8+CiAgICA8IS0tIHNvdXJjZS9kcmFpbiAtLT4KICAgIDxyZWN0IHg9IjIwIiB5PSIxNzUiIHdpZHRoPSI2MCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzEwYjk4MSIgcng9IjIiLz4KICAgIDx0ZXh0IHg9IjUwIiB5PSIxODgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5Tb3VyY2U8L3RleHQ+CiAgICA8cmVjdCB4PSIxMjAiIHk9IjE3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjMTBiOTgxIiByeD0iMiIvPgogICAgPHRleHQgeD0iMTUwIiB5PSIxODgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5EcmFpbjwvdGV4dD4KICAgIDwhLS0gbGFiZWwgLS0+CiAgICA8dGV4dCB4PSIxMDAiIHk9IjI0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2VmNDQ0NCIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj7imqAgRmluIHdpZHRoIGxpbWl0ZWQgYXQgM25tPC90ZXh0PgogICAgPHRleHQgeD0iMTAwIiB5PSIyNTgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5HYXRlIGNvbnRyb2xzIDMgc2lkZXMgb25seTwvdGV4dD4KICA8L2c+CgogIDwhLS0gQXJyb3cgLS0+CiAgPHRleHQgeD0iMzAwIiB5PSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCI+4oaSPC90ZXh0PgoKICA8IS0tIEdBQSBOYW5vc2hlZXQgKGNlbnRlcikgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzMwLDcwKSI+CiAgICA8dGV4dCB4PSIxMDAiIHk9IjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPkdBQSBOYW5vc2hlZXQ8L3RleHQ+CiAgICA8dGV4dCB4PSIxMDAiIHk9IjE2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjM2I4MmY2IiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPjJubeKAkzEuNG5tICgyMDI14oCTMjAyOCk8L3RleHQ+CiAgICA8IS0tIHN1YnN0cmF0ZSAtLT4KICAgIDxyZWN0IHg9IjIwIiB5PSIxOTAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMzAiIGZpbGw9IiMxZTQwYWYiIHJ4PSIzIi8+CiAgICA8dGV4dCB4PSIxMDAiIHk9IjIxMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2JmZGJmZSIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj5TaSBTdWJzdHJhdGU8L3RleHQ+CiAgICA8IS0tIDMgbmFub3NoZWV0cyBzdGFja2VkIC0tPgogICAgPHJlY3QgeD0iNTUiIHk9IjE2MCIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE4IiBmaWxsPSIjM2I4MmY2IiByeD0iMyIvPgogICAgPHJlY3QgeD0iNTUiIHk9IjEzMyIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE4IiBmaWxsPSIjM2I4MmY2IiByeD0iMyIvPgogICAgPHJlY3QgeD0iNTUiIHk9IjEwNiIgd2lkdGg9IjkwIiBoZWlnaHQ9IjE4IiBmaWxsPSIjM2I4MmY2IiByeD0iMyIvPgogICAgPHRleHQgeD0iMTU1IiB5PSIxNTIiIGZpbGw9IiM5M2M1ZmQiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5OYW5vc2hlZXQgMTwvdGV4dD4KICAgIDx0ZXh0IHg9IjE1NSIgeT0iMTI1IiBmaWxsPSIjOTNjNWZkIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TmFub3NoZWV0IDI8L3RleHQ+CiAgICA8dGV4dCB4PSIxNTUiIHk9Ijk4IiBmaWxsPSIjOTNjNWZkIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TmFub3NoZWV0IDM8L3RleHQ+CiAgICA8IS0tIGdhdGUgd3JhcHMgQUxMIHNpZGVzIChpbm5lciBnYXRlIGRpZWxlY3RyaWMgc2hvd24pIC0tPgogICAgPHJlY3QgeD0iNDAiIHk9Ijk2IiB3aWR0aD0iNzAiIGhlaWdodD0iMTAwIiBmaWxsPSIjZjU5ZTBiMjIiIHJ4PSI0Ii8+CiAgICA8cmVjdCB4PSI0MCIgeT0iOTYiIHdpZHRoPSI3MCIgaGVpZ2h0PSIxMDAiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIzIiByeD0iNCIvPgogICAgPHRleHQgeD0iMTgiIHk9IjE0OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZiYmYyNCIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIiB0cmFuc2Zvcm09InJvdGF0ZSgtOTAsMTgsMTQ4KSI+R2F0ZSAoNC1zaWRlZCk8L3RleHQ+CiAgICA8IS0tIHNvdXJjZS9kcmFpbiAtLT4KICAgIDxyZWN0IHg9IjIwIiB5PSIxNzUiIHdpZHRoPSIzMCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzEwYjk4MSIgcng9IjIiLz4KICAgIDx0ZXh0IHg9IjM1IiB5PSIxODgiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5TPC90ZXh0PgogICAgPHJlY3QgeD0iMTU1IiB5PSIxNzUiIHdpZHRoPSIzMCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzEwYjk4MSIgcng9IjIiLz4KICAgIDx0ZXh0IHg9IjE3MCIgeT0iMTg4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+RDwvdGV4dD4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMjQ1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMTBiOTgxIiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPuKckyBHYXRlIHN1cnJvdW5kcyBhbGwgNCBzaWRlczwvdGV4dD4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMjU4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U2hlZXQgd2lkdGggdHVuYWJsZSBmb3IgcGVyZi9wb3dlcjwvdGV4dD4KICA8L2c+CgogIDwhLS0gQXJyb3cgLS0+CiAgPHRleHQgeD0iNTUwIiB5PSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iMjgiIGZvbnQtZmFtaWx5PSJBcmlhbCI+4oaSPC90ZXh0PgoKICA8IS0tIENGRVQgKHJpZ2h0KSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg1ODAsNzApIj4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Q0ZFVDwvdGV4dD4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM4YjVjZjYiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U3ViLTFubSAoMjAyOCsgcmVzZWFyY2gpPC90ZXh0PgogICAgPCEtLSBzdWJzdHJhdGUgLS0+CiAgICA8cmVjdCB4PSIyMCIgeT0iMTkwIiB3aWR0aD0iMTYwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjMWU0MGFmIiByeD0iMyIvPgogICAgPHRleHQgeD0iMTAwIiB5PSIyMTAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNiZmRiZmUiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U2kgU3Vic3RyYXRlPC90ZXh0PgogICAgPCEtLSBORkVUIHN0YWNrIChib3R0b20pIC0tPgogICAgPHJlY3QgeD0iNDUiIHk9IjE1NSIgd2lkdGg9IjExMCIgaGVpZ2h0PSIyMiIgZmlsbD0iIzNiODJmNiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMTcwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+bi1GRVQgKG5hbm9zaGVldCk8L3RleHQ+CiAgICA8IS0tIFBGRVQgc3RhY2sgKHRvcCkgLS0+CiAgICA8cmVjdCB4PSI0NSIgeT0iMTE4IiB3aWR0aD0iMTEwIiBoZWlnaHQ9IjIyIiBmaWxsPSIjZWY0NDQ0IiByeD0iMyIvPgogICAgPHRleHQgeD0iMTAwIiB5PSIxMzMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5wLUZFVCAobmFub3NoZWV0KTwvdGV4dD4KICAgIDwhLS0gc2hhcmVkIGdhdGUgLS0+CiAgICA8cmVjdCB4PSIzMCIgeT0iMTA4IiB3aWR0aD0iMTQwIiBoZWlnaHQ9IjgwIiBmaWxsPSJub25lIiBzdHJva2U9IiNmNTllMGIiIHN0cm9rZS13aWR0aD0iMyIgcng9IjQiIHN0cm9rZS1kYXNoYXJyYXk9IjYsMyIvPgogICAgPHRleHQgeD0iMTAwIiB5PSIxMDQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmYmJmMjQiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U2hhcmVkIEdhdGUgU3RhY2s8L3RleHQ+CiAgICA8IS0tIGlzb2xhdGlvbiAtLT4KICAgIDxyZWN0IHg9IjQ1IiB5PSIxNDMiIHdpZHRoPSIxMTAiIGhlaWdodD0iMTAiIGZpbGw9IiM4YjVjZjYiIHJ4PSIyIi8+CiAgICA8dGV4dCB4PSIxODAiIHk9IjE1MSIgZmlsbD0iI2M0YjVmZCIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPklzb2xhdGlvbjwvdGV4dD4KICAgIDxsaW5lIHgxPSIxNzgiIHkxPSIxNDkiIHgyPSIxNTgiIHkyPSIxNDgiIHN0cm9rZT0iI2M0YjVmZCIgc3Ryb2tlLXdpZHRoPSIxIi8+CiAgICA8IS0tIHNvdXJjZS9kcmFpbiAtLT4KICAgIDxyZWN0IHg9IjIwIiB5PSIxNzUiIHdpZHRoPSIyNSIgaGVpZ2h0PSIyMCIgZmlsbD0iIzEwYjk4MSIgcng9IjIiLz4KICAgIDxyZWN0IHg9IjE2MCIgeT0iMTc1IiB3aWR0aD0iMjUiIGhlaWdodD0iMjAiIGZpbGw9IiMxMGI5ODEiIHJ4PSIyIi8+CiAgICA8dGV4dCB4PSIxMDAiIHk9IjI0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzhiNWNmNiIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj5uK3Agc3RhY2tlZCDihpIgNTAlIGZvb3RwcmludDwvdGV4dD4KICAgIDx0ZXh0IHg9IjEwMCIgeT0iMjU4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Tm8gSFZNIGJlZm9yZSAyMDI44oCTMjAzMDwvdGV4dD4KICA8L2c+CgogIDwhLS0gVGltZWxpbmUgYmFyIGF0IGJvdHRvbSAtLT4KICA8cmVjdCB4PSI2MCIgeT0iMjg4IiB3aWR0aD0iNzgwIiBoZWlnaHQ9IjYiIGZpbGw9IiMxZTI5M2IiIHJ4PSIzIi8+CiAgPHJlY3QgeD0iNjAiIHk9IjI4OCIgd2lkdGg9IjI2MCIgaGVpZ2h0PSI2IiBmaWxsPSIjOTRhM2I4IiByeD0iMyIvPgogIDxyZWN0IHg9IjMyMCIgeT0iMjg4IiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjYiIGZpbGw9IiMzYjgyZjYiIHJ4PSIzIi8+CiAgPHJlY3QgeD0iNjAwIiB5PSIyODgiIHdpZHRoPSIyNDAiIGhlaWdodD0iNiIgZmlsbD0iIzhiNWNmNiIgcng9IjMiLz4KICA8dGV4dCB4PSIxOTAiIHk9IjMwOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj4yMDE04oCTMjAyNCAoTWF0dXJlKTwvdGV4dD4KICA8dGV4dCB4PSI0NjAiIHk9IjMwOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj4yMDI14oCTMjAyOCAoQ3VycmVudCBsZWFkaW5nIGVkZ2UpPC90ZXh0PgogIDx0ZXh0IHg9IjcyMCIgeT0iMzA4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOGI1Y2Y2IiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPjIwMjgrIChSZXNlYXJjaCk8L3RleHQ+Cjwvc3ZnPgo=', caption: 'Transistor Architecture Evolution: FinFET → GAA Nanosheet → CFET', source: 'Based on TSMC / Samsung / Intel public roadmap disclosures'},
+      {src: 'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iOTAwIiBoZWlnaHQ9IjI4MCIgdmlld0JveD0iMCAwIDkwMCAyODAiPgogIDxyZWN0IHdpZHRoPSI5MDAiIGhlaWdodD0iMjgwIiBmaWxsPSIjMGYxNzJhIiByeD0iMTIiLz4KICA8dGV4dCB4PSI0NTAiIHk9IjI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5UU01DIFByb2Nlc3MgTm9kZSBSb2FkbWFwPC90ZXh0PgogIDx0ZXh0IHg9IjQ1MCIgeT0iNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+fjLDlyBkZW5zaXR5IGltcHJvdmVtZW50IGV2ZXJ5IDIgeWVhcnMg4oCUIGVuYWJsaW5nIE52aWRpYSwgQXBwbGUsIEFNRCBsZWFkaW5nLWVkZ2UgY2hpcHM8L3RleHQ+CgogIDwhLS0gVGltZWxpbmUgYXhpcyAtLT4KICA8bGluZSB4MT0iNjAiIHkxPSIyMDAiIHgyPSI4NjAiIHkyPSIyMDAiIHN0cm9rZT0iIzMzNDE1NSIgc3Ryb2tlLXdpZHRoPSIyIi8+CgogIDwhLS0gTm9kZXMgLS0+CiAgPCEtLSBONSAoMjAyMCkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoODAsODApIj4KICAgIDxyZWN0IHg9Ii00MCIgeT0iMCIgd2lkdGg9IjgwIiBoZWlnaHQ9IjkwIiBmaWxsPSIjMWUzYTVmIiByeD0iOCIgc3Ryb2tlPSIjM2I4MmY2IiBzdHJva2Utd2lkdGg9IjEuNSIvPgogICAgPHRleHQgeD0iMCIgeT0iMjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2MGE1ZmEiIGZvbnQtc2l6ZT0iMTQiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPk41PC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iMzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj41bm0gY2xhc3M8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSI1MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkFwcGxlIEExNDwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjY0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TnZpZGlhIEExMDA8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSI3OCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzEwYjk4MSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkZpbkZFVDwvdGV4dD4KICAgIDxjaXJjbGUgY3g9IjAiIGN5PSIxMjIiIHI9IjYiIGZpbGw9IiMzYjgyZjYiLz4KICAgIDx0ZXh0IHg9IjAiIHk9IjE0MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj4yMDIwPC90ZXh0PgogIDwvZz4KCiAgPCEtLSBOMyAoMjAyMikgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjE1LDY1KSI+CiAgICA8cmVjdCB4PSItNDUiIHk9IjAiIHdpZHRoPSI5MCIgaGVpZ2h0PSIxMDUiIGZpbGw9IiMxZTNhNWYiIHJ4PSI4IiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMS41Ii8+CiAgICA8dGV4dCB4PSIwIiB5PSIyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzYwYTVmYSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TjMvTjNFPC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iMzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj4zbm0gY2xhc3M8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSI1MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkFwcGxlIEExNzwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjY0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TnZpZGlhIEgxMDA8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSI4MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPn4xOCUgZGVuc2l0eSDihpE8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSI5NCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzEwYjk4MSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkZpbkZFVDwvdGV4dD4KICAgIDxjaXJjbGUgY3g9IjAiIGN5PSIxMzciIHI9IjYiIGZpbGw9IiMzYjgyZjYiLz4KICAgIDx0ZXh0IHg9IjAiIHk9IjE1NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj4yMDIyPC90ZXh0PgogIDwvZz4KCiAgPCEtLSBOMiAoMjAyNSkgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMzgwLDUwKSI+CiAgICA8cmVjdCB4PSItNTAiIHk9IjAiIHdpZHRoPSIxMDAiIGhlaWdodD0iMTIwIiBmaWxsPSIjMWUzMzU4IiByeD0iOCIgc3Ryb2tlPSIjOGI1Y2Y2IiBzdHJva2Utd2lkdGg9IjIiLz4KICAgIDx0ZXh0IHg9IjAiIHk9IjIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYTc4YmZhIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5OMjwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjM2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Mm5tIGNsYXNzPC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iNTIiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5BcHBsZSBBMTk8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSI2NCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPk52aWRpYSBSdWJpbjwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjgwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+fjE1JSBkZW5zaXR5IOKGkTwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9Ijk2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOGI1Y2Y2IiBmb250LXNpemU9IjkiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPkdBQSBOYW5vc2hlZXQg4piFPC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iMTEwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmJiZjI0IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Rmlyc3QgR0FBIG5vZGU8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIwIiBjeT0iMTUyIiByPSI3IiBmaWxsPSIjOGI1Y2Y2Ii8+CiAgICA8dGV4dCB4PSIwIiB5PSIxNzAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhNzhiZmEiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPjIwMjUgSFZNPC90ZXh0PgogIDwvZz4KCiAgPCEtLSBBMTYgKDIwMjYpIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDU1NSw0MCkiPgogICAgPHJlY3QgeD0iLTUwIiB5PSIwIiB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEzMCIgZmlsbD0iIzFhMWEzZSIgcng9IjgiIHN0cm9rZT0iIzhiNWNmNiIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgICA8dGV4dCB4PSIwIiB5PSIyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2E3OGJmYSIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QTE2PC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iMzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj4xLjZubSBjbGFzczwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjUyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QXBwbGUgQTIwPzwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjY4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QUkgYWNjZWxlcmF0b3JzPC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iODQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM4YjVjZjYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5HQUEgKyBTUFI8L3RleHQ+CiAgICA8dGV4dCB4PSIwIiB5PSIxMDAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmYmJmMjQiIGZvbnQtc2l6ZT0iOSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U3VwZXJQb3dlclJhaWwg4piFPC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iMTE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmJiZjI0IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QmFja3NpZGUgcG93ZXI8L3RleHQ+CiAgICA8Y2lyY2xlIGN4PSIwIiBjeT0iMTYyIiByPSI3IiBmaWxsPSIjOGI1Y2Y2Ii8+CiAgICA8dGV4dCB4PSIwIiB5PSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNhNzhiZmEiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MjAyNjwvdGV4dD4KICA8L2c+CgogIDwhLS0gQTE0ICgyMDI4KSAtLT4KICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSg3MzAsMzApIj4KICAgIDxyZWN0IHg9Ii01NSIgeT0iMCIgd2lkdGg9IjExMCIgaGVpZ2h0PSIxNDAiIGZpbGw9IiMxYTFhM2UiIHJ4PSI4IiBzdHJva2U9IiNlYzQ4OTkiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWRhc2hhcnJheT0iNiwzIi8+CiAgICA8dGV4dCB4PSIwIiB5PSIyMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y0NzJiNiIgZm9udC1zaXplPSIxNCIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QTE0PC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iMzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj4xLjRubSBjbGFzczwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjUyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QXBwbGUgQTIxPzwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjY4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TnZpZGlhIEZleW5tYW4/PC90ZXh0PgogICAgPHRleHQgeD0iMCIgeT0iODQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNlYzQ4OTkiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5HQUEgMm5kIGdlbjwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjEwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2VjNDg5OSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPk5hbm9zaGVldCArIFNQUjwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjExNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZiYmYyNCIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkhpZ2gtTkEgRVVWIOKYhTwvdGV4dD4KICAgIDx0ZXh0IHg9IjAiIHk9IjEzMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPihyZXNlYXJjaCDihpIgcGlsb3QpPC90ZXh0PgogICAgPGNpcmNsZSBjeD0iMCIgY3k9IjE3MiIgcj0iNyIgZmlsbD0iI2VjNDg5OSIvPgogICAgPHRleHQgeD0iMCIgeT0iMTkwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjQ3MmI2IiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPjIwMjhlPC90ZXh0PgogIDwvZz4KCiAgPCEtLSBhcnJvd3MgYmV0d2VlbiBub2RlcyAtLT4KICA8bGluZSB4MT0iMTIwIiB5MT0iMjAwIiB4Mj0iMTY4IiB5Mj0iMjAwIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIgbWFya2VyLWVuZD0idXJsKCNhcnIpIi8+CiAgPGxpbmUgeDE9IjI2MCIgeTE9IjIwMCIgeDI9IjMyOCIgeTI9IjIwMCIgc3Ryb2tlPSIjM2I4MmY2IiBzdHJva2Utd2lkdGg9IjIiLz4KICA8bGluZSB4MT0iMzI4IiB5MT0iMjAwIiB4Mj0iMzI4IiB5Mj0iMjAwIiBzdHJva2U9IiMzYjgyZjYiIHN0cm9rZS13aWR0aD0iMiIvPgogIDxsaW5lIHgxPSI0MzIiIHkxPSIyMDAiIHgyPSI1MDMiIHkyPSIyMDAiIHN0cm9rZT0iIzhiNWNmNiIgc3Ryb2tlLXdpZHRoPSIyIi8+CiAgPGxpbmUgeDE9IjYwOCIgeTE9IjIwMCIgeDI9IjY3MiIgeTI9IjIwMCIgc3Ryb2tlPSIjOGI1Y2Y2IiBzdHJva2Utd2lkdGg9IjIiLz4KCiAgPCEtLSB0cmFuc2lzdG9yIGNvdW50IC0tPgogIDx0ZXh0IHg9IjQ1MCIgeT0iMjQ4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPlRyYW5zaXN0b3IgZGVuc2l0eSAoTVRyL21twrIpOiAgTjU6IDE3MSAg4oaSICBOMzogMjkyICDihpIgIE4yOiB+MzQwICDihpIgIEExNjogfjQwMGUgIOKGkiAgQTE0OiB+NDYwZTwvdGV4dD4KICA8dGV4dCB4PSI0NTAiIHk9IjI2NCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiIgZm9udC1zaXplPSIxMCIgZm9udC1mYW1pbHk9IkFyaWFsIj7imIUgPSBLZXkgdGVjaG5vbG9neSB0cmFuc2l0aW9uICAgU1BSID0gU3VwZXJQb3dlclJhaWwgKGJhY2tzaWRlIHBvd2VyIGRlbGl2ZXJ5KSAgIEhWTSA9IEhpZ2ggVm9sdW1lIE1hbnVmYWN0dXJpbmc8L3RleHQ+Cjwvc3ZnPgo=', caption: 'TSMC Process Node Roadmap: N5 → N3 → N2 → A16 → A14', source: 'Based on TSMC 2024 Annual Report, 2025 Technology Symposium public disclosures'}
+    ],
+  },
+  osat: {
+    title: 'Advanced Packaging: CoWoS vs HB vs FOPLP',
+    comparisons: [
+      {
+        name: 'CoWoS (Chip-on-Wafer-on-Substrate)',
+        pros: ['Proven for HBM + GPU AI packages', 'High bandwidth density (>2TB/s)', 'TSMC monopoly — quality guaranteed'],
+        cons: ['Limited interposer size (scaling to 9.5x reticle by 2027)', 'TSMC captive — 18-month lead times', 'Cost $500–$2,000 per package'],
+        users: 'TSMC — Nvidia H100/H200/B200, AMD MI300X, Google TPU',
+        share2025: 42, share2030: 38, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'Hybrid Bonding (Cu-Cu bumpless)',
+        pros: ['Sub-1µm pitch — 100x finer than flip-chip', 'Near-zero parasitic capacitance', 'Enables true 3D stacking'],
+        cons: ['Extremely flat surface required (< 1nm roughness)', 'Yield sensitive to particle contamination', 'Tool throughput slow'],
+        users: 'TSMC SoIC, Samsung X-Cube, Intel Foveros — Apple A17/M3 (face-to-face bonding)',
+        share2025: 18, share2030: 32, color: '#8b5cf6', winner: false,
+      },
+      {
+        name: 'Fan-Out WLP (FOWLP / InFO)',
+        pros: ['No substrate — thinner package', 'Cost-effective at scale', 'Good for mobile SoC'],
+        cons: ['Not suitable for large AI die', 'Warpage at large panel size', 'Limited I/O density vs. HB'],
+        users: 'TSMC InFO (Apple A-series mobile), Samsung FOWLP, ASE',
+        share2025: 22, share2030: 14, color: '#10b981', winner: false,
+      },
+      {
+        name: 'FOPLP (Fan-Out Panel-Level)',
+        pros: ['60% cost reduction vs. wafer-level', 'Large rectangular panel — less edge waste', 'Scales well for commodity AI edge chips'],
+        cons: ['Warpage control on large panels unsolved', 'Pilot only — 2026 TSMC trial, 2027 volume', 'Equipment ecosystem immature'],
+        users: 'TSMC (2027 volume target), Samsung, ASE evaluating',
+        share2025: 2, share2030: 10, color: '#f59e0b', winner: false,
+      },
+    ],
+    screenshots: [
+      {src: 'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iOTAwIiBoZWlnaHQ9IjMxMCIgdmlld0JveD0iMCAwIDkwMCAzMTAiPgogIDxyZWN0IHdpZHRoPSI5MDAiIGhlaWdodD0iMzEwIiBmaWxsPSIjMGYxNzJhIiByeD0iMTIiLz4KICA8dGV4dCB4PSI0NTAiIHk9IjI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5BZHZhbmNlZCBQYWNrYWdpbmcgRXZvbHV0aW9uPC90ZXh0PgogIDx0ZXh0IHg9IjQ1MCIgeT0iNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QmFuZHdpZHRoIGFuZCBkZW5zaXR5IGRyaXZlIHRoZSBzaGlmdCBmcm9tIHdpcmUgYm9uZCB0byAzRCBoeWJyaWQgYm9uZGluZzwvdGV4dD4KCiAgPCEtLSBXaXJlIEJvbmQgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAsNjUpIj4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5XaXJlIEJvbmQ8L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj4xOTcwcyDihpIgcHJlc2VudDwvdGV4dD4KICAgIDxyZWN0IHg9IjI1IiB5PSI4MCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzFlNDBhZiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSI5MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2JmZGJmZSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPlN1YnN0cmF0ZSAoUENCKTwvdGV4dD4KICAgIDxyZWN0IHg9IjQ1IiB5PSI1MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzNiODJmNiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSI2OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkRpZTwvdGV4dD4KICAgIDxwYXRoIGQ9Ik01NSw1MCBRNDAsMzAgMzUsODAiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICAgIDxwYXRoIGQ9Ik03NSw1MCBRNzIsMjggNzAsODAiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICAgIDxwYXRoIGQ9Ik0xMTUsNTAgUTExOCwyOCAxMjAsODAiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICAgIDxwYXRoIGQ9Ik0xMzUsNTAgUTE1MCwzMCAxNTUsODAiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5JL08gcGl0Y2g6IH4xMDDCtW08L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Qlc6IH4xMCBHQi9zPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkNvc3Q6ICQgKGxvd2VzdCk8L3RleHQ+CiAgPC9nPgoKICA8dGV4dCB4PSIyMjUiIHk9IjE2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSIyMCIgZm9udC1mYW1pbHk9IkFyaWFsIj7ihpI8L3RleHQ+CgogIDwhLS0gRmxpcCBDaGlwIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MCw2NSkiPgogICAgPHRleHQgeD0iOTUiIHk9IjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPkZsaXAgQ2hpcCBCR0E8L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj4xOTkwcyDihpIgbWFpbnN0cmVhbTwvdGV4dD4KICAgIDxyZWN0IHg9IjI1IiB5PSI4MCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzFlNDBhZiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSI5MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2JmZGJmZSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPk9yZ2FuaWMgU3Vic3RyYXRlPC90ZXh0PgogICAgPHJlY3QgeD0iMzAiIHk9IjQ0IiB3aWR0aD0iMTMwIiBoZWlnaHQ9IjMyIiBmaWxsPSIjM2I4MmY2IiByeD0iMyIvPgogICAgPHRleHQgeD0iOTUiIHk9IjYzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+RGllIChmbGlwcGVkKTwvdGV4dD4KICAgIDwhLS0gYnVtcHMgLS0+CiAgICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjgwIiByPSI0IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8Y2lyY2xlIGN4PSI2OCIgY3k9IjgwIiByPSI0IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8Y2lyY2xlIGN4PSI4NiIgY3k9IjgwIiByPSI0IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8Y2lyY2xlIGN4PSIxMDQiIGN5PSI4MCIgcj0iNCIgZmlsbD0iI2Y1OWUwYiIvPgogICAgPGNpcmNsZSBjeD0iMTIyIiBjeT0iODAiIHI9IjQiIGZpbGw9IiNmNTllMGIiLz4KICAgIDxjaXJjbGUgY3g9IjE0MCIgY3k9IjgwIiByPSI0IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+SS9PIHBpdGNoOiB+NDDigJMxMDDCtW08L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Qlc6IH4xMDDigJM1MDAgR0IvczwvdGV4dD4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxNTEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5Db3N0OiAkJCAobW9kZXJhdGUpPC90ZXh0PgogIDwvZz4KCiAgPHRleHQgeD0iNDQ1IiB5PSIxNjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+4oaSPC90ZXh0PgoKICA8IS0tIENvV29TIDIuNUQgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNDYwLDY1KSI+CiAgICA8dGV4dCB4PSI5NSIgeT0iMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Q29Xb1MgMi41RDwvdGV4dD4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPjIwMTIg4oaSIEFJIGVyYSBkb21pbmFudDwvdGV4dD4KICAgIDxyZWN0IHg9IjUiIHk9Ijk1IiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjMWU0MGFmIiByeD0iMyIvPgogICAgPHRleHQgeD0iOTUiIHk9IjEwOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2JmZGJmZSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPk9yZ2FuaWMgU3Vic3RyYXRlPC90ZXh0PgogICAgPCEtLSBzaWxpY29uIGludGVycG9zZXIgLS0+CiAgICA8cmVjdCB4PSIxNSIgeT0iNzAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMjIiIGZpbGw9IiM0MzM4Y2EiIHJ4PSIyIi8+CiAgICA8dGV4dCB4PSI5NSIgeT0iODQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNjN2QyZmUiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5TaWxpY29uIEludGVycG9zZXIgKFJETCk8L3RleHQ+CiAgICA8IS0tIEdQVSBkaWUgLS0+CiAgICA8cmVjdCB4PSIyMCIgeT0iMzYiIHdpZHRoPSI3NSIgaGVpZ2h0PSIzMCIgZmlsbD0iI2VmNDQ0NCIgcng9IjMiLz4KICAgIDx0ZXh0IHg9IjU3IiB5PSI1NCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkdQVS9BSTwvdGV4dD4KICAgIDwhLS0gSEJNIHN0YWNrcyAtLT4KICAgIDxyZWN0IHg9IjEwNSIgeT0iMjAiIHdpZHRoPSIzNSIgaGVpZ2h0PSI0OCIgZmlsbD0iIzEwYjk4MSIgcng9IjIiLz4KICAgIDxyZWN0IHg9IjEwNSIgeT0iMTYiIHdpZHRoPSIzNSIgaGVpZ2h0PSI4IiBmaWxsPSIjMDU5NjY5IiByeD0iMSIvPgogICAgPHJlY3QgeD0iMTA1IiB5PSI4IiB3aWR0aD0iMzUiIGhlaWdodD0iOCIgZmlsbD0iIzA1OTY2OSIgcng9IjEiLz4KICAgIDx0ZXh0IHg9IjEyMiIgeT0iNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtc2l6ZT0iOCIgZm9udC1mYW1pbHk9IkFyaWFsIj5IQk08L3RleHQ+CiAgICA8dGV4dCB4PSIxMjIiIHk9IjY1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNmVlN2I3IiBmb250LXNpemU9IjgiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U3RhY2s8L3RleHQ+CiAgICA8IS0tIG1pY3JvIGJ1bXBzIC0tPgogICAgPGNpcmNsZSBjeD0iMzUiIGN5PSI3MCIgcj0iMi41IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjcwIiByPSIyLjUiIGZpbGw9IiNmNTllMGIiLz4KICAgIDxjaXJjbGUgY3g9IjY1IiBjeT0iNzAiIHI9IjIuNSIgZmlsbD0iI2Y1OWUwYiIvPgogICAgPGNpcmNsZSBjeD0iODAiIGN5PSI3MCIgcj0iMi41IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TWljcm9idW1wIHBpdGNoOiA0MOKAkzU1wrVtPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjE0MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5CVzogfjIgVEIvcyAoSEJNM2UpPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjE1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZiYmYyNCIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkNvc3Q6ICQkJCAoJDUwMOKAkyQySy9wa2cpPC90ZXh0PgogIDwvZz4KCiAgPHRleHQgeD0iNjY1IiB5PSIxNjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+4oaSPC90ZXh0PgoKICA8IS0tIEh5YnJpZCBCb25kaW5nIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY4MCw2NSkiPgogICAgPHRleHQgeD0iOTUiIHk9IjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPkh5YnJpZCBCb25kaW5nPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOGI1Y2Y2IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MjAyMysgKEFwcGxlIE0zLCBBSSk8L3RleHQ+CiAgICA8cmVjdCB4PSIxNSIgeT0iOTUiIHdpZHRoPSIxNjAiIGhlaWdodD0iMjAiIGZpbGw9IiMxZTQwYWYiIHJ4PSIzIi8+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTA4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYmZkYmZlIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U3Vic3RyYXRlPC90ZXh0PgogICAgPCEtLSBib3R0b20gZGllIC0tPgogICAgPHJlY3QgeD0iMjAiIHk9IjYwIiB3aWR0aD0iMTUwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjM2I4MmY2IiByeD0iMyIvPgogICAgPHRleHQgeD0iOTUiIHk9Ijc4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Qm90dG9tIERpZTwvdGV4dD4KICAgIDwhLS0gQ3UtQ3UgYm9uZCBpbnRlcmZhY2UgLS0+CiAgICA8cmVjdCB4PSIyMCIgeT0iNTQiIHdpZHRoPSIxNTAiIGhlaWdodD0iNiIgZmlsbD0iI2Y1OWUwYiIvPgogICAgPHRleHQgeD0iMjAwIiB5PSI1OSIgZmlsbD0iI2ZiYmYyNCIgZm9udC1zaXplPSI4IiBmb250LWZhbWlseT0iQXJpYWwiPkN1LUN1IGJvbmQ8L3RleHQ+CiAgICA8bGluZSB4MT0iMTk4IiB5MT0iNTgiIHgyPSIxNzIiIHkyPSI1NyIgc3Ryb2tlPSIjZmJiZjI0IiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDwhLS0gdG9wIGRpZSAtLT4KICAgIDxyZWN0IHg9IjIwIiB5PSIyNCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzhiNWNmNiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSI0MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPlRvcCBEaWUgKFNSQU0vbG9naWMpPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjEzMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPlBpdGNoOiAmbHQ7McK1bSAoYnVtcGxlc3MhKTwvdGV4dD4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxNDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM4YjVjZjYiIGZvbnQtc2l6ZT0iOSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Qlc6IH4xMCBUQi9zIHBvdGVudGlhbDwvdGV4dD4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmYmJmMjQiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5Db3N0OiAkJCQkICh5aWVsZCBjcml0aWNhbCk8L3RleHQ+CiAgPC9nPgoKICA8IS0tIEJvdHRvbSB0cmVuZCBsaW5lIC0tPgogIDxyZWN0IHg9IjYwIiB5PSIyMzgiIHdpZHRoPSI3ODAiIGhlaWdodD0iNCIgZmlsbD0iIzFlMjkzYiIgcng9IjIiLz4KICA8cmVjdCB4PSI2MCIgeT0iMjM4IiB3aWR0aD0iMTcwIiBoZWlnaHQ9IjQiIGZpbGw9IiM5NGEzYjgiIHJ4PSIyIi8+CiAgPHJlY3QgeD0iMjMwIiB5PSIyMzgiIHdpZHRoPSIyMjAiIGhlaWdodD0iNCIgZmlsbD0iIzNiODJmNiIgcng9IjIiLz4KICA8cmVjdCB4PSI0NTAiIHk9IjIzOCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSI0IiBmaWxsPSIjZjk3MzE2IiByeD0iMiIvPgogIDxyZWN0IHg9IjY1MCIgeT0iMjM4IiB3aWR0aD0iMTkwIiBoZWlnaHQ9IjQiIGZpbGw9IiM4YjVjZjYiIHJ4PSIyIi8+CiAgPHRleHQgeD0iMTQ1IiB5PSIyNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5MZWdhY3kgKG1hdHVyZSk8L3RleHQ+CiAgPHRleHQgeD0iMzQwIiB5PSIyNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5TdGFuZGFyZCBhZHZhbmNlZDwvdGV4dD4KICA8dGV4dCB4PSI1NTAiIHk9IjI1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y5NzMxNiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkFJL0hQQyBkb21pbmFudCBub3c8L3RleHQ+CiAgPHRleHQgeD0iNzQ1IiB5PSIyNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM4YjVjZjYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5OZXh0LWdlbiAyMDI1KzwvdGV4dD4KCiAgPCEtLSBiYW5kd2lkdGggY29tcGFyaXNvbiBiYXJzIC0tPgogIDx0ZXh0IHg9IjQ1MCIgeT0iMjc1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPkJhbmR3aWR0aDogMTAgR0IvcyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgMTAgVEIvcyAoMTAwMHggaW1wcm92ZW1lbnQpPC90ZXh0PgogIDx0ZXh0IHg9IjQ1MCIgeT0iMjkyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPkkvTyBEZW5zaXR5OiAxeCDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgMTAsMDAweCBpbXByb3ZlbWVudDwvdGV4dD4KPC9zdmc+Cg==', caption: 'Advanced Packaging Evolution: Wire Bond → Flip Chip → CoWoS → Hybrid Bonding', source: 'Based on TSMC OIP Ecosystem Forum, ASE Group, IMEC public presentations'}
+    ],
+  },
+  idm: {
+    title: 'Power Semiconductor: Si IGBT vs SiC vs GaN',
+    comparisons: [
+      {
+        name: 'Si IGBT',
+        pros: ['Lowest cost, mature manufacturing', 'Excellent for <1kHz switching frequency', 'Available from many suppliers'],
+        cons: ['High switching losses at high freq', 'Heavier thermal management needed', 'Bulkier magnetics vs. SiC'],
+        users: 'Infineon, Mitsubishi, ABB — industrial drives, legacy EVs, rail',
+        share2025: 48, share2030: 30, color: '#94a3b8', winner: false,
+      },
+      {
+        name: 'SiC MOSFET',
+        pros: ['3–5x lower switching loss vs. Si', 'Higher voltage (1,200–3,300V)', 'Enables smaller EV inverters'],
+        cons: ['4x higher cost than Si IGBT', '150mm wafer supply limited (growing to 200mm)', 'Crystal defect (stacking fault) reliability concerns'],
+        users: 'STMicro, Wolfspeed, Infineon, onsemi — EV traction inverters, fast chargers',
+        share2025: 35, share2030: 52, color: '#3b82f6', winner: true,
+      },
+      {
+        name: 'GaN (Gallium Nitride)',
+        pros: ['Highest switching frequency (>10MHz)', 'Smallest passive components — ultra-compact', 'Best for 650V AC adapters, data center PSU'],
+        cons: ['Breakdown voltage limited to ~650V (vs. 1,700V SiC)', 'Reliability certification still being built', 'Lateral device — no vertical GaN at scale yet'],
+        users: 'Navitas, EPC, Infineon (CoolGaN), Texas Instruments — laptop chargers, 5G, solar',
+        share2025: 12, share2030: 14, color: '#10b981', winner: false,
+      },
+      {
+        name: 'SiC + GaN Hybrid System',
+        pros: ['SiC for main inverter, GaN for gate drive — optimal', 'Best system efficiency', 'Emerging 800V EV architecture'],
+        cons: ['Higher design complexity', 'Two qualification paths needed', 'Not a single-chip solution'],
+        users: 'BYD (800V platforms), Porsche Taycan, GM Ultium — co-optimization emerging',
+        share2025: 5, share2030: 4, color: '#f97316', winner: false,
+      },
+    ],
+    screenshots: [
+      {src: 'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iOTAwIiBoZWlnaHQ9IjMyMCIgdmlld0JveD0iMCAwIDkwMCAzMjAiPgogIDxyZWN0IHdpZHRoPSI5MDAiIGhlaWdodD0iMzIwIiBmaWxsPSIjMGYxNzJhIiByeD0iMTIiLz4KICA8dGV4dCB4PSI0NTAiIHk9IjI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5Qb3dlciBTZW1pY29uZHVjdG9yIE1hdGVyaWFscyBDb21wYXJpc29uPC90ZXh0PgogIDx0ZXh0IHg9IjQ1MCIgeT0iNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U2lDIGFuZCBHYU4gZW5hYmxlIHNtYWxsZXIsIG1vcmUgZWZmaWNpZW50IEVWIGludmVydGVycyBhbmQgZmFzdCBjaGFyZ2VycyB2cy4gdHJhZGl0aW9uYWwgU2lsaWNvbjwvdGV4dD4KCiAgPCEtLSBQcm9wZXJ0eSBjb21wYXJpc29uIHRhYmxlIC0tPgogIDwhLS0gSGVhZGVyIC0tPgogIDxyZWN0IHg9IjMwIiB5PSI2MiIgd2lkdGg9Ijg0MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzFlMjkzYiIgcng9IjYiLz4KICA8dGV4dCB4PSIxNzAiIHk9IjgyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5Qcm9wZXJ0eTwvdGV4dD4KICA8dGV4dCB4PSIzODAiIHk9IjgyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5TaWxpY29uIChTaSk8L3RleHQ+CiAgPHRleHQgeD0iNTcwIiB5PSI4MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U2lDIE1PU0ZFVDwvdGV4dD4KICA8dGV4dCB4PSI3NjAiIHk9IjgyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMTBiOTgxIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5HYU4gSEVNVDwvdGV4dD4KCiAgPCEtLSByb3dzIC0tPgogIDxyZWN0IHg9IjMwIiB5PSI5NSIgd2lkdGg9Ijg0MCIgaGVpZ2h0PSIyOCIgZmlsbD0iIzBmMTcyYSIgcng9IjMiLz4KICA8dGV4dCB4PSIxNzAiIHk9IjExNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5CcmVha2Rvd24gVm9sdGFnZTwvdGV4dD4KICA8dGV4dCB4PSIzODAiIHk9IjExNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5+NjAwViBtYXg8L3RleHQ+CiAgPHRleHQgeD0iNTcwIiB5PSIxMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPjEsNzAwVisg4pyT4pyTPC90ZXh0PgogIDx0ZXh0IHg9Ijc2MCIgeT0iMTE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMTBiOTgxIiBmb250LXNpemU9IjExIiBmb250LWZhbWlseT0iQXJpYWwiPjY1MFYgKGxhdGVyYWwpPC90ZXh0PgoKICA8cmVjdCB4PSIzMCIgeT0iMTI2IiB3aWR0aD0iODQwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMWUyOTNiIiByeD0iMyIvPgogIDx0ZXh0IHg9IjE3MCIgeT0iMTQ1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjExIiBmb250LWZhbWlseT0iQXJpYWwiPlN3aXRjaGluZyBGcmVxdWVuY3k8L3RleHQ+CiAgPHRleHQgeD0iMzgwIiB5PSIxNDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Jmx0OzUwIGtIejwvdGV4dD4KICA8dGV4dCB4PSI1NzAiIHk9IjE0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj4xMDDigJM1MDAga0h6IOKckzwvdGV4dD4KICA8dGV4dCB4PSI3NjAiIHk9IjE0NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzEwYjk4MSIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MeKAkzEwIE1IeiDinJPinJM8L3RleHQ+CgogIDxyZWN0IHg9IjMwIiB5PSIxNTciIHdpZHRoPSI4NDAiIGhlaWdodD0iMjgiIGZpbGw9IiMwZjE3MmEiIHJ4PSIzIi8+CiAgPHRleHQgeD0iMTcwIiB5PSIxNzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+VGhlcm1hbCBDb25kdWN0aXZpdHk8L3RleHQ+CiAgPHRleHQgeD0iMzgwIiB5PSIxNzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MTUwIFcvbcK3SzwvdGV4dD4KICA8dGV4dCB4PSI1NzAiIHk9IjE3NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSIxMiIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+NDkwIFcvbcK3SyDinJPinJM8L3RleHQ+CiAgPHRleHQgeD0iNzYwIiB5PSIxNzYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMxMGI5ODEiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+fjIwMCBXL23Ct0s8L3RleHQ+CgogIDxyZWN0IHg9IjMwIiB5PSIxODgiIHdpZHRoPSI4NDAiIGhlaWdodD0iMjgiIGZpbGw9IiMxZTI5M2IiIHJ4PSIzIi8+CiAgPHRleHQgeD0iMTcwIiB5PSIyMDciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QmFuZGdhcCBFbmVyZ3k8L3RleHQ+CiAgPHRleHQgeD0iMzgwIiB5PSIyMDciIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MS4xIGVWPC90ZXh0PgogIDx0ZXh0IHg9IjU3MCIgeT0iMjA3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjM2I4MmY2IiBmb250LXNpemU9IjExIiBmb250LWZhbWlseT0iQXJpYWwiPjMuMyBlViAod2lkZSkg4pyTPC90ZXh0PgogIDx0ZXh0IHg9Ijc2MCIgeT0iMjA3IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMTBiOTgxIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj4zLjQgZVYgKHdpZGUpIOKckzwvdGV4dD4KCiAgPHJlY3QgeD0iMzAiIHk9IjIxOSIgd2lkdGg9Ijg0MCIgaGVpZ2h0PSIyOCIgZmlsbD0iIzBmMTcyYSIgcng9IjMiLz4KICA8dGV4dCB4PSIxNzAiIHk9IjIzOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSIxMSIgZm9udC1mYW1pbHk9IkFyaWFsIj5XYWZlciBDb3N0ICg2LWluY2gpPC90ZXh0PgogIDx0ZXh0IHg9IjM4MCIgeT0iMjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjMTBiOTgxIiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj4kMTUwICgzMDBtbSkg4pyT4pyTPC90ZXh0PgogIDx0ZXh0IHg9IjU3MCIgeT0iMjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmJiZjI0IiBmb250LXNpemU9IjExIiBmb250LWZhbWlseT0iQXJpYWwiPiQ4MDDigJMkMSw1MDAg4pqgPC90ZXh0PgogIDx0ZXh0IHg9Ijc2MCIgeT0iMjM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmJiZjI0IiBmb250LXNpemU9IjExIiBmb250LWZhbWlseT0iQXJpYWwiPkdhTi1vbi1TaSBsb3dlciBjb3N0PC90ZXh0PgoKICA8cmVjdCB4PSIzMCIgeT0iMjUwIiB3aWR0aD0iODQwIiBoZWlnaHQ9IjI4IiBmaWxsPSIjMWUyOTNiIiByeD0iMyIvPgogIDx0ZXh0IHg9IjE3MCIgeT0iMjY5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjExIiBmb250LWZhbWlseT0iQXJpYWwiPkJlc3QgQXBwbGljYXRpb248L3RleHQ+CiAgPHRleHQgeD0iMzgwIiB5PSIyNjkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+SW5kdXN0cmlhbCwgbGVnYWN5PC90ZXh0PgogIDx0ZXh0IHg9IjU3MCIgeT0iMjY5IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjM2I4MmY2IiBmb250LXNpemU9IjEyIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5FViB0cmFjdGlvbiwgODAwViDinJPinJM8L3RleHQ+CiAgPHRleHQgeD0iNzYwIiB5PSIyNjkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMxMGI5ODEiIGZvbnQtc2l6ZT0iMTIiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPkZhc3QgY2hhcmdlciwgNUcg4pyT4pyTPC90ZXh0PgoKICA8IS0tIE1hcmtldCBzaGFyZSBmb3JlY2FzdCBiYXIgLS0+CiAgPHRleHQgeD0iMTcwIiB5PSIzMDUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MjAzMGUgU2hhcmU6PC90ZXh0PgogIDxyZWN0IHg9IjI2MCIgeT0iMjk1IiB3aWR0aD0iOTAiIGhlaWdodD0iMTQiIGZpbGw9IiM5NGEzYjgiIHJ4PSIzIi8+CiAgPHRleHQgeD0iMzA1IiB5PSIzMDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMwZjE3MmEiIGZvbnQtc2l6ZT0iOSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U2kgMzAlPC90ZXh0PgogIDxyZWN0IHg9IjM3NSIgeT0iMjk1IiB3aWR0aD0iMTU2IiBoZWlnaHQ9IjE0IiBmaWxsPSIjM2I4MmY2IiByeD0iMyIvPgogIDx0ZXh0IHg9IjQ1MyIgeT0iMzA2IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjkiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPlNpQyA1MiUgKEVWIHdpbm5lcik8L3RleHQ+CiAgPHJlY3QgeD0iNTUzIiB5PSIyOTUiIHdpZHRoPSI0MiIgaGVpZ2h0PSIxNCIgZmlsbD0iIzEwYjk4MSIgcng9IjMiLz4KICA8dGV4dCB4PSI1NzQiIHk9IjMwNiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5HYU4gMTQlPC90ZXh0PgogIDxyZWN0IHg9IjYxNyIgeT0iMjk1IiB3aWR0aD0iMTIiIGhlaWdodD0iMTQiIGZpbGw9IiNmOTczMTYiIHJ4PSIzIi8+CiAgPHRleHQgeD0iNjYwIiB5PSIzMDYiIGZpbGw9IiNmOTczMTYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5IeWJyaWQgNCU8L3RleHQ+Cjwvc3ZnPgo=', caption: 'Power Semiconductor Material Properties: Si vs SiC vs GaN — Why SiC Wins for EV', source: 'Based on Wolfspeed, Infineon, STMicro investor presentations'}
+    ],
+  },
+};
+
+// ── Sub-tab state ─────────────────────────────────────────────────
+const segTabState = {};  // segmentId → 'market' | 'tech'
+
+function setSegTab(segId, tab) {
+  segTabState[segId] = tab;
+  document.querySelectorAll('.seg-tab-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === tab);
+  });
+  document.querySelectorAll('.seg-tab-panel').forEach(p => {
+    p.classList.toggle('active', p.dataset.tab === tab);
+  });
+}
+
+function renderTechTab(seg) {
+  const td = TECH_DATA[seg.id];
+  if (!td) return `<div class="empty-state"><div class="big-icon">🔧</div><p>Technology comparison coming soon for this segment.</p></div>`;
+
+  const tableRows = td.comparisons.map(c => `
+    <tr class="${c.winner ? 'tech-winner' : ''}">
+      <td style="min-width:160px">
+        <div style="font-weight:700;font-size:13px">${c.name}${c.winner ? ' <span style="background:#dcfce7;color:#166534;font-size:10px;padding:1px 7px;border-radius:8px;margin-left:4px">Leader</span>' : ''}</div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:2px">${c.users}</div>
+      </td>
+      <td style="min-width:180px">
+        <ul class="pros-list">${c.pros.map(p=>`<li style="font-size:12px;margin-bottom:2px">${p}</li>`).join('')}</ul>
+      </td>
+      <td style="min-width:180px">
+        <ul class="cons-list">${c.cons.map(p=>`<li style="font-size:12px;margin-bottom:2px">${p}</li>`).join('')}</ul>
+      </td>
+      <td style="min-width:140px">
+        <div class="share-forecast">
+          <div style="display:flex;justify-content:space-between;font-size:11px">
+            <span style="color:#64748b">2025</span><strong>${c.share2025}%</strong>
+          </div>
+          <div class="share-forecast-bar" style="width:${c.share2025}%;background:${c.color}99;max-width:120px"></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;margin-top:4px">
+            <span style="color:#64748b">2030e</span><strong style="color:${c.color}">${c.share2030}%</strong>
+          </div>
+          <div class="share-forecast-bar" style="width:${c.share2030}%;background:${c.color};max-width:120px"></div>
+        </div>
+      </td>
+    </tr>`).join('');
+
+  const screenshotsHtml = td.screenshots && td.screenshots.length
+    ? `<div class="tech-screenshots">${td.screenshots.map(s =>
+        `<div class="tech-screenshot-card">
+          <img src="${s.src}" alt="${s.caption}" loading="lazy">
+          <div class="tech-screenshot-caption">📷 ${s.caption} — ${s.source}</div>
+        </div>`).join('')}
+      </div>` : '';
+
+  return `
+    <div class="chart-card" style="margin-bottom:20px">
+      <div class="section-title">${td.title}</div>
+      ${screenshotsHtml}
+      <div style="overflow-x:auto">
+        <table class="tech-table">
+          <thead>
+            <tr>
+              <th>Technology</th>
+              <th>✓ Advantages</th>
+              <th>✗ Disadvantages</th>
+              <th>Market Share</th>
+            </tr>
+          </thead>
+          <tbody>${tableRows}</tbody>
+        </table>
+      </div>
+      <div style="font-size:10px;color:#94a3b8;margin-top:8px">
+        Market share estimates based on industry reports, analyst data, and company disclosures. 2030e = forecast.
+      </div>
+    </div>`;
+}
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+//  INIT
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+document.addEventListener('DOMContentLoaded', () => {
+  renderFlow();
+  renderOverview();
+});
+</script>
+</body>
+</html>
