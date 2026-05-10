@@ -2590,7 +2590,7 @@ function renderSpikeTable(spikes) {
     let av, bv;
     if (state.sortCol === 'date')   { av = a.date; bv = b.date; }
     else if (state.sortCol === 'ticker') { av = a.ticker; bv = b.ticker; }
-    else if (state.sortCol === 'move')  { av = Math.abs(a.change_pct); bv = Math.abs(b.change_pct); }
+    else if (state.sortCol === 'move')  { av = a.change_pct; bv = b.change_pct; }
     else { av = a.date; bv = b.date; }
     if (av < bv) return state.sortDir === 'asc' ? -1 : 1;
     if (av > bv) return state.sortDir === 'asc' ? 1 : -1;
@@ -2676,7 +2676,7 @@ function renderSpikeTable(spikes) {
           ${thBtn('date', 'Date')}
           ${thBtn('ticker', 'Ticker')}
           <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Company</th>
-          ${thBtn('move', 'Move', 'right')}
+          ${thBtn('move', '7-Day move', 'right')}
           <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Threshold</th>
           <th style="text-align:right;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Close</th>
           <th style="text-align:left;padding:10px 12px;font-weight:600;color:#64748b;font-size:11px">Data</th>
