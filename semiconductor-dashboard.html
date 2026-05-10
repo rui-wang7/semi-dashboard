@@ -382,6 +382,7 @@
     <div id="stockSummaryRow" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
     <div id="stockSpikeTable"></div>
     <div id="stockPriceGrid" style="margin-top:20px"></div>
+    <div id="stockPriceGridYTD" style="margin-top:20px"></div>
   </div>
 
 </div>
@@ -2551,6 +2552,7 @@ function renderStockPanel() {
 
   renderSpikeTable(spikes);
   renderPriceGrid(allPrices);
+  renderPriceGridYTD(stockData.all_prices_ytd || {});
 }
 
 function filterStockTable() {
@@ -2736,6 +2738,51 @@ function renderPriceGrid(allPrices) {
 
   document.getElementById('stockPriceGrid').innerHTML = `
     <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">7-Day Price Overview (all tracked tickers)</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px">${cards}</div>`;
+}
+
+function renderPriceGridYTD(allPricesYtd) {
+  // YTD overview using weekly close samples — one card per ticker
+  const tickers = Object.keys(allPricesYtd).filter(t => allPricesYtd[t] && allPricesYtd[t].length > 0).slice(0, 24);
+  const yearStart = new Date().getFullYear();
+  const container = document.getElementById('stockPriceGridYTD');
+  if (!tickers.length) { container.innerHTML = ''; return; }
+
+  const cards = tickers.map(ticker => {
+    const rows = allPricesYtd[ticker];
+    const latest = rows[rows.length - 1];
+    const first = rows[0];
+    const totalChange = first ? ((latest.close - first.close) / first.close * 100).toFixed(1) : '—';
+    const isUp = parseFloat(totalChange) >= 0;
+    const prices = rows.map(r => r.close);
+    const minP = Math.min(...prices);
+    const maxP = Math.max(...prices);
+    const range = maxP - minP || 1;
+
+    const svgW = 100, svgH = 30;
+    const pts = prices.map((p, i) => {
+      const x = (i / (prices.length - 1)) * svgW;
+      const y = svgH - ((p - minP) / range) * svgH;
+      return `${x},${y}`;
+    }).join(' ');
+    const lineColor = isUp ? '#16a34a' : '#dc2626';
+
+    return `<div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;min-width:140px;flex:1">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div>
+          <div style="font-weight:700;font-size:12px">${ticker}</div>
+          <div style="font-size:10px;color:#94a3b8">$${latest ? latest.close.toFixed(2) : '—'}</div>
+        </div>
+        <span style="font-size:11px;font-weight:700;color:${lineColor}">${isUp?'+':''}${totalChange}%</span>
+      </div>
+      <svg width="${svgW}" height="${svgH}" viewBox="0 0 ${svgW} ${svgH}">
+        <polyline points="${pts}" fill="none" stroke="${lineColor}" stroke-width="1.5" stroke-linejoin="round"/>
+      </svg>
+    </div>`;
+  }).join('');
+
+  container.innerHTML = `
+    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">YTD Price Overview (${yearStart} year-to-date · weekly samples)</div>
     <div style="display:flex;flex-wrap:wrap;gap:10px">${cards}</div>`;
 }
 

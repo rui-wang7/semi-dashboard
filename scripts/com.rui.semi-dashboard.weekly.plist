@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>com.rui.semi-dashboard.weekly</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>-l</string>
+    <string>/Users/mini/Routine AI Tools/Semi Dashboard/.claude/worktrees/peaceful-robinson-8b9712/scripts/weekly_refresh.sh</string>
+  </array>
+
+  <!-- Every Saturday at 06:00 local time -->
+  <key>StartCalendarInterval</key>
+  <dict>
+    <key>Weekday</key>
+    <integer>6</integer>
+    <key>Hour</key>
+    <integer>6</integer>
+    <key>Minute</key>
+    <integer>0</integer>
+  </dict>
+
+  <!-- If the Mac is asleep at 6am, run as soon as it wakes -->
+  <key>RunAtLoad</key>
+  <false/>
+
+  <key>StandardOutPath</key>
+  <string>/Users/mini/Library/Logs/semi-dashboard/launchd_stdout.log</string>
+  <key>StandardErrorPath</key>
+  <string>/Users/mini/Library/Logs/semi-dashboard/launchd_stderr.log</string>
+
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/Users/mini/Library/Python/3.9/bin:/Users/mini/.local/bin</string>
+  </dict>
+
+  <key>WorkingDirectory</key>
+  <string>/Users/mini/Routine AI Tools/Semi Dashboard/.claude/worktrees/peaceful-robinson-8b9712</string>
+</dict>
+</plist>

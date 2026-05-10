@@ -189,6 +189,23 @@ def fetch_price_history(ticker):
         print(f"  [price error] {ticker}: {e}")
         return []
 
+def fetch_ytd_history(ticker):
+    """Returns weekly close samples from Jan 1 of current year to today.
+    Weekly sampling keeps payload size manageable (~25 pts vs ~100 daily)."""
+    try:
+        tk = yf.Ticker(ticker)
+        hist = tk.history(period="ytd", interval="1wk")
+        if hist.empty:
+            return []
+        return [
+            {"date": str(d.date()), "close": round(float(c), 4)}
+            for d, c in zip(hist.index, hist["Close"])
+            if c and c > 0
+        ]
+    except Exception as e:
+        print(f"  [ytd error] {ticker}: {e}")
+        return []
+
 # ─────────────────────────────────────────────────────────────────────
 #  FETCH NEWS
 # ─────────────────────────────────────────────────────────────────────
@@ -305,16 +322,18 @@ def main():
     print(f"Semiconductor Stock Monitor — {week_start} to {week_end}")
     print(f"Tracking {len(STOCKS)} tickers across 14 groups\n")
 
-    all_prices = {}   # ticker → [day rows]
+    all_prices = {}       # ticker → [day rows]  (last 7 trading days)
+    all_prices_ytd = {}   # ticker → [{date, close}]  (weekly samples YTD)
     spikes = []
 
-    # ── Phase 1: fetch prices ──────────────────────────────────────
-    print("Phase 1: Fetching price data...")
+    # ── Phase 1: fetch prices (7-day daily + YTD weekly) ──────────
+    print("Phase 1: Fetching price data (7d daily + YTD weekly)...")
     for ticker, meta in STOCKS.items():
         sys.stdout.write(f"  {ticker:16s}")
         sys.stdout.flush()
         rows = fetch_price_history(ticker)
         all_prices[ticker] = rows
+        all_prices_ytd[ticker] = fetch_ytd_history(ticker)
         if rows:
             spike_days = [r for r in rows if abs(r["change_pct"]) >= meta["threshold"] * 100]
             sys.stdout.write(f" {len(rows)} days, {len(spike_days)} spikes\n")
@@ -369,6 +388,7 @@ def main():
         "total_tickers": len(STOCKS),
         "spike_count": len(spikes),
         "all_prices": all_prices,
+        "all_prices_ytd": all_prices_ytd,
         "spikes": spikes,
     }
 
