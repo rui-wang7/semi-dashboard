@@ -246,15 +246,19 @@ Related news on/around this date:
 Analyze what caused this price move in 3-5 sentences. Focus on: technology roadmap changes, order/demand changes, financial events (earnings, revenue guidance, debt/equity raise), product competitiveness (chip launches, competitive wins/losses, benchmark results), investor days or analyst days.
 Be specific about which news item most likely drove the move."""
 
-    # Find claude CLI — try common install locations
+    # Find claude CLI — try common install locations + auto-discover newer versions
+    import glob
     claude_paths = [
         "claude",
         "/usr/local/bin/claude",
         "/opt/homebrew/bin/claude",
         os.path.expanduser("~/.local/bin/claude"),
-        os.path.expanduser("~/Library/Application Support/Claude/claude-code/2.1.87/claude.app/Contents/MacOS/claude"),
-        os.path.expanduser("~/Library/Application Support/Claude/claude-code-vm/2.1.87/claude"),
     ]
+    # Auto-discover any installed claude-code version (e.g., 2.1.87, 2.1.128, …)
+    for app in sorted(glob.glob(os.path.expanduser("~/Library/Application Support/Claude/claude-code/*/claude.app/Contents/MacOS/claude")), reverse=True):
+        claude_paths.append(app)
+    for vm in sorted(glob.glob(os.path.expanduser("~/Library/Application Support/Claude/claude-code-vm/*/claude")), reverse=True):
+        claude_paths.append(vm)
     claude_bin = None
     for p in claude_paths:
         if os.path.isfile(p) and os.access(p, os.X_OK):

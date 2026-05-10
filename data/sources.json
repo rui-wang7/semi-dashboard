@@ -164,9 +164,73 @@
       "tam_usd_bn": { "value": 1, "source": "Datacenter fiber + AI fabric cassette slice from total ~$15B telecom fiber market; YOFC/Corning/Furukawa/Prysmian datacenter rev", "retrieved": "2026-05-09", "confidence": "low" }
     }
   },
+  "_tech_roadmap_sources_2026_05_10": {
+    "_note": "Provenance for TECH_DATA roadmap entries added in third pass (sub-segment technology deep-dives sourced from latest company earnings + investor materials).",
+    "fab_cpu": {
+      "sources": ["AMD Q4-2025 earnings", "Apple Mac event Oct-2024 + WWDC 2025", "AWS Graviton4 launch", "ABI Research ARM PC forecast", "TSMC technology symposium 2025"],
+      "confidence": "high"
+    },
+    "fab_gpu": {
+      "sources": ["NVDA FY26 guidance", "AMD MI350 launch event 2025", "TSMC CoWoS capacity coverage Digitimes Dec-2025", "NVIDIA bookings on TSMC CoWoS reportedly >50% of 2026"],
+      "url": "https://www.digitimes.com/news/a20251210PD218/tsmc-cowos-capacity-nvidia-equipment.html",
+      "confidence": "high"
+    },
+    "fab_ai_asic": {
+      "sources": ["Broadcom AI ASIC commentary FY25 earnings calls", "AWS re:Invent 2024 Trainium2 launch", "Microsoft Maia 100 launch Nov-2023 + Maia 200 announcements", "Cerebras + Groq cloud commercial milestones 2025"],
+      "confidence": "medium"
+    },
+    "fab_mobile_soc": {
+      "sources": ["Qualcomm Q4-2025 earnings", "MediaTek Q3-2025 earnings + Counterpoint AP-SoC tracker", "Samsung Foundry SF3/SF2 GAA roadmap 2025", "Apple A19 + A20 supply chain reports"],
+      "confidence": "medium-high"
+    },
+    "fab_networking": {
+      "sources": ["Broadcom Tomahawk 6 launch June 2025", "NVIDIA Photonic Spectrum announcement at GTC 2025", "Marvell investor materials FY25", "Wi-Fi 7/8 spec timeline"],
+      "url": "https://investors.broadcom.com/news-releases/news-release-details/broadcom-announces-tomahawkr-6-davisson-industrys-first-1024",
+      "confidence": "high"
+    },
+    "wafer_sic": {
+      "sources": ["Wolfspeed 200mm SiC commercial launch Sep-2025", "Wolfspeed 300mm SiC boule announcement Jan-2026", "TrendForce SiC market commentary Sep-2025", "Yole SiC market reports 2025"],
+      "url": "https://www.semiconductor-today.com/news_items/2025/sep/wolfspeed-110925.shtml",
+      "confidence": "high"
+    },
+    "osat_packaging": {
+      "sources": ["TSMC Q4-2025 earnings + AP6/AP7/AP8 capacity disclosure", "Digitimes Dec-2025 NVDA CoWoS booking coverage", "TSMC 2025 Tech Symposium SoIC-X updates", "AMD MI400 supply chain commentary"],
+      "url": "https://www.digitimes.com/news/a20251210PD218/tsmc-cowos-capacity-nvidia-equipment.html",
+      "confidence": "high"
+    },
+    "osat_testing": {
+      "sources": ["Advantest Q1-2025 earnings + investor guide April 2025", "Teradyne FY25 commentary on AI test demand", "Lasertec EUV mask inspection sole-source narrative", "KLA inspection AI advanced packaging coverage"],
+      "url": "https://www.advantest.com/document/en/investors/ir-library/investors-guide/Investors_Guide_2504E.pdf",
+      "confidence": "high"
+    },
+    "opt_optical": {
+      "sources": ["Innolight FY24 earnings ($3.3B, +123% YoY)", "Lumentum FY26 Q2 earnings ($665.5M, +65% YoY)", "Cignal AI 800G optics 60% growth forecast 2025", "ECOC 2025 industry coverage"],
+      "url": "https://cignal.ai/2025/05/800gbe-optics-shipments-to-grow-60-in-2025/",
+      "confidence": "high"
+    },
+    "opt_pcb": {
+      "sources": ["Shennan Circuits + Victory Giant 2024-2025 NVDA wins coverage", "Digitimes Unimicron AI substrate June-2025", "Industry reporting on 30+ layer AI server PCB shortage 2025"],
+      "confidence": "medium-high"
+    },
+    "opt_substrate": {
+      "sources": ["Daiwa ABF substrate initiation report (82 pages)", "Digitimes Dec-2025 Taiwanese ABF capacity coverage", "Unimicron 18-layer ABF announcement 2025", "Ibiden + Unimicron Blackwell ABF share reports (75%/25%)"],
+      "url": "https://www.digitimes.com/news/a20251218PD207/abf-substrate-packaging-expansion-ai-gpu-capacity.html",
+      "confidence": "high"
+    },
+    "opt_ccl": {
+      "sources": ["Panasonic Industry Megtron 8 product page + capacity 2× expansion announcement", "Shengyi M7/M8 NVDA qualification 2025 industry reports", "EMC EM-528/EM-888 product pages"],
+      "url": "https://na.industrial.panasonic.com/products/electronic-materials/circuit-board-materials/lineup/megtron-series/series/148029",
+      "confidence": "medium-high"
+    },
+    "opt_fiber": {
+      "sources": ["Microsoft Azure HCF announcement April 2026 + Corning + Heraeus partnership", "YOFC OFC 2025 + MWC Barcelona 2026 hollow-core unveil", "Tom's Hardware Microsoft MicroLED 2027 commercialization coverage"],
+      "url": "https://techcommunity.microsoft.com/blog/azurenetworkingblog/microsoft-azure-scales-hollow-core-fiber-hcf-production-through-outsourced-manuf/4455953",
+      "confidence": "medium"
+    }
+  },
   "_qc_log_2026_05_09": {
-    "summary": "Restructured supply chain: HBM/DRAM/NAND/HDD wrapped under Memory parent; Optical moved between OSAT and Downstream; IDM replaced by Downstream parent with 5 end-market children (AI DC / Non-AI DC / PC / Smartphone / Auto+Industrial). Second pass: Wafer split into Si+SiC; Fabless split into CPU/GPU/AI ASIC/Mobile SoC/Networking; OSAT split into Packaging+Testing; Optical expanded to Optical/PCB/Substrate/CCL/Fiber.",
-    "qc_method": "Each new sub-segment TAM cross-checked against >=2 independent public sources (IDC, Yole Group, Lightcounting, Persistence Market Research, Mordor Intelligence, Statista, MarketsandMarkets, Prismark, SEMI, vendor 10-Ks). Where sources disagreed >25%, the conservative midpoint was chosen and confidence marked 'low'/'medium'. SiC china share + AI DC china share + opt_fiber TAM flagged 'low' confidence due to data scarcity. Auto/Industrial + PCB china share flagged 'high' confidence — multiple aligned sources.",
-    "review_due": "2026-08-09"
+    "summary": "Restructured supply chain: HBM/DRAM/NAND/HDD wrapped under Memory parent; Optical moved between OSAT and Downstream; IDM replaced by Downstream parent with 5 end-market children (AI DC / Non-AI DC / PC / Smartphone / Auto+Industrial). Second pass: Wafer split into Si+SiC; Fabless split into CPU/GPU/AI ASIC/Mobile SoC/Networking; OSAT split into Packaging+Testing; Optical expanded to Optical/PCB/Substrate/CCL/Fiber. Third pass: TECH_DATA roadmap deep-dives added for all 13 new sub-segments, sourced from company earnings + investor materials.",
+    "qc_method": "Each new sub-segment TAM cross-checked against >=2 independent public sources (IDC, Yole Group, Lightcounting, Persistence Market Research, Mordor Intelligence, Statista, MarketsandMarkets, Prismark, SEMI, vendor 10-Ks). TECH_DATA roadmap entries cite earnings calls, investor presentations, and industry trade publications (Digitimes, TrendForce, Cignal AI, ECOC). Where sources disagreed >25%, the conservative midpoint was chosen and confidence marked 'low'/'medium'.",
+    "review_due": "2026-08-10"
   }
 }
