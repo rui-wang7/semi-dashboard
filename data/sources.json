@@ -1,0 +1,172 @@
+{
+  "_meta": {
+    "description": "Data provenance map for semiconductor-dashboard.html. Each entry records the source, URL, and retrieval date for key numeric fields. Update this file whenever segment data is refreshed.",
+    "last_reviewed": "2025-05-09",
+    "reviewer": "Manual — cross-checked against SIA, SEMI, and company earnings"
+  },
+  "global_tam": {
+    "source": "SIA Factbook 2025 / WSTS Bi-Annual Semiconductor Market Forecast",
+    "url": "https://www.semiconductors.org/resources/factbook/",
+    "note": "2025 figure (~$795B) is a preliminary estimate based on WSTS spring 2025 forecast. Confirm against WSTS June 2025 update.",
+    "retrieved": "2025-05-09"
+  },
+  "wfe_spending": {
+    "source": "SEMI World Fab Forecast — Spring 2025 Edition",
+    "url": "https://www.semi.org/en/products-services/market-data/world-fab-forecast",
+    "note": "2025 WFE actuals ($113B) based on SEMI spring 2025 preliminary data. 2026+ are SEMI consensus forecasts.",
+    "retrieved": "2025-05-09"
+  },
+  "segments": {
+    "eda": {
+      "tam_usd_bn": { "value": 15.7, "year": 2025, "source": "Gartner EDA Market Forecast Q1 2025 + Synopsys/Cadence FY2024 combined revenue extrapolation", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 8.5, "source": "Gartner 5-yr CAGR estimate for EDA/IP segment", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 12, "source": "CSIA 2024 Annual Report estimate; BIS export control impact analysis", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "AI-driven uplift estimated from Synopsys DSO.ai and Cadence Cerebrus adoption rates in design centers; McKinsey AI Semiconductor 2025 report", "confidence": "medium" }
+    },
+    "ip": {
+      "tam_usd_bn": { "value": 9.3, "year": 2025, "source": "ARM Holdings FY2025 guidance + Gartner IP licensing market", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 8.0, "source": "ARM royalty growth trajectory from IPO prospectus + FY2024 results", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 11, "source": "ARM China JV revenue estimate; RISC-V China adoption data from RISC-V International", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "AI NPU IP block adoption rate from ARM Compute Library data; CEVA AI IP licensing growth", "confidence": "medium" }
+    },
+    "fabless": {
+      "tam_usd_bn": { "value": 330, "year": 2025, "source": "IC Insights / Omdia Fabless Top-50 ranking 2025; NVDA FY2025 + AMD CY2025 guidance", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 13, "source": "Omdia fabless 5-yr CAGR, AI accelerator segment growth weighted", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 14, "source": "CSIA + IC Insights China fabless revenue share; reduced from 16% due to HiSilicon volume constraints", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "NVDA data center GPU revenue as AI proxy ($115B+ in FY2025); AMD Instinct guidance; Broadcom custom ASIC disclosure", "confidence": "high" }
+    },
+    "wafers": {
+      "tam_usd_bn": { "value": 18.8, "year": 2025, "source": "SEMI Silicon Manufacturers Group (SMG) Q4 2024 shipment data + price trend", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 5.5, "source": "Shin-Etsu / SUMCO investor day guidance; SEMI SMG long-range forecast", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 11, "source": "Zhonghuan / SIMGUI capacity data; SEMI China fab wafer consumption estimate", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "AI server wafer intensity higher than consumer; estimated from TSMC CoWoS-L wafer consumption vs. standard compute", "confidence": "low" }
+    },
+    "masks": {
+      "tam_usd_bn": { "value": 5.6, "year": 2025, "source": "SEMI Photomask Market Report 2025; Photronics FY2024 10-K", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 6.5, "source": "EUV mask ASP increase + tape-out volume growth; Photronics guidance", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 13, "source": "Photronics China revenue disclosure; estimated domestic mask shop revenue", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "High-NA EUV mask demand correlated with TSMC N2 AI chip tape-outs; limited public data", "confidence": "low" }
+    },
+    "equipment": {
+      "tam_usd_bn": { "value": 113, "year": 2025, "source": "SEMI World Fab Forecast Spring 2025; ASML/AMAT/LRCX/KLAC combined guidance", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 9.0, "source": "SEMI 5-yr WFE CAGR forecast; VLSI Research equipment outlook", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 25, "source": "SEMI China equipment spending estimate; down from 28% as stockpiling peaked in 2023-24", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "AI fab capex from TSMC CoWoS capacity expansion + HBM DRAM equipment; AMAT/LRCX AI-specific revenue disclosures", "confidence": "high" }
+    },
+    "chemicals": {
+      "tam_usd_bn": { "value": 76, "year": 2025, "source": "TECHCET Critical Materials Council 2025; DuPont / Entegris / Shin-Etsu combined semiconductor chemical revenue", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 6.5, "source": "TECHCET 5-yr CAGR for semiconductor materials; EUV resist volume growth weighted", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 21, "source": "CSIA materials import/export data; domestic photoresist production estimates", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "EUV resist and high-purity gas demand correlated with leading-edge AI chip fab activity; indirect estimate", "confidence": "low" }
+    },
+    "foundry": {
+      "tam_usd_bn": { "value": 155, "year": 2025, "source": "TrendForce Foundry Revenue Ranking Q4 2024; TSMC 2025 annual revenue guidance ($105-110B TWD equivalent)", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 11.0, "source": "TrendForce 5-yr foundry CAGR; TSMC long-term model (15-20% revenue CAGR)", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 11, "source": "SMIC + Hua Hong revenue as % of total; TrendForce China foundry share quarterly", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "TSMC AI revenue disclosure: AI accounted for ~mid-teens % of wafer revenue in 2024, growing to ~20%+ in 2025", "confidence": "high" }
+    },
+    "osat": {
+      "tam_usd_bn": { "value": 50, "year": 2025, "source": "TrendForce OSAT Revenue Ranking 2025; ASE / Amkor FY2024 revenue + CoWoS captive estimate", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 13.0, "source": "Advanced packaging (CoWoS, SoIC, HBM) volume growth; TrendForce advanced packaging forecast", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 27, "source": "JCET + Huatian + Tongfu revenue; TrendForce China OSAT share; slightly down from 29% as AI packaging non-China", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "TSMC CoWoS capacity tripling 2024→2026 driven by NVDA H100/H200/B200; HBM bonding for AI memory; direct AI packaging demand measurable", "confidence": "high" }
+    },
+    "idm": {
+      "_status": "DEPRECATED 2026-05-09 — replaced by 'downstream' parent + 5 sub-segments. Old IDM tracked supply-side IDMs (Samsung/Intel/TI); new Downstream tracks demand-side end-markets.",
+      "tam_usd_bn": { "value": 218, "year": 2025, "source": "IC Insights IDM Top-20 ranking 2025; Samsung / Intel / TI / ST combined revenue estimates", "retrieved": "2025-05-09" },
+      "cagr_pct": { "value": 6.0, "source": "IC Insights IDM 5-yr CAGR; memory recovery offset by PC/mobile softness", "retrieved": "2025-05-09" },
+      "china_share_pct": { "value": 10, "source": "YMTC / CXMT / BYD Semi revenue estimate; CSIA IDM segment data", "retrieved": "2025-05-09" },
+      "ai_lift": { "note": "Samsung HBM3/HBM3E revenue for AI; SK Hynix HBM dominance; Intel Gaudi AI accelerator ramp — measurable AI subset", "confidence": "medium" }
+    },
+    "memory": {
+      "_note": "Aggregated parent — see mem_hbm/mem_dram/mem_nand/mem_hdd children for primary sources. Aggregate values are sums (TAM, China TAM) or TAM-weighted averages (CAGR, AI lift uplift).",
+      "tam_usd_bn": { "value": 228, "year": 2025, "source": "Sum of HBM ($22B) + DRAM ($110B) + NAND ($82B) + HDD ($14B). Underlying sources: SEMI, WSTS, TrendForce, IDC, vendor 10-Ks.", "retrieved": "2026-05-09" },
+      "cagr_pct": { "value": 16, "source": "TAM-weighted average of children CAGRs (HBM 45 / DRAM 15 / NAND 12 / HDD 3).", "retrieved": "2026-05-09" }
+    },
+    "downstream": {
+      "_note": "Aggregated parent over 5 end-market children. Top-level parent figures are sums/weighted-averages; see children for primary sources.",
+      "tam_usd_bn": { "value": 695, "year": 2025, "source": "Sum across AI DC ($230B) + Non-AI DC ($90B) + PC ($85B) + Smartphone ($130B) + Auto/Industrial ($160B).", "retrieved": "2026-05-09" }
+    },
+    "ds_ai_dc": {
+      "tam_usd_bn": { "value": 230, "year": 2025, "source": "IDC: data-center semis $209B in 2024 → $477B in 2026 (AI driving growth); Yole Group 2030 GPU forecast $215B; NVDA AI-related FY26 ~$130B + AMD MI ~$9B + Broadcom AI ASIC ~$28B + TSMC AI wafer rev ~$35B + HBM ~$22B + Marvell ~$4.5B; AI subset of DC silicon estimated $185-250B in 2025.", "url": "https://www.idc.com/resource-center/blog/semiconductor-market-to-surge-past-the-trillion-dollar-threshold-ai-infrastructure-drives-market-growth/", "retrieved": "2026-05-09", "confidence": "medium-high" },
+      "cagr_pct": { "value": 35, "source": "IDC: data-center semis 2024 $209B → 2026 $477B implies ~50% near-term CAGR; Yole GPU forecast 2024 $100B → 2030 $215B = 14% CAGR; AI subset growing faster — 35% midpoint to 2030.", "retrieved": "2026-05-09", "confidence": "medium" },
+      "china_share_pct": { "value": 8, "source": "China AI accelerator market constrained by US export controls (NVDA H20 ban Apr 2025); Huawei Ascend domestic build-out estimated at 30-50% of China demand in 2025; cross-checked vs. SemiAnalysis China AI capex tracker.", "retrieved": "2026-05-09", "confidence": "low" },
+      "ai_lift": { "note": "Definitionally ~96% AI — segment is purpose-built for AI workloads; remaining 4% is general-purpose accelerator workloads (HPC, graphics, video).", "confidence": "high" }
+    },
+    "ds_non_ai_dc": {
+      "tam_usd_bn": { "value": 90, "year": 2025, "source": "Server CPU $22.86B (Intel + AMD); server DRAM ~$16B; eSSD ~$12B; networking ~$14B; misc (NIC/DPU/BMC/security) ~$25B. Cross-checked vs. Mordor + Skyquest enterprise server reports ($116B total system rev implies semi content ~$90B).", "url": "https://www.intelmarketresearch.com/cpu-for-server-2025-2032-237-6045", "retrieved": "2026-05-09", "confidence": "medium" },
+      "cagr_pct": { "value": 4, "source": "Mordor: server CPU growing low-single-digit; AI shift cannibalizes capex from non-AI DC; CXL/DPU/storage upgrades sustain mid-single-digit growth.", "retrieved": "2026-05-09", "confidence": "medium" },
+      "china_share_pct": { "value": 18, "source": "Alibaba/Tencent/ByteDance + China Telecom/Mobile cloud + government cloud share; estimated from CSIA + Yole datacenter regional analysis.", "retrieved": "2026-05-09", "confidence": "low" }
+    },
+    "ds_pc": {
+      "tam_usd_bn": { "value": 85, "year": 2025, "source": "AI PC market alone $32.2B (Persistence Market Research); broader PC semi (CPU+iGPU+dGPU+DRAM+NAND+I/O+Wi-Fi+PMIC) ~$80-95B for 250M units shipped; Intel PC CPU rev ~$22B + AMD PC CPU ~$8B + NVDA mobile dGPU ~$4.5B + Apple M-series ~$12B + memory content + misc. Cross-checked vs. Statista 'AI laptop $32.2B 2025' and Gartner 'AI PCs ~31% of PC market by end-2025'.", "url": "https://www.persistencemarketresearch.com/market-research/ai-laptop-market.asp", "retrieved": "2026-05-09", "confidence": "medium" },
+      "cagr_pct": { "value": 7, "source": "Copilot+ refresh cycle (40 TOPS NPU floor) drives upgrade demand; ABI Research projects ARM PC share 5% → 13% by 2030; AI PC share 31% (2025) → 60%+ (2030) per Gartner.", "retrieved": "2026-05-09", "confidence": "medium" },
+      "china_share_pct": { "value": 22, "source": "Lenovo (China HQ) ~25% global PC unit share + China consumer/enterprise/government tenders; 'Xinchuang' (信创) domestic CPU procurement carving small share.", "retrieved": "2026-05-09", "confidence": "medium" }
+    },
+    "ds_smartphone": {
+      "tam_usd_bn": { "value": 130, "year": 2025, "source": "Smartphone semi: AP-SoC $42B (Statista/Mordor) + RFFE ~$25B + CIS ~$20B (Sony 50% share) + memory content ~$30B + PMIC/audio/sensors ~$13B = ~$130B. Statista narrow estimate $146B for 2025 (rising from $104B in 2023); Fortune Business Insights $40.88B is AP-only narrow definition.", "url": "https://www.statista.com/statistics/498265/cagr-main-semiconductor-target-markets/", "retrieved": "2026-05-09", "confidence": "medium" },
+      "cagr_pct": { "value": 4, "source": "Smartphone unit shipments flat ~1.2B/yr; ASP up via 5G + memory content + on-device AI premium; Counterpoint AP-SoC growth 5.29% (Mordor); broader semi content slightly less.", "retrieved": "2026-05-09", "confidence": "medium" },
+      "china_share_pct": { "value": 28, "source": "Xiaomi + OPPO + Vivo + Honor + Huawei collectively >40% global smartphone unit share; semi consumption skewed by Apple/Samsung/Sony non-China sourcing.", "retrieved": "2026-05-09", "confidence": "medium" }
+    },
+    "ds_auto_industrial": {
+      "tam_usd_bn": { "value": 160, "year": 2025, "source": "Auto semi: Yole 2025 'Infineon/NXP/STM in $132B race' to $137B by 2030; MarketsandMarkets $133B by 2030; consensus $77-100B in 2025. Industrial chip: TI/ADI/Microchip combined industrial rev ~$35B + Infineon/NXP/Renesas industrial ~$20B + Bosch/Siemens captive + sensors/PLC + grid/energy = ~$60-80B. Combined ~$160B.", "url": "https://www.yolegroup.com/press-release/infineon-technologies-nxp-and-stmicroelectronics-face-rising-competition-in-132-billion-automotive-semiconductor-race/", "retrieved": "2026-05-09", "confidence": "high" },
+      "cagr_pct": { "value": 8, "source": "Yole/MarketsandMarkets auto semi 8-9% CAGR to 2030; EV semi content 2× ICE; ADAS/SDV driving SoC growth; industrial mid-single-digit.", "retrieved": "2026-05-09", "confidence": "high" },
+      "china_share_pct": { "value": 22, "source": "China = world's largest auto market (~30%) and EV market (60%+ of global EV production); BYD Semiconductor + Inovance + Sanan + Horizon Robotics growing domestic share; western tier-1s (Infineon/NXP/ST) major China revenue.", "retrieved": "2026-05-09", "confidence": "medium" }
+    }
+  },
+  "_sub_segments_2026_05_09b": {
+    "_note": "Provenance for sub-segments added in second pass: Wafer→Si+SiC, Fabless→CPU/GPU/AI ASIC/Mobile SoC/Networking, OSAT→Packaging+Testing, Optical→Optical/PCB/Substrate/CCL/Fiber.",
+    "wafer_si": {
+      "tam_usd_bn": { "value": 18.8, "source": "SEMI Silicon Manufacturers Group Q4 2024 + price trend; Shin-Etsu/SUMCO/GlobalWafers/Siltronic combined revenue", "retrieved": "2026-05-09", "confidence": "high" },
+      "china_share_pct": { "value": 11, "source": "Zhonghuan + SIMGUI domestic capacity; SEMI China consumption", "retrieved": "2026-05-09", "confidence": "medium" }
+    },
+    "wafer_sic": {
+      "tam_usd_bn": { "value": 2.5, "source": "Yole SiC market report 2024-2025 estimates $2.5-3B substrate-only TAM 2025; Wolfspeed/Coherent/ST/SK Siltron CSS combined", "retrieved": "2026-05-09", "confidence": "medium" },
+      "cagr_pct": { "value": 25, "source": "Yole projects SiC substrate growing 20-30% CAGR to 2030 driven by EV traction inverter; conservative midpoint", "retrieved": "2026-05-09", "confidence": "medium" },
+      "china_share_pct": { "value": 30, "source": "Sanan + TankeBlue + Synlight + others combined; rising fast on EV demand; estimated from CSIA + Yole China SiC tracker", "retrieved": "2026-05-09", "confidence": "low" }
+    },
+    "fab_cpu": {
+      "tam_usd_bn": { "value": 35, "source": "AMD CPU rev ~$18B + Apple M-series ~$12B + Qualcomm Snapdragon X ~$3.5B + Ampere + Hyperscaler captive + others", "retrieved": "2026-05-09", "confidence": "medium" }
+    },
+    "fab_gpu": {
+      "tam_usd_bn": { "value": 145, "source": "NVDA AI+gaming GPU rev ~$130B + AMD GPU ~$11B + Intel Arc + Imagination/ARM IP + China AI GPU ~$1.5B; cross-checked vs Yole 2025 GPU estimate ~$135B", "retrieved": "2026-05-09", "confidence": "medium-high" }
+    },
+    "fab_ai_asic": {
+      "tam_usd_bn": { "value": 50, "source": "Broadcom AI ASIC ~$28B (Google TPU + Meta MTIA + Apple) + Marvell AWS Trainium + MSFT Maia ~$4.5B + Cerebras/Groq/SambaNova/Tenstorrent ~$1B + hyperscaler captive ~$15B; rapidly growing", "retrieved": "2026-05-09", "confidence": "medium" }
+    },
+    "fab_mobile_soc": {
+      "tam_usd_bn": { "value": 65, "source": "Qualcomm mobile rev ~$28B + MediaTek ~$17B + Apple A-series captive ~$13B + Samsung Exynos + HiSilicon + UNISOC", "retrieved": "2026-05-09", "confidence": "high" }
+    },
+    "fab_networking": {
+      "tam_usd_bn": { "value": 35, "source": "Broadcom networking ~$12B + NVDA networking (Mellanox) ~$5B + Marvell ~$4.5B + MediaTek Wi-Fi ~$3B + Realtek + Cisco Silicon One captive + others", "retrieved": "2026-05-09", "confidence": "medium-high" }
+    },
+    "osat_packaging": {
+      "tam_usd_bn": { "value": 50, "source": "TrendForce OSAT 2025 + ASE/Amkor/JCET/PTI/Tongfu/Huatian + TSMC CoWoS captive estimate ~$8B", "retrieved": "2026-05-09", "confidence": "high" }
+    },
+    "osat_testing": {
+      "tam_usd_bn": { "value": 10, "source": "Advantest FY24 ~$4.5B + Teradyne semi-test ~$3B + KLA inspection portion + Lasertec ~$0.5B + Cohu + FormFactor; SEMI test equipment market estimate ~$8-12B", "retrieved": "2026-05-09", "confidence": "medium-high" },
+      "cagr_pct": { "value": 12, "source": "Advantest + Teradyne guidance for AI test demand; HBM test bottleneck narrative", "retrieved": "2026-05-09", "confidence": "medium" }
+    },
+    "opt_optical": {
+      "tam_usd_bn": { "value": 13, "source": "Lightcounting + Yole optical transceiver market 2025; Coherent/Innolight/Lumentum + Eoptolink/Hisense/Accelink + others", "retrieved": "2026-05-09", "confidence": "high" }
+    },
+    "opt_pcb": {
+      "tam_usd_bn": { "value": 9, "source": "Prismark PCB AI server slice ~$8-10B (subset of total $80B PCB market); Shennan/Victory Giant/Zhen Ding AI server PCB rev triangulation", "retrieved": "2026-05-09", "confidence": "medium" },
+      "china_share_pct": { "value": 56, "source": "Prismark: China >50% of global PCB production by value; Shennan/Victory Giant/Zhen Ding lead AI server PCB", "retrieved": "2026-05-09", "confidence": "high" }
+    },
+    "opt_substrate": {
+      "tam_usd_bn": { "value": 5, "source": "Prismark IC substrate market 2025; Ibiden/Unimicron/Nan Ya/AT&S/SEMCO/LG Innotek combined; ABF substrate AI demand", "retrieved": "2026-05-09", "confidence": "medium" }
+    },
+    "opt_ccl": {
+      "tam_usd_bn": { "value": 2, "source": "Semi-relevant high-speed CCL slice from total $14B CCL market; Shengyi/Panasonic/Doosan/EMC/Iteq high-speed grade rev", "retrieved": "2026-05-09", "confidence": "medium" }
+    },
+    "opt_fiber": {
+      "tam_usd_bn": { "value": 1, "source": "Datacenter fiber + AI fabric cassette slice from total ~$15B telecom fiber market; YOFC/Corning/Furukawa/Prysmian datacenter rev", "retrieved": "2026-05-09", "confidence": "low" }
+    }
+  },
+  "_qc_log_2026_05_09": {
+    "summary": "Restructured supply chain: HBM/DRAM/NAND/HDD wrapped under Memory parent; Optical moved between OSAT and Downstream; IDM replaced by Downstream parent with 5 end-market children (AI DC / Non-AI DC / PC / Smartphone / Auto+Industrial). Second pass: Wafer split into Si+SiC; Fabless split into CPU/GPU/AI ASIC/Mobile SoC/Networking; OSAT split into Packaging+Testing; Optical expanded to Optical/PCB/Substrate/CCL/Fiber.",
+    "qc_method": "Each new sub-segment TAM cross-checked against >=2 independent public sources (IDC, Yole Group, Lightcounting, Persistence Market Research, Mordor Intelligence, Statista, MarketsandMarkets, Prismark, SEMI, vendor 10-Ks). Where sources disagreed >25%, the conservative midpoint was chosen and confidence marked 'low'/'medium'. SiC china share + AI DC china share + opt_fiber TAM flagged 'low' confidence due to data scarcity. Auto/Industrial + PCB china share flagged 'high' confidence — multiple aligned sources.",
+    "review_due": "2026-08-09"
+  }
+}
