@@ -394,90 +394,111 @@
 //  DATA
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 const SEGMENTS = [
+  // ── EDA & IP — design inputs, parent with 2 children ───────────
   {
-    id: 'eda',
-    name: 'EDA Tools',
-    shortName: 'EDA',
+    id: 'eda_ip',
+    name: 'EDA & IP',
+    shortName: 'EDA & IP',
     icon: '🛠',
     color: '#6366f1',
     position: 1,
-    tam_usd_bn: 15.7,
-    cagr_pct: 8.5,
-    tam_china_usd_bn: 1.9,
+    isParent: true,
+    tam_usd_bn: 25.0,
+    cagr_pct: 8.3,
+    tam_china_usd_bn: 2.9,
     china_share_pct: 12,
-    ai_lift: { cagr_uplift_pp: 2.5, ai_tam_usd_bn: 3.5, ai_pct_of_total: 22 },
-    asp_note: '$1M–$5M/yr per enterprise EDA suite license',
-    volume_note: '~500 major design centers globally',
-    description: 'Software tools used by chip designers for RTL, simulation, synthesis, place-and-route, and verification.',
-    players: [
-      { name: 'Synopsys', hq: '🇺🇸 USA', revenue_usd_bn: 5.84, market_share_pct: 32, role: 'Full EDA suite, IP library, security tools, AI-assisted PnR', china_exposure: 'high', ticker: 'SNPS' },
-      { name: 'Cadence Design', hq: '🇺🇸 USA', revenue_usd_bn: 4.09, market_share_pct: 28, role: 'Virtuoso analog, Innovus digital, Palladium emulation', china_exposure: 'high', ticker: 'CDNS' },
-      { name: 'Siemens EDA (Mentor)', hq: '🇩🇪 Germany', revenue_usd_bn: 2.61, market_share_pct: 18, role: 'PCB, IC packaging, Calibre DRC/LVS signoff', china_exposure: 'medium', ticker: 'SIEGY' },
-      { name: 'Ansys', hq: '🇺🇸 USA', revenue_usd_bn: 1.16, market_share_pct: 8, role: 'Structural & thermal simulation, power integrity', china_exposure: 'medium', ticker: 'ANSS' },
-      { name: 'Empyrean (华大九天)', hq: '🇨🇳 China', revenue_usd_bn: 0.32, market_share_pct: 2, role: 'Domestic EDA for mature nodes; backed by national funds', china_exposure: 'low', ticker: 'SZ301261' },
-      { name: 'Others', hq: '—', revenue_usd_bn: 1.45, market_share_pct: 10, role: 'Niche tools: formal verification, DSPF extraction, etc.', china_exposure: 'low', ticker: '' },
+    ai_lift: { cagr_uplift_pp: 2.3, ai_tam_usd_bn: 5.5, ai_pct_of_total: 22 },
+    asp_note: 'EDA: $1M–$5M/yr per enterprise suite | IP: $0.5M–$10M license + $0.01–$0.10 royalty/chip',
+    volume_note: '~500 major design centers globally; ~15B ARM-core chips shipped/yr',
+    description: 'Design inputs — EDA software and licensed IP cores: the tools and pre-verified building blocks every chip design starts from. Two sub-segments.',
+    players: [],
+    children: [
+      {
+        id: 'eda',
+        name: 'EDA Tools',
+        shortName: 'EDA',
+        icon: '🛠',
+        color: '#6366f1',
+        position: 1,
+        tam_usd_bn: 15.7,
+        cagr_pct: 8.5,
+        tam_china_usd_bn: 1.9,
+        china_share_pct: 12,
+        ai_lift: { cagr_uplift_pp: 2.5, ai_tam_usd_bn: 3.5, ai_pct_of_total: 22 },
+        asp_note: '$1M–$5M/yr per enterprise EDA suite license',
+        volume_note: '~500 major design centers globally',
+        description: 'Software tools used by chip designers for RTL, simulation, synthesis, place-and-route, and verification.',
+        players: [
+          { name: 'Synopsys', hq: '🇺🇸 USA', revenue_usd_bn: 5.84, market_share_pct: 32, role: 'Full EDA suite, IP library, security tools, AI-assisted PnR', china_exposure: 'high', ticker: 'SNPS' },
+          { name: 'Cadence Design', hq: '🇺🇸 USA', revenue_usd_bn: 4.09, market_share_pct: 28, role: 'Virtuoso analog, Innovus digital, Palladium emulation', china_exposure: 'high', ticker: 'CDNS' },
+          { name: 'Siemens EDA (Mentor)', hq: '🇩🇪 Germany', revenue_usd_bn: 2.61, market_share_pct: 18, role: 'PCB, IC packaging, Calibre DRC/LVS signoff', china_exposure: 'medium', ticker: 'SIEGY' },
+          { name: 'Ansys', hq: '🇺🇸 USA', revenue_usd_bn: 1.16, market_share_pct: 8, role: 'Structural & thermal simulation, power integrity', china_exposure: 'medium', ticker: 'ANSS' },
+          { name: 'Empyrean (华大九天)', hq: '🇨🇳 China', revenue_usd_bn: 0.32, market_share_pct: 2, role: 'Domestic EDA for mature nodes; backed by national funds', china_exposure: 'low', ticker: 'SZ301261' },
+          { name: 'Others', hq: '—', revenue_usd_bn: 1.45, market_share_pct: 10, role: 'Niche tools: formal verification, DSPF extraction, etc.', china_exposure: 'low', ticker: '' },
+        ],
+        roadmap: [
+          { year: 2018, milestone: '7nm process nodes fully supported in major EDA suites' },
+          { year: 2020, milestone: 'Cloud-native EDA pilots on AWS/GCP — elastic compute for simulation' },
+          { year: 2022, milestone: 'AI-assisted place-and-route (Synopsys DSO.ai, Cadence Cerebrus) go mainstream' },
+          { year: 2024, milestone: '3D-IC multi-die co-simulation; EDA tools extended for chiplet design' },
+          { year: 2026, milestone: 'LLM-assisted RTL generation; generative AI for schematic entry (preview)' },
+          { year: 2028, milestone: 'Autonomous silicon design loop — AI closes the loop from spec to GDS' },
+        ],
+        china: {
+          summary: 'China EDA market ~12% of global ($1.8B). Heavily dependent on Synopsys and Cadence for advanced nodes. US export controls since 2022 restrict access to EDA tools for sub-7nm processes in China.',
+          initiatives: [
+            'Empyrean Software (华大九天) — largest domestic EDA vendor; covers analog, PDK, IC layout for mature nodes',
+            'National IC Design Center (ICCAD) funding ~¥10B+ for domestic EDA ecosystem development',
+            'Huawei\'s internal EDA tools rumored for self-use at advanced nodes',
+            'Restrictions: BIS rules block US EDA vendors from supplying certain advanced-node tools to Chinese fabs/IDMs',
+          ],
+          risk_level: 'high',
+        },
+      },
+      {
+        id: 'ip',
+        name: 'IP Cores',
+        shortName: 'IP',
+        icon: '🧩',
+        color: '#8b5cf6',
+        position: 2,
+        tam_usd_bn: 9.3,
+        cagr_pct: 8.0,
+        tam_china_usd_bn: 1.0,
+        china_share_pct: 11,
+        ai_lift: { cagr_uplift_pp: 2.0, ai_tam_usd_bn: 2.0, ai_pct_of_total: 22 },
+        asp_note: '$0.5M–$10M up-front license + $0.01–$0.10 royalty/chip',
+        volume_note: '~15 billion chips shipped annually using ARM cores',
+        description: 'Pre-designed, pre-verified silicon logic blocks (CPU cores, interfaces, memory controllers) licensed to chip designers.',
+        players: [
+          { name: 'ARM Holdings', hq: '🇬🇧 UK', revenue_usd_bn: 3.83, market_share_pct: 45, role: 'CPU/GPU IP for mobile, server, IoT, automotive (Cortex, Neoverse)', china_exposure: 'medium', ticker: 'ARM' },
+          { name: 'Synopsys IP', hq: '🇺🇸 USA', revenue_usd_bn: 1.70, market_share_pct: 20, role: 'Interface IP (PCIe, USB, DDR), embedded memories, security IP', china_exposure: 'high', ticker: 'SNPS' },
+          { name: 'Cadence IP', hq: '🇺🇸 USA', revenue_usd_bn: 1.02, market_share_pct: 12, role: 'PHY IP, verification IP, NoC interconnect IP', china_exposure: 'high', ticker: 'CDNS' },
+          { name: 'CEVA', hq: '🇺🇸 USA', revenue_usd_bn: 0.43, market_share_pct: 5, role: 'DSP IP, Bluetooth/WiFi IP, AI inference engines', china_exposure: 'medium', ticker: 'CEVA' },
+          { name: 'Imagination Technologies', hq: '🇬🇧 UK', revenue_usd_bn: 0.34, market_share_pct: 4, role: 'PowerVR GPU IP for mobile and embedded; Apple former licensee', china_exposure: 'medium', ticker: 'Private' },
+          { name: 'SiFive / RISC-V Others', hq: '🇺🇸 USA', revenue_usd_bn: 0.59, market_share_pct: 7, role: 'Open-ISA RISC-V cores gaining ground in China and IoT', china_exposure: 'low', ticker: 'Private' },
+          { name: 'Others', hq: '—', revenue_usd_bn: 0.59, market_share_pct: 7, role: 'Niche IP: display, image sensor, crypto accelerators', china_exposure: 'low', ticker: '' },
+        ],
+        roadmap: [
+          { year: 2020, milestone: 'ARMv8.x ubiquitous — Neoverse N1 targets cloud servers; Apple M1 launches' },
+          { year: 2022, milestone: 'ARMv9 introduced with Realm security extensions; RISC-V momentum builds in China' },
+          { year: 2023, milestone: 'ARM IPO on NASDAQ; China ARM JV governance dispute resolved' },
+          { year: 2025, milestone: 'Compute Subsystems (CSS): pre-integrated IP bundles accelerate SoC design starts' },
+          { year: 2027, milestone: 'AI inference IP blocks become standard in every SoC — integrated NPU IP dominant' },
+          { year: 2029, milestone: 'RISC-V ecosystem matures with certified safety-ready cores for automotive' },
+        ],
+        china: {
+          summary: 'RISC-V is the strategic alternative to ARM for China. Alibaba T-Head (玄铁), SiFive China partnerships, and government mandates are accelerating RISC-V adoption to reduce dependency on UK/US-controlled IP.',
+          initiatives: [
+            'Alibaba T-Head (平头哥) XuanTie RISC-V cores — open-sourced, widely deployed in IoT and automotive',
+            'China RISC-V Alliance — industry body promoting domestic RISC-V ecosystem standardization',
+            'ARM China JV (安谋科技) operates independently; ARM retains brand but faces governance friction',
+            'Government procurement guidelines increasingly mandate RISC-V or domestic CPU IP in state systems',
+          ],
+          risk_level: 'medium',
+        },
+      },
     ],
-    roadmap: [
-      { year: 2018, milestone: '7nm process nodes fully supported in major EDA suites' },
-      { year: 2020, milestone: 'Cloud-native EDA pilots on AWS/GCP — elastic compute for simulation' },
-      { year: 2022, milestone: 'AI-assisted place-and-route (Synopsys DSO.ai, Cadence Cerebrus) go mainstream' },
-      { year: 2024, milestone: '3D-IC multi-die co-simulation; EDA tools extended for chiplet design' },
-      { year: 2026, milestone: 'LLM-assisted RTL generation; generative AI for schematic entry (preview)' },
-      { year: 2028, milestone: 'Autonomous silicon design loop — AI closes the loop from spec to GDS' },
-    ],
-    china: {
-      summary: 'China EDA market ~12% of global ($1.8B). Heavily dependent on Synopsys and Cadence for advanced nodes. US export controls since 2022 restrict access to EDA tools for sub-7nm processes in China.',
-      initiatives: [
-        'Empyrean Software (华大九天) — largest domestic EDA vendor; covers analog, PDK, IC layout for mature nodes',
-        'National IC Design Center (ICCAD) funding ~¥10B+ for domestic EDA ecosystem development',
-        'Huawei\'s internal EDA tools rumored for self-use at advanced nodes',
-        'Restrictions: BIS rules block US EDA vendors from supplying certain advanced-node tools to Chinese fabs/IDMs',
-      ],
-      risk_level: 'high',
-    },
-  },
-  {
-    id: 'ip',
-    name: 'IP Cores',
-    shortName: 'IP',
-    icon: '🧩',
-    color: '#8b5cf6',
-    position: 2,
-    tam_usd_bn: 9.3,
-    cagr_pct: 8.0,
-    tam_china_usd_bn: 1.0,
-    china_share_pct: 11,
-    ai_lift: { cagr_uplift_pp: 2.0, ai_tam_usd_bn: 2.0, ai_pct_of_total: 22 },
-    asp_note: '$0.5M–$10M up-front license + $0.01–$0.10 royalty/chip',
-    volume_note: '~15 billion chips shipped annually using ARM cores',
-    description: 'Pre-designed, pre-verified silicon logic blocks (CPU cores, interfaces, memory controllers) licensed to chip designers.',
-    players: [
-      { name: 'ARM Holdings', hq: '🇬🇧 UK', revenue_usd_bn: 3.83, market_share_pct: 45, role: 'CPU/GPU IP for mobile, server, IoT, automotive (Cortex, Neoverse)', china_exposure: 'medium', ticker: 'ARM' },
-      { name: 'Synopsys IP', hq: '🇺🇸 USA', revenue_usd_bn: 1.70, market_share_pct: 20, role: 'Interface IP (PCIe, USB, DDR), embedded memories, security IP', china_exposure: 'high', ticker: 'SNPS' },
-      { name: 'Cadence IP', hq: '🇺🇸 USA', revenue_usd_bn: 1.02, market_share_pct: 12, role: 'PHY IP, verification IP, NoC interconnect IP', china_exposure: 'high', ticker: 'CDNS' },
-      { name: 'CEVA', hq: '🇺🇸 USA', revenue_usd_bn: 0.43, market_share_pct: 5, role: 'DSP IP, Bluetooth/WiFi IP, AI inference engines', china_exposure: 'medium', ticker: 'CEVA' },
-      { name: 'Imagination Technologies', hq: '🇬🇧 UK', revenue_usd_bn: 0.34, market_share_pct: 4, role: 'PowerVR GPU IP for mobile and embedded; Apple former licensee', china_exposure: 'medium', ticker: 'Private' },
-      { name: 'SiFive / RISC-V Others', hq: '🇺🇸 USA', revenue_usd_bn: 0.59, market_share_pct: 7, role: 'Open-ISA RISC-V cores gaining ground in China and IoT', china_exposure: 'low', ticker: 'Private' },
-      { name: 'Others', hq: '—', revenue_usd_bn: 0.59, market_share_pct: 7, role: 'Niche IP: display, image sensor, crypto accelerators', china_exposure: 'low', ticker: '' },
-    ],
-    roadmap: [
-      { year: 2020, milestone: 'ARMv8.x ubiquitous — Neoverse N1 targets cloud servers; Apple M1 launches' },
-      { year: 2022, milestone: 'ARMv9 introduced with Realm security extensions; RISC-V momentum builds in China' },
-      { year: 2023, milestone: 'ARM IPO on NASDAQ; China ARM JV governance dispute resolved' },
-      { year: 2025, milestone: 'Compute Subsystems (CSS): pre-integrated IP bundles accelerate SoC design starts' },
-      { year: 2027, milestone: 'AI inference IP blocks become standard in every SoC — integrated NPU IP dominant' },
-      { year: 2029, milestone: 'RISC-V ecosystem matures with certified safety-ready cores for automotive' },
-    ],
-    china: {
-      summary: 'RISC-V is the strategic alternative to ARM for China. Alibaba T-Head (玄铁), SiFive China partnerships, and government mandates are accelerating RISC-V adoption to reduce dependency on UK/US-controlled IP.',
-      initiatives: [
-        'Alibaba T-Head (平头哥) XuanTie RISC-V cores — open-sourced, widely deployed in IoT and automotive',
-        'China RISC-V Alliance — industry body promoting domestic RISC-V ecosystem standardization',
-        'ARM China JV (安谋科技) operates independently; ARM retains brand but faces governance friction',
-        'Government procurement guidelines increasingly mandate RISC-V or domestic CPU IP in state systems',
-      ],
-      risk_level: 'medium',
-    },
   },
   // ── Chip Design (Fabless) — parent with 5 children ────────────
   {
@@ -910,6 +931,58 @@ const SEGMENTS = [
       ],
       risk_level: 'high',
     },
+    // In-page sub-sections (front-end equipment only — back-end bonding/test equipment lives under the OSAT tab)
+    subSections: [
+      {
+        id: 'litho',
+        name: 'Lithography',
+        icon: '🔦',
+        tam_usd_bn: 28,
+        blurb: 'Pattern printing — the most concentrated equipment market on earth. ASML holds a 100% monopoly on EUV; High-NA EUV (0.55) tools ($380M each) now shipping for sub-2nm logic. Canon\'s nanoimprint (NIL) is the only wildcard alternative.',
+        players: [
+          { name: 'ASML', hq: '🇳🇱 Netherlands', revenue_usd_bn: 27.6, market_share_pct: 90, role: 'EUV monopoly (Low-NA + High-NA EXE:5200); ArF-i / KrF DUV; computational litho', china_exposure: 'high', ticker: 'ASML' },
+          { name: 'Nikon', hq: '🇯🇵 Japan', revenue_usd_bn: 1.8, market_share_pct: 6, role: 'ArF immersion scanners for memory/mature logic; lost leading-edge to ASML', china_exposure: 'high', ticker: '7731.T' },
+          { name: 'Canon', hq: '🇯🇵 Japan', revenue_usd_bn: 1.2, market_share_pct: 4, role: 'i-line/KrF steppers + nanoimprint litho (NIL) — potential EUV bypass for memory', china_exposure: 'high', ticker: '7751.T' },
+        ],
+      },
+      {
+        id: 'dep_etch',
+        name: 'Deposition · Etch · Clean',
+        icon: '🌫',
+        tam_usd_bn: 55,
+        blurb: 'The volume core of WFE. Gate-all-around transistors and 300+ layer 3D NAND multiply deposition/etch step counts. Cryogenic etch (Lam) and selective ALD are the current battlegrounds; wet clean (SCREEN, TEL) is critical for EUV defectivity.',
+        players: [
+          { name: 'Applied Materials', hq: '🇺🇸 USA', revenue_usd_bn: 21.9, market_share_pct: 34, role: 'Broadest portfolio: CVD/PVD/epi/implant/CMP; Sculpta pattern-shaping reduces EUV double-pass', china_exposure: 'high', ticker: 'AMAT' },
+          { name: 'Lam Research', hq: '🇺🇸 USA', revenue_usd_bn: 16.4, market_share_pct: 26, role: 'Etch leader; cryo etch for 400+ layer NAND; ALD/PECVD; backside power delivery flows', china_exposure: 'high', ticker: 'LRCX' },
+          { name: 'Tokyo Electron', hq: '🇯🇵 Japan', revenue_usd_bn: 9.8, market_share_pct: 15, role: 'Coater/developer (track) near-monopoly for EUV; etch, CVD; bonding for 3D DRAM roadmap', china_exposure: 'high', ticker: '8035.T' },
+          { name: 'SCREEN Holdings', hq: '🇯🇵 Japan', revenue_usd_bn: 4.4, market_share_pct: 7, role: 'Wet clean #1 — critical for EUV defect control; single-wafer clean', china_exposure: 'medium', ticker: '7735.T' },
+          { name: 'NAURA / AMEC (China)', hq: '🇨🇳 China', revenue_usd_bn: 11.5, market_share_pct: 18, role: 'Domestic etch/CVD/furnace champions; NAURA now #6 WFE vendor globally by revenue; ≥28nm focus', china_exposure: 'low', ticker: '002371.SZ / 688012.SS' },
+        ],
+      },
+      {
+        id: 'process_control',
+        name: 'Process Control (Metrology & Inspection)',
+        icon: '🔬',
+        tam_usd_bn: 14,
+        blurb: 'Finding defects before they kill yield. KLA holds a structural monopoly in wafer/reticle inspection; Lasertec is the sole supplier of EUV actinic mask inspection. Advanced packaging inspection (Camtek, Onto) is the fastest-growing niche thanks to HBM/CoWoS.',
+        players: [
+          { name: 'KLA', hq: '🇺🇸 USA', revenue_usd_bn: 10.9, market_share_pct: 56, role: 'Wafer inspection/metrology monopoly; reticle inspection; advanced packaging inspection push', china_exposure: 'high', ticker: 'KLAC' },
+          { name: 'Lasertec', hq: '🇯🇵 Japan', revenue_usd_bn: 1.5, market_share_pct: 8, role: 'Sole EUV actinic (ACTIS) mask inspection supplier — chokepoint for sub-3nm masks', china_exposure: 'medium', ticker: '6920.T' },
+          { name: 'Onto Innovation', hq: '🇺🇸 USA', revenue_usd_bn: 1.0, market_share_pct: 5, role: 'Macro inspection + litho metrology; Dragonfly for HBM/advanced packaging bump inspection', china_exposure: 'medium', ticker: 'ONTO' },
+          { name: 'Camtek', hq: '🇮🇱 Israel', revenue_usd_bn: 0.5, market_share_pct: 3, role: 'Advanced packaging / HBM inspection pure-play — CoWoS + HBM stack QC', china_exposure: 'medium', ticker: 'CAMT' },
+          { name: 'Nova', hq: '🇮🇱 Israel', revenue_usd_bn: 0.7, market_share_pct: 4, role: 'Optical CD + materials metrology for GAA nodes', china_exposure: 'medium', ticker: 'NVMI' },
+        ],
+      },
+      {
+        id: 'backend_xlink',
+        name: 'Back-end Equipment → see OSAT tab',
+        icon: '📦',
+        tam_usd_bn: 16,
+        crossLink: 'osat_packaging',
+        blurb: 'Die bonding, TCB/hybrid bonding (Besi, ASMPT, Hanmi) and test (Teradyne, Advantest, KLA) are covered under the OSAT tab — Packaging and Testing sub-segments — because they sit at the assembly/test stage of the flow, not wafer fab.',
+        players: [],
+      },
+    ],
   },
   {
     id: 'chemicals',
@@ -1198,6 +1271,125 @@ const SEGMENTS = [
       },
     ],
   },
+  // ── Analog & Power (parent — Analog ICs + Power semis incl. SiC/GaN) ──
+  {
+    id: 'analog_power',
+    name: 'Analog & Power',
+    shortName: 'Analog/Power',
+    icon: '⚡',
+    color: '#eab308',
+    position: 9.5,
+    isParent: true,
+    tam_usd_bn: 135,
+    cagr_pct: 7.5,
+    tam_china_usd_bn: 47,
+    china_share_pct: 35,
+    ai_lift: { cagr_uplift_pp: 3.0, ai_tam_usd_bn: 18, ai_pct_of_total: 13 },
+    asp_note: 'Analog IC: $0.10–$5 | Power discrete: $0.50–$20 | SiC module: $200–$800 | GPU VRM power stage: $2–$8',
+    volume_note: '>200B analog units/yr; AI server power (48V→800V HVDC) and EV traction inverters are the growth engines',
+    description: 'Supply-side analog & power device makers (mostly IDMs with internal fabs). Two sub-segments: Analog ICs (signal chain, RF, MCU-adjacent) and Power semiconductors (Si IGBT, SiC, GaN).',
+    players: [],
+    roadmap: [],
+    china: {
+      summary: 'China is the largest analog/power demand market (~35%) and is aggressively localizing: SG Micro, 3PEAK in analog; BYD Semi, StarPower, Hunan Sanan in SiC. Mature-node analog is the most exposed US segment to China substitution.',
+      initiatives: [
+        'SG Micro / 3PEAK — domestic analog catalog vendors gaining share in consumer/industrial',
+        'BYD Semiconductor + StarPower — vertically integrated IGBT/SiC for domestic EVs',
+        'Hunan Sanan 6-inch SiC line; SICC/TanKeBlue substrates feeding domestic device makers',
+        'China 2024–25 anti-dumping probe into US mature-node analog chips (TI/ADI exposure)',
+      ],
+      risk_level: 'high',
+    },
+    children: [
+      {
+        id: 'analog',
+        name: 'Analog ICs',
+        shortName: 'Analog',
+        icon: '🎚',
+        color: '#eab308',
+        tam_usd_bn: 85,
+        cagr_pct: 7,
+        tam_china_usd_bn: 30,
+        china_share_pct: 35,
+        ai_lift: { cagr_uplift_pp: 2.0, ai_tam_usd_bn: 8, ai_pct_of_total: 9 },
+        asp_note: '$0.10–$5 per IC; precision converters up to $50',
+        volume_note: '>150B units/yr across industrial, auto, comms, consumer',
+        description: 'Signal-chain (converters, amplifiers), power management ICs, interface and RF front-end. Long product cycles (10–30 yrs), high margins, fragmented catalog business. Industrial + auto = ~60% of demand.',
+        players: [
+          { name: 'Texas Instruments', hq: '🇺🇸 USA', revenue_usd_bn: 16.6, market_share_pct: 19, role: 'Broadest catalog (~80k SKUs); internal 300mm fabs (LFAB, SM1) = structural cost lead; industrial/auto ~70% of revenue', china_exposure: 'high', ticker: 'TXN' },
+          { name: 'Analog Devices', hq: '🇺🇸 USA', revenue_usd_bn: 10.4, market_share_pct: 12, role: 'High-performance signal chain (converters #1), Maxim power; industrial, auto (BMS, GMSL), comms infra', china_exposure: 'high', ticker: 'ADI' },
+          { name: 'STMicroelectronics', hq: '🇨🇭 Switzerland', revenue_usd_bn: 5.2, market_share_pct: 6, role: 'Analog + MCU + sensors; auto (with power/SiC arm counted separately)', china_exposure: 'high', ticker: 'STM' },
+          { name: 'Skyworks', hq: '🇺🇸 USA', revenue_usd_bn: 4.1, market_share_pct: 5, role: 'RF front-end modules — Apple ~65% of revenue; merging with Qorvo (announced 2025)', china_exposure: 'medium', ticker: 'SWKS' },
+          { name: 'Qorvo', hq: '🇺🇸 USA', revenue_usd_bn: 3.7, market_share_pct: 4, role: 'RF front-end (BAW filters), defense GaN; merging with Skyworks', china_exposure: 'medium', ticker: 'QRVO' },
+          { name: 'Microchip', hq: '🇺🇸 USA', revenue_usd_bn: 4.4, market_share_pct: 5, role: 'MCU + analog attach; industrial recovery play after 2024–25 inventory correction', china_exposure: 'medium', ticker: 'MCHP' },
+          { name: 'SG Micro / 3PEAK (China)', hq: '🇨🇳 China', revenue_usd_bn: 1.0, market_share_pct: 1, role: 'Domestic analog catalog challengers — consumer first, moving into industrial', china_exposure: 'low', ticker: 'SZ300661' },
+          { name: 'Others', hq: '—', revenue_usd_bn: 39.6, market_share_pct: 48, role: 'Renesas, NXP analog attach, Onsemi sensing, Richtek, novosense, etc.', china_exposure: 'medium', ticker: '' },
+        ],
+        roadmap: [
+          { year: 2022, milestone: 'TI LFAB (300mm, Lehi) online — 300mm analog cost lead widens' },
+          { year: 2024, milestone: 'Industrial/auto inventory correction bottoms; China "de-Americanization" of analog BOMs accelerates' },
+          { year: 2025, milestone: 'Skyworks–Qorvo merger announced (~$22B combined RF house); ADI guides record auto content' },
+          { year: 2026, milestone: 'AI server power-tree attach (hot-swap, eFuse, telemetry) becomes fastest-growing analog line' },
+          { year: 2028, milestone: '48V→800V HVDC data-center architectures mainstream — high-voltage signal chain content doubles per rack' },
+        ],
+        china: {
+          summary: 'Analog is the front line of China import substitution: MOFCOM anti-dumping probe (2025) into US mature-node analog targets TI/ADI; domestic vendors (SG Micro, 3PEAK, Novosense) gaining in consumer and creeping into industrial.',
+          initiatives: [
+            'MOFCOM anti-dumping investigation into US-origin mature-node analog ICs (opened 2025)',
+            'SG Micro — domestic PMIC/signal-chain leader, Huawei supply chain',
+            'Novosense / 3PEAK — isolation, interface, auto-qualified parts ramping',
+            'SMIC/Hua Hong mature-node capacity feeding domestic analog fabless',
+          ],
+          risk_level: 'high',
+        },
+      },
+      {
+        id: 'power',
+        name: 'Power Semis (Si/SiC/GaN)',
+        shortName: 'Power',
+        icon: '🔌',
+        color: '#f59e0b',
+        tam_usd_bn: 50,
+        cagr_pct: 8,
+        tam_china_usd_bn: 17,
+        china_share_pct: 34,
+        ai_lift: { cagr_uplift_pp: 4.0, ai_tam_usd_bn: 10, ai_pct_of_total: 20 },
+        asp_note: 'MOSFET: $0.5–$5 | IGBT module: $50–$300 | SiC traction module: $200–$800 | GaN power stage: $2–$10',
+        volume_note: 'EV traction + AI data-center power are the two demand engines; SiC device market ~$5B heading to $10B+ by 2030',
+        description: 'Power discretes and modules: silicon MOSFET/IGBT, silicon-carbide (SiC) for EV traction & DC fast charge, gallium-nitride (GaN) for fast charge & AI server 800V HVDC power. Device layer on top of the SiC Wafer sub-segment (see Wafers ▸ SiC Wafer).',
+        players: [
+          { name: 'Infineon', hq: '🇩🇪 Germany', revenue_usd_bn: 7.0, market_share_pct: 14, role: '#1 power overall (MOSFET+IGBT); CoolSiC ramp; NVIDIA 800V HVDC data-center power partner', china_exposure: 'high', ticker: 'IFX.DE' },
+          { name: 'onsemi', hq: '🇺🇸 USA', revenue_usd_bn: 6.2, market_share_pct: 12, role: 'EliteSiC (Tesla, VW); image sensing; vertically integrated SiC from boule to module', china_exposure: 'high', ticker: 'ON' },
+          { name: 'STMicro (Power/SiC)', hq: '🇨🇭 Switzerland', revenue_usd_bn: 4.5, market_share_pct: 9, role: 'SiC pioneer (first Tesla Model 3 inverter); Catania SiC campus with internal substrates', china_exposure: 'high', ticker: 'STM' },
+          { name: 'Mitsubishi Electric', hq: '🇯🇵 Japan', revenue_usd_bn: 2.6, market_share_pct: 5, role: 'IGBT/SiC modules for rail, industrial, EV; new Kumamoto SiC fab', china_exposure: 'medium', ticker: '6503.T' },
+          { name: 'Fuji Electric', hq: '🇯🇵 Japan', revenue_usd_bn: 2.1, market_share_pct: 4, role: 'IGBT modules for industrial drives and EV; RC-IGBT for hybrids', china_exposure: 'medium', ticker: '6504.T' },
+          { name: 'Rohm', hq: '🇯🇵 Japan', revenue_usd_bn: 1.6, market_share_pct: 3, role: 'SiC devices + internal substrates; trench SiC MOSFET; supplies Toyota/Denso ecosystem', china_exposure: 'medium', ticker: '6963.T' },
+          { name: 'Monolithic Power', hq: '🇺🇸 USA', revenue_usd_bn: 2.6, market_share_pct: 5, role: 'Power management modules for NVIDIA GPU VRMs — purest AI power play; fabless model', china_exposure: 'high', ticker: 'MPWR' },
+          { name: 'Wolfspeed', hq: '🇺🇸 USA', revenue_usd_bn: 0.8, market_share_pct: 2, role: 'SiC pure-play (devices + 200mm substrates); emerged from Ch.11 restructuring 2025 — watch item', china_exposure: 'low', ticker: 'WOLF' },
+          { name: 'Navitas', hq: '🇺🇸 USA', revenue_usd_bn: 0.1, market_share_pct: 0, role: 'GaN/SiC fabless; named NVIDIA 800V HVDC partner (2025) — high-beta AI power story', china_exposure: 'medium', ticker: 'NVTS' },
+          { name: 'Others (incl. China)', hq: '—', revenue_usd_bn: 22.5, market_share_pct: 45, role: 'Toshiba, Nexperia, Vishay + China: BYD Semi, StarPower, Silan — domestic IGBT/SiC ramping fast', china_exposure: 'medium', ticker: '' },
+        ],
+        roadmap: [
+          { year: 2018, milestone: 'Tesla Model 3 ships first mass-market SiC traction inverter (ST devices)' },
+          { year: 2023, milestone: 'SiC capacity land-grab: ST Catania, Infineon Kulim, onsemi Bucheon; 200mm SiC transition begins' },
+          { year: 2025, milestone: 'NVIDIA 800V HVDC data-center power architecture announced — Infineon, Navitas, MPS named partners; Wolfspeed Ch.11 restructuring', },
+          { year: 2026, milestone: '200mm SiC wafers mainstream; GaN enters AI server power shelves at scale' },
+          { year: 2028, milestone: '800V HVDC racks deployed at hyperscale; SiC device market ~2× vs 2024 despite EV slowdown' },
+          { year: 2030, milestone: 'Vertical GaN / SiC super-junction devices; power delivery integrated into GPU package substrate' },
+        ],
+        china: {
+          summary: 'China EV boom created the world\'s largest power-semi demand pool and a fast-scaling domestic supply base (BYD Semi, StarPower, Silan, CR Micro). SiC substrate cost curve is being reset by Chinese suppliers (TanKeBlue, SICC).',
+          initiatives: [
+            'BYD Semiconductor — in-house IGBT/SiC for BYD EVs; external sales growing',
+            'StarPower — IGBT module #2 domestically; wind/solar + EV',
+            'TanKeBlue / SICC — SiC substrates at ~50% of US price, forcing global price reset',
+            'Nexperia China dispute (2025) — Dutch/China control fight disrupted auto discrete supply, accelerating dual-sourcing',
+          ],
+          risk_level: 'medium',
+        },
+      },
+    ],
+  },
   {
     id: 'osat',
     name: 'OSAT (Packaging + Testing)',
@@ -1324,13 +1516,13 @@ const SEGMENTS = [
     color: '#0d9488',
     position: 11,
     isParent: true,
-    tam_usd_bn: 30,
-    cagr_pct: 18,
-    tam_china_usd_bn: 12,
+    tam_usd_bn: 43,
+    cagr_pct: 15,
+    tam_china_usd_bn: 17,
     china_share_pct: 40,
     ai_lift: { cagr_uplift_pp: 12, ai_tam_usd_bn: 18, ai_pct_of_total: 60 },
     asp_note: 'See sub-segments — optical modules, PCB, IC substrate, CCL, fiber/cable each have distinct ASP structure.',
-    volume_note: 'Optical transceiver $13B + PCB $9B + Substrate $5B + CCL $2B + Fiber $1B (semi-relevant slice)',
+    volume_note: 'Optical $13B + PCB $9B + Substrate $5B + CCL $2B + Fiber $1B + ABF $1.2B + MLCC $12B (semi-relevant slices)',
     description: 'Physical layer that connects all the silicon together: optical transceivers (GPU↔GPU), PCBs (motherboards/AI accelerator boards), IC substrates (under every chip), copper-clad laminate (CCL — the raw PCB material), and fiber/cable. Pick a sub-segment for player breakdown.',
     players: [],
     roadmap: [],
@@ -1555,6 +1747,80 @@ const SEGMENTS = [
           risk_level: 'low',
         },
       },
+      {
+        id: 'opt_abf',
+        parentId: 'optical',
+        name: 'ABF Film',
+        shortName: 'ABF',
+        icon: '🎞',
+        color: '#14b8a6',
+        tam_usd_bn: 1.2,
+        cagr_pct: 15,
+        tam_china_usd_bn: 0.1,
+        china_share_pct: 8,
+        ai_lift: { cagr_uplift_pp: 10, ai_tam_usd_bn: 0.6, ai_pct_of_total: 50 },
+        asp_note: 'ABF film: sold by area; cost per large AI substrate $20–$60 of film — tiny cost, absolute bottleneck',
+        volume_note: 'Every FC-BGA substrate (see Substrate sub-segment) uses ABF as the build-up dielectric; large AI packages use 3–5× the film area of a PC CPU',
+        description: 'Ajinomoto Build-up Film — the insulating dielectric film laminated between copper layers of every FC-BGA IC substrate. A near-monopoly of Ajinomoto (yes, the MSG food company). Feeds directly into the Substrate sub-segment; AI package sizes (>100×100mm) are multiplying film consumption.',
+        players: [
+          { name: 'Ajinomoto (Fine-Techno)', hq: '🇯🇵 Japan', revenue_usd_bn: 0.55, market_share_pct: 95, role: 'De-facto monopoly on build-up film for FC-BGA; electronics materials is Ajinomoto\'s highest-margin business; capacity doubling by 2027 for AI', china_exposure: 'medium', ticker: '2802.T' },
+          { name: 'Sekisui Chemical', hq: '🇯🇵 Japan', revenue_usd_bn: 0.03, market_share_pct: 3, role: 'Challenger build-up films; qualified at select substrate makers as second source', china_exposure: 'low', ticker: '4204.T' },
+          { name: 'Others (Taiyo, domestic China trials)', hq: '—', revenue_usd_bn: 0.02, market_share_pct: 2, role: 'Solder-resist adjacents and Chinese film trials — none qualified for leading-edge AI substrates yet', china_exposure: 'low', ticker: '' },
+        ],
+        roadmap: [
+          { year: 2021, milestone: 'ABF shortage bottlenecks entire server CPU supply — industry wake-up call' },
+          { year: 2024, milestone: 'AI accelerator substrates (>100mm) drive film area per package to new records' },
+          { year: 2026, milestone: 'Ajinomoto capacity expansion online; next-gen low-Dk/low-Df film for 224G SerDes' },
+          { year: 2028, milestone: 'Glass-core substrates (Intel, Samsung) begin displacing some organic ABF layers — watch item' },
+        ],
+        china: {
+          summary: 'China has effectively zero share of build-up film — one of the hardest single-source Japanese chokepoints in the entire supply chain. Domestic trials exist but nothing qualified at advanced substrate makers.',
+          initiatives: [
+            'Domestic film R&D programs at CAS institutes + material startups — early stage',
+            'Chinese substrate makers (Shennan) still import 100% of ABF from Ajinomoto',
+          ],
+          risk_level: 'low',
+        },
+      },
+      {
+        id: 'opt_mlcc',
+        parentId: 'optical',
+        name: 'MLCC (Passives)',
+        shortName: 'MLCC',
+        icon: '🔋',
+        color: '#0891b2',
+        tam_usd_bn: 12,
+        cagr_pct: 9,
+        tam_china_usd_bn: 4.8,
+        china_share_pct: 40,
+        ai_lift: { cagr_uplift_pp: 5, ai_tam_usd_bn: 3, ai_pct_of_total: 25 },
+        asp_note: 'Commodity MLCC: $0.001–$0.01 | High-cap / high-temp auto grade: $0.05–$0.50 | AI server uses ~10× the MLCC count of a smartphone',
+        volume_note: '~5 trillion units/yr globally; one GB200 NVL72 rack ≈ 500k+ MLCCs; EV ≈ 10,000 vs 3,000 in ICE car',
+        description: 'Multilayer ceramic capacitors — the most numerous component on every board. AI servers (GPU power delivery) and EVs are mix-shifting demand toward high-capacitance, high-reliability parts where Japan/Korea lead.',
+        players: [
+          { name: 'Murata', hq: '🇯🇵 Japan', revenue_usd_bn: 4.6, market_share_pct: 38, role: '#1 MLCC globally; leads high-end miniaturized high-cap parts; AI server + auto mix shift', china_exposure: 'high', ticker: '6981.T' },
+          { name: 'Samsung Electro-Mechanics', hq: '🇰🇷 Korea', revenue_usd_bn: 2.4, market_share_pct: 20, role: '#2; high-cap MLCC for AI servers (NVIDIA qualified) + FC-BGA substrates arm', china_exposure: 'high', ticker: '009150.KS' },
+          { name: 'Taiyo Yuden', hq: '🇯🇵 Japan', revenue_usd_bn: 1.6, market_share_pct: 13, role: 'High-cap MLCC specialist; auto + industrial focus', china_exposure: 'high', ticker: '6976.T' },
+          { name: 'Yageo (incl. KEMET)', hq: '🇹🇼 Taiwan', revenue_usd_bn: 1.4, market_share_pct: 12, role: 'Commodity MLCC + tantalum (KEMET); bidding for premium mix; pursued Shibaura/芝浦 deals', china_exposure: 'medium', ticker: '2327.TW' },
+          { name: 'TDK', hq: '🇯🇵 Japan', revenue_usd_bn: 0.8, market_share_pct: 7, role: 'Auto-grade MLCC + inductors; largest battery (ATL) and sensor portfolio alongside', china_exposure: 'high', ticker: '6762.T' },
+          { name: 'Others (Walsin, FH 风华高科)', hq: '—', revenue_usd_bn: 1.2, market_share_pct: 10, role: 'Walsin Taiwan; Fenghua Advanced (China) — commodity segment, government-backed capacity', china_exposure: 'low', ticker: '' },
+        ],
+        roadmap: [
+          { year: 2022, milestone: 'MLCC downcycle from consumer glut; auto/industrial grades stay tight' },
+          { year: 2024, milestone: 'AI server power-delivery demand inflects — high-cap 0402/0603 parts allocated' },
+          { year: 2026, milestone: 'Murata/SEMCO capacity adds for AI-grade high-cap MLCC; silicon capacitors emerge for 2.5D packages' },
+          { year: 2028, milestone: 'Embedded/land-side capacitors under GPU packages standard; silicon caps take premium niche' },
+        ],
+        china: {
+          summary: 'China (Fenghua, Chaozhou Three-Circle) supplies commodity MLCC but imports nearly all high-cap/auto-grade parts from Japan/Korea. Localization pressure rising via EV supply chains.',
+          initiatives: [
+            'Fenghua Advanced Technology (风华高科) — national champion, commodity → mid-range push',
+            'EV OEMs (BYD) qualifying domestic MLCC for non-safety-critical boards',
+            'High-cap (≥10µF, small case) remains Japan-dominated — key import dependency',
+          ],
+          risk_level: 'low',
+        },
+      },
     ],
   },
   // ── Downstream / End Markets (parent — replaces IDM) ─────────────
@@ -1588,88 +1854,83 @@ const SEGMENTS = [
     },
     children: [
       {
-        id: 'ds_ai_dc',
+        id: 'ds_csp',
         parentId: 'downstream',
-        name: 'AI Data Center',
-        shortName: 'AI DC',
-        icon: '🤖',
+        name: 'Hyperscale CSP',
+        shortName: 'CSP',
+        icon: '☁️',
         color: '#10b981',
-        tam_usd_bn: 230,
-        cagr_pct: 35,
-        tam_china_usd_bn: 18,
-        china_share_pct: 8,
-        ai_lift: { cagr_uplift_pp: 35, ai_tam_usd_bn: 220, ai_pct_of_total: 96 },
-        asp_note: 'NVDA B200 GPU: ~$30,000–$40,000 | AMD MI300X: ~$15,000 | TPU v5p (Google internal): n/a | HBM3E 144GB stack: ~$10,000+',
-        volume_note: 'Hyperscaler 2025 AI capex >$300B (MSFT/META/GOOG/AMZN); ~3M GPUs shipped 2025; CoWoS capacity is the binding constraint',
-        description: 'Semiconductor consumption inside accelerator clusters: GPUs, custom AI ASICs (TPU/Trainium/MTIA), HBM, NVLink/InfiniBand networking silicon, and high-speed optical interconnect. The single largest growth engine for the entire industry — Yole and IDC see data-center semis crossing $470B by 2026 with AI as the driver.',
+        tam_usd_bn: 270,
+        cagr_pct: 28,
+        tam_china_usd_bn: 30,
+        china_share_pct: 11,
+        ai_lift: { cagr_uplift_pp: 24, ai_tam_usd_bn: 200, ai_pct_of_total: 74 },
+        asp_note: 'GB200 NVL72 rack: ~$3M | NVDA B200: $30–40K | Custom ASIC (TPU/Trainium/Maia/MTIA): $5–15K | Server DDR5 RDIMM 128GB: $500–700',
+        volume_note: 'Big-4 CSP capex ~$380B (2026e) — the single largest semiconductor demand pool; AI accelerators + HBM + networking + general-purpose servers',
+        description: 'The established hyperscalers — AWS, Microsoft Azure, Google Cloud, Meta (plus Alibaba/Tencent/ByteDance in China). They consume AI accelerators (merchant NVDA/AMD + own custom ASICs), HBM, networking silicon, and the traditional server fleet (Xeon/EPYC CPUs, DDR5, eSSD). Their dual strategy — buy NVIDIA at scale while building in-house silicon — defines demand for the whole supply chain.',
         players: [
-          { name: 'NVIDIA', hq: '🇺🇸 USA', revenue_usd_bn: 130.0, market_share_pct: 57, role: 'H100/H200 (Hopper): TSMC 4N + CoWoS-S, 2022/2024. B100/B200/GB200 (Blackwell): TSMC 4NP + CoWoS-L (local Si bridge), Q4-2024 ramp. Rubin R100: TSMC N3P + CoWoS-L + HBM4, expected H2-2026. ~93% AI accelerator share', china_exposure: 'medium', ticker: 'NVDA' },
-          { name: 'AMD', hq: '🇺🇸 USA', revenue_usd_bn: 9.0, market_share_pct: 4, role: 'MI300X/MI325X (CDNA 3): TSMC N5+N6 chiplets + CoWoS-S, 2023/2024. MI350 (CDNA 4): TSMC N3P + CoWoS-S + HBM3E, 2025. MI400: TSMC N2 + CoWoS-L, target 2026. ROCm software', china_exposure: 'medium', ticker: 'AMD' },
-          { name: 'Broadcom', hq: '🇺🇸 USA', revenue_usd_bn: 28.0, market_share_pct: 12, role: 'Google TPU v5p/v6 (Trillium): TSMC N5/N3 + CoWoS-S, 2023-2025. Meta MTIA v2: TSMC N5 + CoWoS, 2024. Tomahawk 5 (51.2T switch): TSMC N5; Humming 6 (102.4T) with CPO: TSMC N3, 2026', china_exposure: 'medium', ticker: 'AVGO' },
-          { name: 'Marvell', hq: '🇺🇸 USA', revenue_usd_bn: 4.5, market_share_pct: 2, role: 'Amazon Trainium2: TSMC N5 + CoWoS, 2024. Trainium3: TSMC N3 + CoWoS-L, 2026. Microsoft Maia 200: TSMC N3, 2025. 1.6T DSP / PAM4 SerDes', china_exposure: 'low', ticker: 'MRVL' },
-          { name: 'TSMC (allocated AI revenue)', hq: '🇹🇼 Taiwan', revenue_usd_bn: 35.0, market_share_pct: 15, role: 'Wafer fab (4N, N3, N3P, N3E, N2 ramp 2025) + CoWoS capacity (S/R/L variants). CoWoS capacity: ~70k wpm Q4-2025, tripling 2024→2026. Dominant AI foundry; ~25% of TSMC FY25 revenue', china_exposure: 'low', ticker: 'TSM' },
-          { name: 'SK Hynix + Samsung + Micron (HBM)', hq: '🇰🇷🇺🇸', revenue_usd_bn: 22.0, market_share_pct: 10, role: 'HBM3E (12-hi, 1.2 TB/s): SK Hynix dominant, Micron 2nd, Samsung qualifying. HBM4 (hybrid bonding, 1.8+ TB/s): SK Hynix sampling 2025, Micron 2026, Samsung 2026. Bonded via TCB (HBM3E) → CU-CU hybrid bonding (HBM4)', china_exposure: 'low', ticker: '000660.KS / 005930.KS / MU' },
-          { name: 'OSAT (TSMC captive + ASE/Amkor advanced packaging)', hq: '🇹🇼🇺🇸', revenue_usd_bn: 12.0, market_share_pct: 5, role: 'CoWoS-S/R/L (TSMC captive — primary AI 2.5D packaging). SoIC-X (TSMC 3D F2F bonding for AMD MI / Apple). ASE FOCoS-Bridge (alternative 2.5D). Amkor S-SWIFT (advanced fan-out). HBM bonding: TC-NCF (TCB) → CU-CU hybrid bonding from HBM4', china_exposure: 'low', ticker: 'TSM / 3711.TW / AMKR' },
+          { name: 'Amazon / AWS', hq: '🇺🇸 USA', revenue_usd_bn: 78.0, market_share_pct: 29, role: 'Capex ~$125B (2026e). Custom: Trainium2 (TSMC N5+CoWoS, via Marvell/Alchip), Trainium3 (N3, 2026), Graviton4 CPU, Nitro DPU. Project Rainier 500k-chip Trainium cluster for Anthropic', china_exposure: 'low', ticker: 'AMZN' },
+          { name: 'Microsoft Azure', hq: '🇺🇸 USA', revenue_usd_bn: 70.0, market_share_pct: 26, role: 'Capex ~$120B (2026e). OpenAI host + Copilot fleet; GB200/GB300 NVL72 early deployer. Custom: Maia 200 (TSMC N3), Cobalt 100 ARM CPU. Also leases from Nebius/CoreWeave (see New Cloud)', china_exposure: 'low', ticker: 'MSFT' },
+          { name: 'Google Cloud / Alphabet', hq: '🇺🇸 USA', revenue_usd_bn: 55.0, market_share_pct: 20, role: 'Capex ~$90B (2026e). Largest custom-ASIC fleet: TPU v6 Trillium / v7 Ironwood (Broadcom co-design, TSMC N3 + CoWoS); Axion ARM CPU; also sells TPU capacity externally (Anthropic ~1M TPU deal)', china_exposure: 'low', ticker: 'GOOGL' },
+          { name: 'Meta', hq: '🇺🇸 USA', revenue_usd_bn: 45.0, market_share_pct: 17, role: 'Capex ~$70B (2026e). Llama training clusters (H100→GB200); custom MTIA v2 inference ASIC (Broadcom, TSMC N5); Prometheus/Hyperion gigawatt DC campuses', china_exposure: 'low', ticker: 'META' },
+          { name: 'Alibaba / Tencent / ByteDance', hq: '🇨🇳 China', revenue_usd_bn: 30.0, market_share_pct: 11, role: 'China CSP capex cycle re-accelerating; H20 ban (Apr 2025) shifted ~50% of AI orders to Huawei Ascend 910C + Cambricon; T-Head Yitian 710 ARM CPU; PPIO/inference clouds', china_exposure: 'low', ticker: 'BABA / 0700.HK' },
+          { name: 'Merchant suppliers into CSPs', hq: '—', revenue_usd_bn: 0, market_share_pct: 0, role: 'NVDA (~57% of AI accel $), AMD MI350/400, Broadcom (TPU/MTIA + Tomahawk), Marvell (Trainium/Maia), HBM trio (SK Hynix/Micron/Samsung), Intel/AMD server CPUs — see supply-side tabs for detail', china_exposure: 'medium', ticker: 'NVDA / AVGO / MRVL' },
         ],
         roadmap: [
-          { year: 2022, milestone: 'NVDA H100 (Hopper) launches; ChatGPT debut triggers hyperscaler AI capex super-cycle' },
-          { year: 2024, milestone: 'NVDA B200/GB200 (Blackwell) and AMD MI300X ramp; HBM3E + CoWoS-L become AI bottleneck' },
-          { year: 2025, milestone: 'GB200 NVL72 racks at hyperscale; AMD MI350 (CDNA 4); Trainium2 + TPU v6e in volume; 1.6T optical mainstream' },
-          { year: 2026, milestone: 'NVDA Rubin (R100) on N3P + HBM4; AMD MI400; custom ASIC share reaches ~25% of training compute' },
-          { year: 2027, milestone: 'Co-packaged optics in switches; HBM4E in NVDA Rubin Ultra; Broadcom Humming 102.4T switches' },
-          { year: 2029, milestone: 'On-chip photonics in accelerators; rack-scale optical fabrics; HBM5; data-center semis ~$840B' },
+          { year: 2022, milestone: 'ChatGPT debut triggers hyperscaler AI capex super-cycle; H100 allocation wars begin' },
+          { year: 2024, milestone: 'Big-4 capex crosses $200B; GB200 NVL72 racks ship; custom ASIC (TPU v6, Trainium2, MTIA) volume ramps' },
+          { year: 2025, milestone: 'Capex guides ~$380B for 2026; OpenAI–AWS $38B, Anthropic–Google ~1M TPUs; custom ASIC ~25% of training compute' },
+          { year: 2026, milestone: 'NVDA Rubin + HBM4 deployments; Trainium3 / TPU v7 / Maia 200 at scale; CXL 3.0 memory pooling mainstream' },
+          { year: 2028, milestone: 'Gigawatt campuses (Hyperion, Stargate-class) online; co-packaged optics standard in CSP fabrics' },
         ],
         china: {
-          summary: 'China AI accelerator market is gated by US export controls. NVDA H20 export ban (Apr 2025) blocks new licenses; Huawei Ascend 910C is the leading domestic alternative on SMIC N+2, with Cambricon and Biren as second-tier. China hyperscalers (ByteDance, Alibaba) shifted ~50% of 2025 AI orders to domestic Ascend/Cambricon parts.',
+          summary: 'China CSPs are structurally decoupling: H20 export ban (Apr 2025) blocked NVDA China supply; Alibaba/ByteDance shifted AI orders to Huawei Ascend 910C (SMIC N+2) and Cambricon. Domestic server CPU (Kunpeng, Yitian) share rising in state-linked cloud procurement.',
           initiatives: [
-            'Huawei Ascend 910C — H100-class FP16 throughput; SMIC N+2 manufactured; throughput-per-watt gap closing',
-            'Cambricon (寒武纪) — MLU370/MLU590 inference accelerators; ByteDance/Tencent inference workloads',
-            'Biren (壁仞) — BR100/BR104 training GPUs; entity-listed; production yield challenges on SMIC',
-            'NVDA H20 ban (Apr 2025) — blocked new licenses for downgraded H100 variant; major revenue headwind for NVDA China',
-            'Alibaba T-Head Hanguang 800; Baidu Kunlun K200 — first-party hyperscaler AI silicon',
+            'Huawei Ascend 910C — leading domestic accelerator; CloudMatrix 384 rack competes with NVL72 on aggregate throughput',
+            'Cambricon MLU590 — ByteDance/Tencent inference workloads; revenue inflected 2025',
+            'Alibaba T-Head Yitian 710 (ARM N2) + Hanguang inference ASIC',
+            'Xinchuang (信创) procurement mandates domestic CPU/DRAM in government cloud',
           ],
           risk_level: 'high',
         },
       },
       {
-        id: 'ds_non_ai_dc',
+        id: 'ds_neocloud',
         parentId: 'downstream',
-        name: 'Non-AI Data Center',
-        shortName: 'Non-AI DC',
-        icon: '🖥️',
-        color: '#3b82f6',
-        tam_usd_bn: 90,
-        cagr_pct: 4,
-        tam_china_usd_bn: 16,
-        china_share_pct: 18,
-        ai_lift: { cagr_uplift_pp: 1, ai_tam_usd_bn: 5, ai_pct_of_total: 6 },
-        asp_note: 'Intel Xeon 6 / AMD EPYC Turin: $1,500–$15,000 | Server DDR5 RDIMM 128GB: $500–$700 | Enterprise NVMe 7.68TB: $1,000–$1,400',
-        volume_note: '~14M general-purpose servers shipped/yr; CXL fabric, DPUs, and DDR5 are the upgrade levers',
-        description: 'Traditional cloud and enterprise data center silicon excluding AI accelerators. Server CPUs (Xeon/EPYC), high-capacity DDR5 DRAM, enterprise NAND SSDs, NICs/DPUs, switching ASICs, and BMC/security chips. Growth slowing as hyperscalers shift capex to AI, but installed base modernization keeps mid-single-digit CAGR.',
+        name: 'New Cloud (NeoCloud)',
+        shortName: 'New Cloud',
+        icon: '🚀',
+        color: '#8b5cf6',
+        tam_usd_bn: 50,
+        cagr_pct: 60,
+        tam_china_usd_bn: 2,
+        china_share_pct: 4,
+        ai_lift: { cagr_uplift_pp: 55, ai_tam_usd_bn: 48, ai_pct_of_total: 96 },
+        asp_note: 'GPU rental: $2–$6/H100-hr spot → $1.5–$3 long-term contract | GB200 NVL72 rack: ~$3M capex financed against multi-year offtake contracts',
+        volume_note: 'NeoCloud GPU fleets >1M accelerators combined (2026e); CoreWeave alone >250k GPUs; nearly 100% NVIDIA — the purest NVDA demand channel',
+        description: 'GPU-native AI clouds that rent accelerator capacity: CoreWeave, Nebius, Oracle OCI (AI infra arm), xAI, Lambda, Crusoe, Together AI. They buy NVIDIA at list price, finance against offtake contracts (OpenAI, Microsoft, Meta), and build faster than hyperscalers. The marginal buyer that sets GPU market pricing — and the most leveraged players if AI demand disappoints.',
         players: [
-          { name: 'Intel (server CPU)', hq: '🇺🇸 USA', revenue_usd_bn: 17.0, market_share_pct: 19, role: 'Xeon 6 (Granite Rapids/Sierra Forest); ~63% server CPU share but ceded ground to AMD', china_exposure: 'medium', ticker: 'INTC' },
-          { name: 'AMD (server CPU)', hq: '🇺🇸 USA', revenue_usd_bn: 14.0, market_share_pct: 16, role: 'EPYC Turin (Zen 5); >36% revenue share in server CPU; chiplet architecture lead', china_exposure: 'medium', ticker: 'AMD' },
-          { name: 'Samsung + SK Hynix (server DRAM)', hq: '🇰🇷 Korea', revenue_usd_bn: 16.0, market_share_pct: 18, role: 'DDR5 RDIMM/MRDIMM for servers; CXL 2.0 memory expansion', china_exposure: 'high', ticker: '005930.KS / 000660.KS' },
-          { name: 'Solidigm + Samsung + Micron (eSSD)', hq: '🇰🇷🇺🇸', revenue_usd_bn: 12.0, market_share_pct: 13, role: 'Enterprise NVMe SSDs (PCIe Gen5); QLC for read-heavy hyperscale', china_exposure: 'medium', ticker: '000660.KS / 005930.KS / MU' },
-          { name: 'Broadcom (networking)', hq: '🇺🇸 USA', revenue_usd_bn: 9.0, market_share_pct: 10, role: 'Tomahawk 4/5 switch ASICs; Trident; Jericho; merchant silicon for white-box switches', china_exposure: 'medium', ticker: 'AVGO' },
-          { name: 'NVIDIA Networking (Mellanox)', hq: '🇺🇸 USA', revenue_usd_bn: 5.0, market_share_pct: 6, role: 'ConnectX, BlueField DPU; Spectrum Ethernet; even non-AI clusters use Mellanox NICs', china_exposure: 'low', ticker: 'NVDA' },
-          { name: 'Others (Intel Tofino, Cisco Silicon One…)', hq: '—', revenue_usd_bn: 17.0, market_share_pct: 18, role: 'Switch silicon long tail; Marvell DPUs; ARM-based Ampere CPUs; BMC/security chips', china_exposure: 'medium', ticker: '' },
+          { name: 'CoreWeave', hq: '🇺🇸 USA', revenue_usd_bn: 5.3, market_share_pct: 11, role: 'Largest neocloud; IPO Mar-2025; >250k GPUs; OpenAI contracts ~$22B; first GB300 NVL72 deployments; acquiring Core Scientific for power/DC capacity', china_exposure: 'low', ticker: 'CRWV' },
+          { name: 'Oracle OCI', hq: '🇺🇸 USA', revenue_usd_bn: 12.0, market_share_pct: 24, role: 'Stargate partner with OpenAI (~$300B multi-year compute deal); zettascale clusters (131k GB200); the bridge between legacy cloud and neocloud economics', china_exposure: 'low', ticker: 'ORCL' },
+          { name: 'Nebius', hq: '🇳🇱 Netherlands', revenue_usd_bn: 1.5, market_share_pct: 3, role: 'Ex-Yandex; Microsoft offtake $17.4–19.4B (2025), Meta ~$3B; NVDA equity investor; fastest-growing pure-play; NASDAQ-listed', china_exposure: 'low', ticker: 'NBIS' },
+          { name: 'xAI (Colossus)', hq: '🇺🇸 USA', revenue_usd_bn: 4.0, market_share_pct: 8, role: 'Self-consumption neocloud: Colossus Memphis >200k H100/H200 scaling to 1M; Grok training; vertically integrated power (gas turbines)', china_exposure: 'low', ticker: 'Private' },
+          { name: 'Lambda', hq: '🇺🇸 USA', revenue_usd_bn: 0.8, market_share_pct: 2, role: 'AI developer cloud; multi-B Microsoft GPU supply deal (2025); IPO candidate', china_exposure: 'low', ticker: 'Private' },
+          { name: 'Crusoe', hq: '🇺🇸 USA', revenue_usd_bn: 0.7, market_share_pct: 1, role: 'Energy-first builder — Stargate Abilene (1.2GW) site developer; stranded-gas powered DCs', china_exposure: 'low', ticker: 'Private' },
+          { name: 'Others (Together, Voltage Park, FluidStack…)', hq: '—', revenue_usd_bn: 25.7, market_share_pct: 51, role: 'Long tail of GPU clouds + sovereign AI clouds (G42, Humain); inference-focused platforms; consolidation expected', china_exposure: 'low', ticker: '' },
         ],
         roadmap: [
-          { year: 2022, milestone: 'AMD EPYC Genoa (Zen 4); Intel Sapphire Rapids — DDR5 + PCIe Gen5 enter mainstream' },
-          { year: 2024, milestone: 'EPYC Turin (Zen 5, 192c); Intel Granite Rapids; CXL 1.1 memory expansion modules in volume' },
-          { year: 2025, milestone: 'AMD EPYC Venice (Zen 6) sampling; Intel Clearwater Forest E-core server; CXL 2.0 pooling at hyperscale' },
-          { year: 2027, milestone: 'EPYC Verano; Intel Diamond Rapids; CXL 3.0 fabric — TB-scale shared memory pools across racks' },
-          { year: 2029, milestone: 'Disaggregated server architectures dominate; >50% of server DRAM behind CXL fabric; Optane revival in CXL form-factor' },
+          { year: 2023, milestone: 'CoreWeave pivots crypto→AI; GPU shortage makes rental a business; NVDA invests in neoclouds' },
+          { year: 2024, milestone: 'GPU rental market forms ($2–6/hr H100); xAI Colossus built in 122 days; debt-financed GPU purchases normalize' },
+          { year: 2025, milestone: 'CoreWeave IPO; Nebius–Microsoft $17.4B; OpenAI–Oracle Stargate $300B; GPU-backed securitization emerges' },
+          { year: 2026, milestone: 'GB300/Rubin fleets at neoclouds; hyperscalers become biggest neocloud tenants; capacity oversupply debate' },
+          { year: 2028, milestone: 'Sector consolidation — the AWS-of-AI emerges or gets absorbed; survivors own power + long-term contracts' },
         ],
         china: {
-          summary: 'China hyperscalers (Alibaba, Tencent, ByteDance) and government cloud (China Telecom, China Mobile cloud) are major buyers of mainstream server silicon. US Xeon/EPYC export still permitted for non-AI workloads, but scrutiny is increasing. Domestic alternatives — Huawei Kunpeng (ARM) and Loongson (LoongArch) — make inroads in government/telecom procurement.',
+          summary: 'US export controls make a China neocloud on NVIDIA silicon impossible at scale. Domestic equivalents rent Ascend/Cambricon capacity (state-backed intelligent computing centers, 智算中心), heavily subsidized but utilization is uneven.',
           initiatives: [
-            'Huawei Kunpeng 920 (ARMv8) — China Mobile / China Telecom server CPU; growing share in "Xinchuang" (信创) procurement',
-            'Loongson 3C5000/3C6000 (LoongArch) — fully indigenous ISA; performance still trails Xeon by 2–3 generations',
-            'Alibaba T-Head Yitian 710 — ARM Neoverse N2; powers Alibaba Cloud ECS; first-party server silicon',
-            'CXMT DDR5 — DUV-based; targeted at domestic server DRAM supply 2026+',
-            'Procurement guidance: state-owned cloud increasingly mandates domestic CPU + DRAM in new deployments',
+            '智算中心 (intelligent computing centers) — 100+ municipal AI DCs on Ascend/Cambricon/Biren hardware',
+            'Sovereign-style clouds: China Telecom/Mobile AI zones with domestic accelerators',
+            'Grey-market H100/H200 rental via offshore entities — enforcement tightening',
           ],
           risk_level: 'medium',
         },
@@ -1966,8 +2227,8 @@ function renderSegmentDetail() {
   const tamDisplay = CM ? seg.tam_china_usd_bn : seg.tam_usd_bn;
   const tamLabel = CM ? 'China TAM' : 'Global TAM';
 
-  // player cards
-  const playerCards = seg.players.map(p => {
+  // player cards (reused for sub-sections)
+  const playerCardHTML = p => {
     const highlight = CM && (p.china_exposure === 'low' || p.hq.includes('🇨🇳'));
     const dimStyle = CM && p.china_exposure === 'high' && !p.hq.includes('🇨🇳') ? 'opacity:0.5;' : '';
     return `<div class="player-card" style="${dimStyle}">
@@ -1991,7 +2252,30 @@ function renderSegmentDetail() {
         <span class="rev-val">${fmtB(p.revenue_usd_bn)}</span>
       </div>
     </div>`;
-  }).join('');
+  };
+  const playerCards = seg.players.map(playerCardHTML).join('');
+
+  // in-page sub-sections (e.g. Equipment: Litho / Dep-Etch / Process Control) with anchor links
+  const subSecNav = seg.subSections ? `
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin:12px 0;padding:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px">
+      <span style="font-size:11px;color:#64748b;font-weight:600;align-self:center;margin-right:4px">JUMP TO:</span>
+      ${seg.subSections.map(ss => ss.crossLink
+        ? `<button onclick="selectSegment('${ss.crossLink}')" style="padding:5px 12px;border-radius:14px;border:1px dashed #cbd5e1;background:#fff;color:#475569;font-size:12px;cursor:pointer">${ss.icon} ${ss.name}</button>`
+        : `<button onclick="document.getElementById('subsec-${ss.id}').scrollIntoView({behavior:'smooth'})" style="padding:5px 12px;border-radius:14px;border:1px solid ${seg.color};background:${seg.color}18;color:${seg.color};font-size:12px;font-weight:600;cursor:pointer">${ss.icon} ${ss.name} <span style="font-size:10px;color:#94a3b8;font-weight:500">${fmtB(ss.tam_usd_bn)}</span></button>`
+      ).join('')}
+    </div>` : '';
+  const subSecBlocks = seg.subSections ? seg.subSections.map(ss => ss.crossLink
+    ? `<div id="subsec-${ss.id}" style="margin-top:24px;padding:14px;border:1px dashed #cbd5e1;border-radius:12px;background:#f8fafc">
+        <div class="section-title" style="margin-bottom:6px">${ss.icon} ${ss.name}</div>
+        <div style="font-size:12.5px;color:#475569;line-height:1.55">${ss.blurb}</div>
+        <button onclick="selectSegment('${ss.crossLink}')" style="margin-top:10px;padding:6px 14px;background:${seg.color};color:#fff;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Open OSAT →</button>
+      </div>`
+    : `<div id="subsec-${ss.id}" style="margin-top:24px">
+        <div class="section-title">${ss.icon} ${ss.name} <span style="font-weight:500;color:#94a3b8;font-size:11px">· TAM ${fmtB(ss.tam_usd_bn)}</span></div>
+        <div style="font-size:12.5px;color:#475569;line-height:1.55;margin:6px 0 12px">${ss.blurb}</div>
+        <div class="player-grid">${ss.players.map(playerCardHTML).join('')}</div>
+      </div>`
+  ).join('') : '';
 
   // roadmap
   const now = 2025;
@@ -2088,10 +2372,12 @@ function renderSegmentDetail() {
       <div class="asp-box">
         <strong>ASP × Volume:</strong> ${seg.asp_note} &nbsp;·&nbsp; ${seg.volume_note}
       </div>
+      ${subSecNav}
       <div class="detail-grid">
         <div>
           <div class="section-title">Major Players ${CM ? '— China Focus Mode' : ''}</div>
           <div class="player-grid">${playerCards}</div>
+          ${subSecBlocks}
         </div>
         <div style="display:flex;flex-direction:column;gap:16px">
           <div class="chart-card" style="flex:0 0 auto">
@@ -2178,7 +2464,7 @@ function renderOverview() {
   const highRisk = SEGMENTS.filter(s => s.china.risk_level === 'high').length;
 
   // Data freshness banner
-  const INDUSTRY_DATA_DATE = '2026-05-09'; // last manual review date
+  const INDUSTRY_DATA_DATE = '2026-07-04'; // last manual review date
   const industryAge = Math.floor((Date.now() - new Date(INDUSTRY_DATA_DATE)) / 86400000);
   const stale = industryAge > 90;
   document.getElementById('dataFreshnessBanner').innerHTML = `
@@ -2492,6 +2778,8 @@ function renderOverview() {
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 let stockData = null;
 let expandedSpike = null;
+let liveQuotes = null;   // overlay from /api/quotes (real-time, Vercel serverless)
+let liveAsOf = null;
 
 async function loadStockData(forceRefresh = false) {
   const el = document.getElementById('stockLastUpdated');
@@ -2508,6 +2796,7 @@ async function loadStockData(forceRefresh = false) {
     const bannerStock = document.getElementById('freshnessBannerStock');
     if (bannerStock) bannerStock.textContent = `Stock data: ${dt.toLocaleDateString()} (${stockData.total_tickers} tickers)`;
     renderStockPanel();
+    if (forceRefresh) fetchLiveQuotes();  // async overlay — doesn't block render
   } catch(e) {
     el.textContent = `Failed to load (${e.message}) — run: python3 scripts/update_stocks.py`;
     document.getElementById('stockSpikeTable').innerHTML =
@@ -2516,6 +2805,29 @@ async function loadStockData(forceRefresh = false) {
         <div>No data yet. Run the weekly script to populate:</div>
         <code style="background:#f1f5f9;padding:4px 10px;border-radius:4px;margin-top:8px;display:inline-block">cd /Users/tony/Rui02 && python3 scripts/update_stocks.py</code>
       </div>`;
+  }
+}
+
+async function fetchLiveQuotes() {
+  // Real-time overlay via /api/quotes (Vercel serverless proxy; primary provider
+  // pluggable via QUOTES_PROVIDER_URL, Yahoo fallback). Fails silently when the
+  // dashboard is served locally without the API (python http.server).
+  const el = document.getElementById('stockLastUpdated');
+  const tickers = Object.keys(stockData.all_prices || {});
+  if (!tickers.length) return;
+  try {
+    el.textContent += ' · ⚡ fetching live quotes…';
+    const r = await fetch(`api/quotes?symbols=${encodeURIComponent(tickers.join(','))}`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    liveQuotes = j.quotes || {};
+    liveAsOf = j.asof;
+    const dt = new Date(stockData.generated_at);
+    el.textContent = `Weekly data: ${dt.toLocaleDateString()} · ⚡ Live quotes: ${new Date(liveAsOf).toLocaleString()} (${j.count} tickers · ${j.provider})`;
+    renderStockPanel();
+  } catch(e) {
+    const dt = new Date(stockData.generated_at);
+    el.textContent = `Last updated: ${dt.toLocaleString()} · ${stockData.total_tickers} tickers · ${stockData.spike_count} spikes · (live quotes unavailable here — works on the Vercel deployment)`;
   }
 }
 
@@ -2704,14 +3016,19 @@ function renderPriceGrid(allPrices) {
 
   const cards = tickers.map(ticker => {
     const rows = allPrices[ticker];
-    const latest = rows[rows.length - 1];
+    const live = liveQuotes && liveQuotes[ticker];
+    const latestClose = live ? live.price : rows[rows.length - 1].close;
     const first = rows[0];
-    const totalChange = first ? ((latest.close - first.close) / first.close * 100).toFixed(1) : '—';
+    const totalChange = first ? ((latestClose - first.close) / first.close * 100).toFixed(1) : '—';
     const isUp = parseFloat(totalChange) >= 0;
     const prices = rows.map(r => r.close);
+    if (live) prices.push(live.price);
     const minP = Math.min(...prices);
     const maxP = Math.max(...prices);
     const range = maxP - minP || 1;
+    const liveBadge = live && live.changePct != null
+      ? `<div style="font-size:9px;font-weight:700;color:${live.changePct >= 0 ? '#16a34a' : '#dc2626'}">⚡ ${live.changePct >= 0 ? '+' : ''}${live.changePct}% today</div>`
+      : '';
 
     // Build SVG sparkline
     const svgW = 100, svgH = 30;
@@ -2726,7 +3043,8 @@ function renderPriceGrid(allPrices) {
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
         <div>
           <div style="font-weight:700;font-size:12px">${ticker}</div>
-          <div style="font-size:10px;color:#94a3b8">$${latest ? latest.close.toFixed(2) : '—'}</div>
+          <div style="font-size:10px;color:#94a3b8">$${latestClose.toFixed(2)}</div>
+          ${liveBadge}
         </div>
         <span style="font-size:11px;font-weight:700;color:${lineColor}">${isUp?'+':''}${totalChange}%</span>
       </div>
@@ -2736,8 +3054,9 @@ function renderPriceGrid(allPrices) {
     </div>`;
   }).join('');
 
+  const liveNote = liveQuotes ? ` · <span style="color:#3b82f6">⚡ live prices as of ${new Date(liveAsOf).toLocaleTimeString()}</span>` : '';
   document.getElementById('stockPriceGrid').innerHTML = `
-    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">7-Day Price Overview (all tracked tickers)</div>
+    <div style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;letter-spacing:0.4px;margin-bottom:10px">7-Day Price Overview (all tracked tickers)${liveNote}</div>
     <div style="display:flex;flex-wrap:wrap;gap:10px">${cards}</div>`;
 }
 
@@ -3177,8 +3496,119 @@ const TECH_DATA = {
       {src: 'data:image/svg+xml;base64,CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB3aWR0aD0iOTAwIiBoZWlnaHQ9IjMxMCIgdmlld0JveD0iMCAwIDkwMCAzMTAiPgogIDxyZWN0IHdpZHRoPSI5MDAiIGhlaWdodD0iMzEwIiBmaWxsPSIjMGYxNzJhIiByeD0iMTIiLz4KICA8dGV4dCB4PSI0NTAiIHk9IjI4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZjFmNWY5IiBmb250LXNpemU9IjE1IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5BZHZhbmNlZCBQYWNrYWdpbmcgRXZvbHV0aW9uPC90ZXh0PgogIDx0ZXh0IHg9IjQ1MCIgeT0iNDYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtZmFtaWx5PSJBcmlhbCI+QmFuZHdpZHRoIGFuZCBkZW5zaXR5IGRyaXZlIHRoZSBzaGlmdCBmcm9tIHdpcmUgYm9uZCB0byAzRCBoeWJyaWQgYm9uZGluZzwvdGV4dD4KCiAgPCEtLSBXaXJlIEJvbmQgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMjAsNjUpIj4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjExIiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5XaXJlIEJvbmQ8L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj4xOTcwcyDihpIgcHJlc2VudDwvdGV4dD4KICAgIDxyZWN0IHg9IjI1IiB5PSI4MCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzFlNDBhZiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSI5MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2JmZGJmZSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPlN1YnN0cmF0ZSAoUENCKTwvdGV4dD4KICAgIDxyZWN0IHg9IjQ1IiB5PSI1MCIgd2lkdGg9IjEwMCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzNiODJmNiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSI2OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkRpZTwvdGV4dD4KICAgIDxwYXRoIGQ9Ik01NSw1MCBRNDAsMzAgMzUsODAiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICAgIDxwYXRoIGQ9Ik03NSw1MCBRNzIsMjggNzAsODAiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICAgIDxwYXRoIGQ9Ik0xMTUsNTAgUTExOCwyOCAxMjAsODAiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICAgIDxwYXRoIGQ9Ik0xMzUsNTAgUTE1MCwzMCAxNTUsODAiIHN0cm9rZT0iI2Y1OWUwYiIgc3Ryb2tlLXdpZHRoPSIxLjUiIGZpbGw9Im5vbmUiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxMjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5JL08gcGl0Y2g6IH4xMDDCtW08L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Qlc6IH4xMCBHQi9zPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY0NzQ4YiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkNvc3Q6ICQgKGxvd2VzdCk8L3RleHQ+CiAgPC9nPgoKICA8dGV4dCB4PSIyMjUiIHk9IjE2NSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSIyMCIgZm9udC1mYW1pbHk9IkFyaWFsIj7ihpI8L3RleHQ+CgogIDwhLS0gRmxpcCBDaGlwIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDI0MCw2NSkiPgogICAgPHRleHQgeD0iOTUiIHk9IjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPkZsaXAgQ2hpcCBCR0E8L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj4xOTkwcyDihpIgbWFpbnN0cmVhbTwvdGV4dD4KICAgIDxyZWN0IHg9IjI1IiB5PSI4MCIgd2lkdGg9IjE0MCIgaGVpZ2h0PSIyMCIgZmlsbD0iIzFlNDBhZiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSI5MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2JmZGJmZSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPk9yZ2FuaWMgU3Vic3RyYXRlPC90ZXh0PgogICAgPHJlY3QgeD0iMzAiIHk9IjQ0IiB3aWR0aD0iMTMwIiBoZWlnaHQ9IjMyIiBmaWxsPSIjM2I4MmY2IiByeD0iMyIvPgogICAgPHRleHQgeD0iOTUiIHk9IjYzIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+RGllIChmbGlwcGVkKTwvdGV4dD4KICAgIDwhLS0gYnVtcHMgLS0+CiAgICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjgwIiByPSI0IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8Y2lyY2xlIGN4PSI2OCIgY3k9IjgwIiByPSI0IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8Y2lyY2xlIGN4PSI4NiIgY3k9IjgwIiByPSI0IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8Y2lyY2xlIGN4PSIxMDQiIGN5PSI4MCIgcj0iNCIgZmlsbD0iI2Y1OWUwYiIvPgogICAgPGNpcmNsZSBjeD0iMTIyIiBjeT0iODAiIHI9IjQiIGZpbGw9IiNmNTllMGIiLz4KICAgIDxjaXJjbGUgY3g9IjE0MCIgY3k9IjgwIiByPSI0IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTI1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+SS9PIHBpdGNoOiB+NDDigJMxMDDCtW08L3RleHQ+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTM4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Qlc6IH4xMDDigJM1MDAgR0IvczwvdGV4dD4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxNTEiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM2NDc0OGIiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5Db3N0OiAkJCAobW9kZXJhdGUpPC90ZXh0PgogIDwvZz4KCiAgPHRleHQgeD0iNDQ1IiB5PSIxNjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+4oaSPC90ZXh0PgoKICA8IS0tIENvV29TIDIuNUQgLS0+CiAgPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoNDYwLDY1KSI+CiAgICA8dGV4dCB4PSI5NSIgeT0iMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2YxZjVmOSIgZm9udC1zaXplPSIxMSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Q29Xb1MgMi41RDwvdGV4dD4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxNCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPjIwMTIg4oaSIEFJIGVyYSBkb21pbmFudDwvdGV4dD4KICAgIDxyZWN0IHg9IjUiIHk9Ijk1IiB3aWR0aD0iMTgwIiBoZWlnaHQ9IjIwIiBmaWxsPSIjMWU0MGFmIiByeD0iMyIvPgogICAgPHRleHQgeD0iOTUiIHk9IjEwOCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2JmZGJmZSIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPk9yZ2FuaWMgU3Vic3RyYXRlPC90ZXh0PgogICAgPCEtLSBzaWxpY29uIGludGVycG9zZXIgLS0+CiAgICA8cmVjdCB4PSIxNSIgeT0iNzAiIHdpZHRoPSIxNjAiIGhlaWdodD0iMjIiIGZpbGw9IiM0MzM4Y2EiIHJ4PSIyIi8+CiAgICA8dGV4dCB4PSI5NSIgeT0iODQiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNjN2QyZmUiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5TaWxpY29uIEludGVycG9zZXIgKFJETCk8L3RleHQ+CiAgICA8IS0tIEdQVSBkaWUgLS0+CiAgICA8cmVjdCB4PSIyMCIgeT0iMzYiIHdpZHRoPSI3NSIgaGVpZ2h0PSIzMCIgZmlsbD0iI2VmNDQ0NCIgcng9IjMiLz4KICAgIDx0ZXh0IHg9IjU3IiB5PSI1NCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkdQVS9BSTwvdGV4dD4KICAgIDwhLS0gSEJNIHN0YWNrcyAtLT4KICAgIDxyZWN0IHg9IjEwNSIgeT0iMjAiIHdpZHRoPSIzNSIgaGVpZ2h0PSI0OCIgZmlsbD0iIzEwYjk4MSIgcng9IjIiLz4KICAgIDxyZWN0IHg9IjEwNSIgeT0iMTYiIHdpZHRoPSIzNSIgaGVpZ2h0PSI4IiBmaWxsPSIjMDU5NjY5IiByeD0iMSIvPgogICAgPHJlY3QgeD0iMTA1IiB5PSI4IiB3aWR0aD0iMzUiIGhlaWdodD0iOCIgZmlsbD0iIzA1OTY2OSIgcng9IjEiLz4KICAgIDx0ZXh0IHg9IjEyMiIgeT0iNTUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmZmYiIGZvbnQtc2l6ZT0iOCIgZm9udC1mYW1pbHk9IkFyaWFsIj5IQk08L3RleHQ+CiAgICA8dGV4dCB4PSIxMjIiIHk9IjY1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNmVlN2I3IiBmb250LXNpemU9IjgiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U3RhY2s8L3RleHQ+CiAgICA8IS0tIG1pY3JvIGJ1bXBzIC0tPgogICAgPGNpcmNsZSBjeD0iMzUiIGN5PSI3MCIgcj0iMi41IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjcwIiByPSIyLjUiIGZpbGw9IiNmNTllMGIiLz4KICAgIDxjaXJjbGUgY3g9IjY1IiBjeT0iNzAiIHI9IjIuNSIgZmlsbD0iI2Y1OWUwYiIvPgogICAgPGNpcmNsZSBjeD0iODAiIGN5PSI3MCIgcj0iMi41IiBmaWxsPSIjZjU5ZTBiIi8+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTRhM2I4IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+TWljcm9idW1wIHBpdGNoOiA0MOKAkzU1wrVtPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjE0MyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzNiODJmNiIgZm9udC1zaXplPSI5IiBmb250LXdlaWdodD0iYm9sZCIgZm9udC1mYW1pbHk9IkFyaWFsIj5CVzogfjIgVEIvcyAoSEJNM2UpPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjE1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZiYmYyNCIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkNvc3Q6ICQkJCAoJDUwMOKAkyQySy9wa2cpPC90ZXh0PgogIDwvZz4KCiAgPHRleHQgeD0iNjY1IiB5PSIxNjUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iMjAiIGZvbnQtZmFtaWx5PSJBcmlhbCI+4oaSPC90ZXh0PgoKICA8IS0tIEh5YnJpZCBCb25kaW5nIC0tPgogIDxnIHRyYW5zZm9ybT0idHJhbnNsYXRlKDY4MCw2NSkiPgogICAgPHRleHQgeD0iOTUiIHk9IjAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmMWY1ZjkiIGZvbnQtc2l6ZT0iMTEiIGZvbnQtd2VpZ2h0PSJib2xkIiBmb250LWZhbWlseT0iQXJpYWwiPkh5YnJpZCBCb25kaW5nPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjE0IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOGI1Y2Y2IiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+MjAyMysgKEFwcGxlIE0zLCBBSSk8L3RleHQ+CiAgICA8cmVjdCB4PSIxNSIgeT0iOTUiIHdpZHRoPSIxNjAiIGhlaWdodD0iMjAiIGZpbGw9IiMxZTQwYWYiIHJ4PSIzIi8+CiAgICA8dGV4dCB4PSI5NSIgeT0iMTA4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjYmZkYmZlIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+U3Vic3RyYXRlPC90ZXh0PgogICAgPCEtLSBib3R0b20gZGllIC0tPgogICAgPHJlY3QgeD0iMjAiIHk9IjYwIiB3aWR0aD0iMTUwIiBoZWlnaHQ9IjMwIiBmaWxsPSIjM2I4MmY2IiByeD0iMyIvPgogICAgPHRleHQgeD0iOTUiIHk9Ijc4IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjZmZmIiBmb250LXNpemU9IjkiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Qm90dG9tIERpZTwvdGV4dD4KICAgIDwhLS0gQ3UtQ3UgYm9uZCBpbnRlcmZhY2UgLS0+CiAgICA8cmVjdCB4PSIyMCIgeT0iNTQiIHdpZHRoPSIxNTAiIGhlaWdodD0iNiIgZmlsbD0iI2Y1OWUwYiIvPgogICAgPHRleHQgeD0iMjAwIiB5PSI1OSIgZmlsbD0iI2ZiYmYyNCIgZm9udC1zaXplPSI4IiBmb250LWZhbWlseT0iQXJpYWwiPkN1LUN1IGJvbmQ8L3RleHQ+CiAgICA8bGluZSB4MT0iMTk4IiB5MT0iNTgiIHgyPSIxNzIiIHkyPSI1NyIgc3Ryb2tlPSIjZmJiZjI0IiBzdHJva2Utd2lkdGg9IjEiLz4KICAgIDwhLS0gdG9wIGRpZSAtLT4KICAgIDxyZWN0IHg9IjIwIiB5PSIyNCIgd2lkdGg9IjE1MCIgaGVpZ2h0PSIzMCIgZmlsbD0iIzhiNWNmNiIgcng9IjMiLz4KICAgIDx0ZXh0IHg9Ijk1IiB5PSI0MiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2ZmZiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPlRvcCBEaWUgKFNSQU0vbG9naWMpPC90ZXh0PgogICAgPHRleHQgeD0iOTUiIHk9IjEzMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk0YTNiOCIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPlBpdGNoOiAmbHQ7McK1bSAoYnVtcGxlc3MhKTwvdGV4dD4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxNDMiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM4YjVjZjYiIGZvbnQtc2l6ZT0iOSIgZm9udC13ZWlnaHQ9ImJvbGQiIGZvbnQtZmFtaWx5PSJBcmlhbCI+Qlc6IH4xMCBUQi9zIHBvdGVudGlhbDwvdGV4dD4KICAgIDx0ZXh0IHg9Ijk1IiB5PSIxNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiNmYmJmMjQiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5Db3N0OiAkJCQkICh5aWVsZCBjcml0aWNhbCk8L3RleHQ+CiAgPC9nPgoKICA8IS0tIEJvdHRvbSB0cmVuZCBsaW5lIC0tPgogIDxyZWN0IHg9IjYwIiB5PSIyMzgiIHdpZHRoPSI3ODAiIGhlaWdodD0iNCIgZmlsbD0iIzFlMjkzYiIgcng9IjIiLz4KICA8cmVjdCB4PSI2MCIgeT0iMjM4IiB3aWR0aD0iMTcwIiBoZWlnaHQ9IjQiIGZpbGw9IiM5NGEzYjgiIHJ4PSIyIi8+CiAgPHJlY3QgeD0iMjMwIiB5PSIyMzgiIHdpZHRoPSIyMjAiIGhlaWdodD0iNCIgZmlsbD0iIzNiODJmNiIgcng9IjIiLz4KICA8cmVjdCB4PSI0NTAiIHk9IjIzOCIgd2lkdGg9IjIwMCIgaGVpZ2h0PSI0IiBmaWxsPSIjZjk3MzE2IiByeD0iMiIvPgogIDxyZWN0IHg9IjY1MCIgeT0iMjM4IiB3aWR0aD0iMTkwIiBoZWlnaHQ9IjQiIGZpbGw9IiM4YjVjZjYiIHJ4PSIyIi8+CiAgPHRleHQgeD0iMTQ1IiB5PSIyNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5NGEzYjgiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5MZWdhY3kgKG1hdHVyZSk8L3RleHQ+CiAgPHRleHQgeD0iMzQwIiB5PSIyNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiMzYjgyZjYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5TdGFuZGFyZCBhZHZhbmNlZDwvdGV4dD4KICA8dGV4dCB4PSI1NTAiIHk9IjI1NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iI2Y5NzMxNiIgZm9udC1zaXplPSI5IiBmb250LWZhbWlseT0iQXJpYWwiPkFJL0hQQyBkb21pbmFudCBub3c8L3RleHQ+CiAgPHRleHQgeD0iNzQ1IiB5PSIyNTYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM4YjVjZjYiIGZvbnQtc2l6ZT0iOSIgZm9udC1mYW1pbHk9IkFyaWFsIj5OZXh0LWdlbiAyMDI1KzwvdGV4dD4KCiAgPCEtLSBiYW5kd2lkdGggY29tcGFyaXNvbiBiYXJzIC0tPgogIDx0ZXh0IHg9IjQ1MCIgeT0iMjc1IiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPkJhbmR3aWR0aDogMTAgR0IvcyDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgMTAgVEIvcyAoMTAwMHggaW1wcm92ZW1lbnQpPC90ZXh0PgogIDx0ZXh0IHg9IjQ1MCIgeT0iMjkyIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjNjQ3NDhiIiBmb250LXNpemU9IjEwIiBmb250LWZhbWlseT0iQXJpYWwiPkkvTyBEZW5zaXR5OiAxeCDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIDilIAgMTAsMDAweCBpbXByb3ZlbWVudDwvdGV4dD4KPC9zdmc+Cg==', caption: 'Advanced Packaging Evolution: Wire Bond → Flip Chip → CoWoS → Hybrid Bonding', source: 'Based on TSMC OIP Ecosystem Forum, ASE Group, IMEC public presentations'}
     ],
   },
-  ds_ai_dc: {
-    title: 'AI Data Center: GPU vs Custom ASIC vs Other Approaches',
+  analog: {
+    title: 'Analog: 300mm Internal Fab vs Foundry-Fabless vs China Substitution',
+    comparisons: [
+      {
+        name: '300mm internal fab IDM (TI model)',
+        pros: ['TI: ~40% cost advantage per chip on 300mm vs 200mm', 'Capacity control through cycles — no foundry allocation risk', 'CHIPS Act funded (TI $1.6B) — US onshore capacity'],
+        cons: ['Heavy capex through downturns pressures free cash flow', 'Utilization risk if demand disappoints', 'Catalog breadth needed to fill fabs'],
+        users: 'Texas Instruments (LFAB, SM1), ADI (hybrid — internal + TSMC), Infineon',
+        share2025: 55, share2030: 60, color: '#eab308', winner: true,
+      },
+      {
+        name: 'Fab-lite / foundry-partner analog',
+        pros: ['Asset-light margins in upturns', 'TSMC/UMC/Vanguard mature-node capacity abundant post-2024', 'Faster process porting for BCD/high-voltage'],
+        cons: ['Allocation risk in shortages (2021 scars)', 'Less process differentiation vs. IDM proprietary nodes'],
+        users: 'MPS (fabless), Skyworks/Qorvo (fab-lite RF), most China analog fabless on SMIC/Hua Hong',
+        share2025: 35, share2030: 30, color: '#3b82f6', winner: false,
+      },
+      {
+        name: 'China domestic analog (SG Micro, Novosense, 3PEAK)',
+        pros: ['Anti-dumping tariffs + procurement preference at home', 'Fast copy of standard catalog parts at 30–50% discount', 'Local support/logistics for domestic OEMs'],
+        cons: ['Precision/reliability gap in auto & industrial grades', 'Fragmented — hundreds of subscale vendors', 'Limited IP for high-voltage isolation and RF'],
+        users: 'Consumer OEMs fully switched; EV makers qualifying domestic parts board-by-board',
+        share2025: 10, share2030: 18, color: '#dc2626', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  power: {
+    title: 'Power Devices: Si IGBT vs SiC vs GaN',
+    leaders: 'SiC devices: STMicro > Infineon > onsemi > Rohm | GaN: Infineon > Navitas > Power Integrations | Si IGBT: Infineon > Fuji > Mitsubishi',
+    comparisons: [
+      {
+        name: 'Silicon IGBT / MOSFET (incumbent)',
+        pros: ['Cheapest $/amp — mature 300mm production', 'Bankable 20-year reliability record', 'Good enough below 650V and for industrial drives'],
+        cons: ['Switching losses cap efficiency at high voltage/frequency', 'Physical scaling exhausted — incremental gains only'],
+        users: 'Industrial drives, white goods, mainstream EV inverters (BYD), solar string inverters',
+        share2025: 78, share2030: 62, color: '#64748b', winner: true,
+      },
+      {
+        name: 'Silicon Carbide (SiC)',
+        pros: ['~5–10% EV range gain vs IGBT at 800V', '200mm wafer transition cutting device cost ~30%', 'China substrate price war halved input costs'],
+        cons: ['Still 2–3× Si cost per amp', 'EV demand air-pocket 2024–25 delayed capacity ramps (Wolfspeed Ch.11)', 'Yield/singulation harder than Si'],
+        users: 'Tesla, BYD (high-end), Hyundai E-GMP 800V, ST/Infineon/onsemi design wins; DC fast chargers',
+        share2025: 15, share2030: 26, color: '#f59e0b', winner: false,
+      },
+      {
+        name: 'Gallium Nitride (GaN)',
+        pros: ['MHz-class switching — smallest magnetics, highest density', 'NVIDIA 800V HVDC data-center architecture names GaN power stages', 'Grown on cheap Si substrates (GaN-on-Si)'],
+        cons: ['Voltage ceiling ~650–900V today (vertical GaN still R&D)', 'Reliability history shorter than SiC', 'Fragmented supplier base of small players'],
+        users: 'Fast chargers (Anker, Apple), AI server power shelves (Navitas/Infineon/TI), EV OBC entering',
+        share2025: 7, share2030: 12, color: '#10b981', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  opt_abf: {
+    title: 'Substrate Dielectric: ABF vs Glass Core vs Alternatives',
+    leaders: 'Build-up film: Ajinomoto (near-monopoly) > Sekisui | Glass core (emerging): Intel > Samsung (SEMCO) > Corning ecosystem',
+    comparisons: [
+      {
+        name: 'ABF organic build-up (incumbent)',
+        pros: ['Entire FC-BGA ecosystem tooled around it for 25 years', 'Ajinomoto capacity doubling by 2027 removes shortage risk', 'Proven laser-via processing at fine pitch'],
+        cons: ['Warpage limits package size (~120mm reticle-class AI packages struggle)', 'CTE mismatch with silicon worsens as packages grow', 'Single-supplier concentration'],
+        users: 'Every FC-BGA substrate: Ibiden, Shinko, Unimicron, AT&S, Shennan — 95%+ of AI packages',
+        share2025: 97, share2030: 85, color: '#14b8a6', winner: true,
+      },
+      {
+        name: 'Glass-core substrate',
+        pros: ['10× flatter — enables >120mm ultra-large AI packages', 'Better CTE match to silicon; finer TGV via pitch', 'Intel + Samsung + SKC (Absolics) all running pilot lines 2026–27'],
+        cons: ['Handling/singulation yield immature', 'New supply chain — panel glass, TGV drilling, metallization', 'Cost premium until volume'],
+        users: 'Intel 18A-era server packages (first), Samsung SEMCO pilots, Absolics (SKC) Georgia fab for AMD/NVDA eval',
+        share2025: 1, share2030: 12, color: '#8b5cf6', winner: false,
+      },
+      {
+        name: 'Co-packaged / embedded alternatives (RDL interposer, EMIB)',
+        pros: ['Skips large monolithic substrate problem via silicon bridges', 'TSMC CoWoS-L local interposer + InFO derivatives', 'Lower cost than full-size silicon interposer'],
+        cons: ['Still sits on an ABF substrate underneath', 'Design complexity; thermal density'],
+        users: 'NVDA Blackwell (CoWoS-L bridges), Intel EMIB/Foveros, AMD chiplet stacks',
+        share2025: 2, share2030: 3, color: '#f59e0b', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  opt_mlcc: {
+    title: 'Board Capacitance: MLCC vs Silicon Caps vs Polymer',
+    leaders: 'High-cap MLCC: Murata > Samsung Electro-Mechanics > Taiyo Yuden | Silicon caps: Murata (IPDiA) > TDK > Empower',
+    comparisons: [
+      {
+        name: 'MLCC (incumbent, ~5 trillion units/yr)',
+        pros: ['Cheapest capacitance per µF at scale', 'High-temp auto grades (150°C) proven', 'Miniaturization continues (008004 case size)'],
+        cons: ['Class-2 dielectrics lose capacitance under DC bias', 'Piezo noise ("singing capacitors")', 'AI GPU transient loads push count per board into thousands'],
+        users: 'Every electronic product; AI server boards ~10× smartphone count; EV ~10,000/car',
+        share2025: 90, share2030: 82, color: '#0891b2', winner: true,
+      },
+      {
+        name: 'Silicon capacitors (trench caps, land-side/embedded)',
+        pros: ['Mounted inside/under the package — nH-class loop inductance for GPU power integrity', 'Stable capacitance vs voltage/temp', 'The de-facto choice for HBM4-era power delivery'],
+        cons: ['10–50× cost per µF vs MLCC', 'Capacity limited — few qualified suppliers'],
+        users: 'NVDA/AMD accelerator packages (land-side caps), Apple SoCs, Murata IPDiA + TDK + Empower ramping',
+        share2025: 3, share2030: 10, color: '#8b5cf6', winner: false,
+      },
+      {
+        name: 'Polymer / tantalum bulk caps',
+        pros: ['High bulk capacitance for VRM input filtering', 'Better ESR behavior than aluminum electrolytic'],
+        cons: ['Tantalum supply chain (Congo sourcing) ESG risk', 'Larger footprint; derating rules'],
+        users: 'Server VRM bulk stages (KEMET/Yageo, Panasonic polymer), notebook power rails',
+        share2025: 7, share2030: 8, color: '#f59e0b', winner: false,
+      },
+    ],
+    screenshots: [],
+  },
+  ds_csp: {
+    title: 'CSP AI Compute: Merchant GPU vs Custom ASIC vs Other Approaches',
     comparisons: [
       {
         name: 'NVIDIA GPU (CUDA)',
@@ -3218,29 +3648,36 @@ const TECH_DATA = {
     ],
     screenshots: [],
   },
-  ds_non_ai_dc: {
-    title: 'Non-AI Data Center: x86 vs ARM vs RISC-V Server CPUs',
+  ds_neocloud: {
+    title: 'AI Compute Buildout Models: Hyperscaler vs NeoCloud vs Sovereign',
     comparisons: [
       {
-        name: 'x86 (Intel Xeon + AMD EPYC)',
-        pros: ['Decades of software/hypervisor compatibility', 'AMD Zen 5 chiplet architecture: 192 cores per socket', 'Intel Granite Rapids E-cores for cloud-native scale-out workloads'],
-        cons: ['Intel ceded ~36% server share to AMD over 5 years', 'Power-per-instruction trails ARM in scale-out workloads', 'Single-socket TDPs hitting 500W+ thermal walls'],
-        users: 'Hyperscalers (AWS, Azure, GCP), enterprise servers, on-prem virtualization — incumbent stack',
-        share2025: 87, share2030: 72, color: '#3b82f6', winner: true,
+        name: 'Hyperscaler self-build (AWS / Azure / GCP / Meta)',
+        pros: ['Cheapest capital (A-rated balance sheets)', 'Own custom silicon lowers TCO 30–50% on fixed workloads', 'Vertical integration: DC, power, network, models'],
+        cons: ['Slow land/power permitting vs. neocloud speed', 'Internal demand prioritized — external capacity constrained', 'Capex scrutiny from public investors each quarter'],
+        users: 'Big-4 capex ~$380B (2026e); majority of global AI compute',
+        share2025: 70, share2030: 62, color: '#3b82f6', winner: true,
       },
       {
-        name: 'ARM Neoverse (Graviton, Ampere, Cobalt, Axion)',
-        pros: ['~40% better perf-per-watt for cloud-native workloads', 'AWS Graviton4 ~50% of new EC2 CPU launches', 'Custom hyperscaler silicon (Microsoft Cobalt, Google Axion)'],
-        cons: ['ISV ecosystem still catching up for enterprise apps', 'Limited single-thread performance vs. high-frequency x86', 'Per-instance ARM workload migration cost'],
-        users: 'AWS Graviton, Microsoft Cobalt, Google Axion, Ampere Altra — cloud-native first',
-        share2025: 12, share2030: 25, color: '#10b981', winner: false,
+        name: 'NeoCloud GPU rental (CoreWeave, Nebius, Lambda, Crusoe)',
+        pros: ['Fastest time-to-GPU — builds in months not years', 'Contract-backed financing (offtake from OpenAI/MSFT/Meta)', 'Pure NVIDIA fleets — no software fragmentation'],
+        cons: ['High leverage; GPU-backed debt at 8–12% rates', 'Customer concentration (one contract = most of revenue)', 'Asset residual-value risk as GPU generations turn over faster'],
+        users: 'CoreWeave (OpenAI ~$22B), Nebius (MSFT $17.4B), Lambda, Crusoe (Stargate Abilene)',
+        share2025: 15, share2030: 20, color: '#8b5cf6', winner: false,
       },
       {
-        name: 'RISC-V Server (Tenstorrent, Ventana, SiFive)',
-        pros: ['Royalty-free ISA — strategic value for hyperscalers and China', 'Open ecosystem; rapid customization', 'Strong China alignment (Alibaba T-Head, XuanTie)'],
-        cons: ['Performance gap vs. ARM Neoverse N3 still ~2 generations', 'Software ecosystem nascent at server scale', 'No tier-1 hyperscaler in production deployment yet'],
-        users: 'Alibaba T-Head; Ventana Veyron; Tenstorrent Wormhole — early production',
-        share2025: 1, share2030: 3, color: '#8b5cf6', winner: false,
+        name: 'AI-lab self-consumption (xAI, OpenAI Stargate JV)',
+        pros: ['Full control of cluster topology for frontier training', 'xAI Colossus: 122-day buildout proved speed is possible', 'Compute becomes the moat — no margin paid to a cloud'],
+        cons: ['Enormous capital needs (Stargate ~$500B program)', 'Power procurement is the binding constraint', 'Single-purpose infrastructure — no revenue diversification'],
+        users: 'xAI Colossus (Memphis, 200k+ → 1M GPUs), OpenAI Stargate w/ Oracle + Crusoe + SoftBank',
+        share2025: 10, share2030: 12, color: '#10b981', winner: false,
+      },
+      {
+        name: 'Sovereign AI clouds (G42, Humain, EU/Japan programs)',
+        pros: ['State funding — not ROI-constrained', 'NVIDIA sovereign-AI sales channel with export-license blessing', 'Data-residency requirements guarantee local demand'],
+        cons: ['Talent and software ecosystem gaps vs. US clouds', 'Utilization risk — build first, find workloads later', 'Geopolitical license risk (UAE/Saudi chip caps)'],
+        users: 'G42 (UAE), Humain (Saudi), EU AI factories, Japan GENIAC — fast-growing NVDA channel',
+        share2025: 5, share2030: 6, color: '#f59e0b', winner: false,
       },
     ],
     screenshots: [],

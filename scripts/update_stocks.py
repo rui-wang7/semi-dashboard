@@ -13,6 +13,7 @@ Requirements:
 """
 
 import json
+import math
 import os
 import subprocess
 import sys
@@ -149,6 +150,37 @@ STOCKS = {
     "VRT":      {"name": "Vertiv",             "group": "Server & Cooling",    "threshold": 0.10, "region": "US"},
     "DELL":     {"name": "Dell",               "group": "Server & Cooling",    "threshold": 0.10, "region": "US"},
     "HPE":      {"name": "HPE",                "group": "Server & Cooling",    "threshold": 0.10, "region": "US"},
+
+    # Group 15 — Analog & Power (new segment 2026-07)
+    "TXN":      {"name": "Texas Instruments",  "group": "Analog & Power",      "threshold": 0.05, "region": "US"},
+    "ADI":      {"name": "Analog Devices",     "group": "Analog & Power",      "threshold": 0.05, "region": "US"},
+    "MCHP":     {"name": "Microchip",          "group": "Analog & Power",      "threshold": 0.10, "region": "US"},
+    "SWKS":     {"name": "Skyworks",           "group": "Analog & Power",      "threshold": 0.10, "region": "US"},
+    "QRVO":     {"name": "Qorvo",              "group": "Analog & Power",      "threshold": 0.10, "region": "US"},
+    "IFX.DE":   {"name": "Infineon",           "group": "Analog & Power",      "threshold": 0.10, "region": "EU"},
+    "6963.T":   {"name": "ローム Rohm",         "group": "Analog & Power",      "threshold": 0.10, "region": "JP"},
+    "6503.T":   {"name": "三菱電機 Mitsubishi", "group": "Analog & Power",      "threshold": 0.10, "region": "JP"},
+    "6504.T":   {"name": "富士電機 Fuji Elec",  "group": "Analog & Power",      "threshold": 0.10, "region": "JP"},
+    "NVTS":     {"name": "Navitas (GaN)",      "group": "Analog & Power",      "threshold": 0.10, "region": "US"},
+
+    # Group 16 — Passives & Package Materials (MLCC / ABF)
+    "6981.T":   {"name": "村田製作所 Murata",   "group": "Passives & Materials","threshold": 0.10, "region": "JP"},
+    "009150.KS":{"name": "Samsung 전기 SEMCO", "group": "Passives & Materials","threshold": 0.10, "region": "KR"},
+    "6976.T":   {"name": "太陽誘電 Taiyo Yuden","group": "Passives & Materials","threshold": 0.10, "region": "JP"},
+    "2327.TW":  {"name": "國巨 Yageo",          "group": "Passives & Materials","threshold": 0.10, "region": "TW"},
+    "6762.T":   {"name": "TDK",                "group": "Passives & Materials","threshold": 0.10, "region": "JP"},
+    "2802.T":   {"name": "味の素 Ajinomoto (ABF)","group": "Passives & Materials","threshold": 0.10, "region": "JP"},
+
+    # Group 17 — Equipment additions (process control / litho)
+    "CAMT":     {"name": "Camtek",             "group": "Equipment",           "threshold": 0.10, "region": "US"},
+    "NVMI":     {"name": "Nova",               "group": "Equipment",           "threshold": 0.10, "region": "US"},
+    "7731.T":   {"name": "ニコン Nikon",        "group": "Equipment",           "threshold": 0.10, "region": "JP"},
+    "7751.T":   {"name": "キヤノン Canon",      "group": "Equipment",           "threshold": 0.10, "region": "JP"},
+
+    # Group 18 — New Cloud / NeoCloud
+    "CRWV":     {"name": "CoreWeave",          "group": "New Cloud",           "threshold": 0.10, "region": "US"},
+    "NBIS":     {"name": "Nebius",             "group": "New Cloud",           "threshold": 0.10, "region": "US"},
+    "ORCL":     {"name": "Oracle",             "group": "New Cloud",           "threshold": 0.05, "region": "US"},
 
     # Group 14 — Energy for AI Datacenters
     "GEV":      {"name": "GE Vernova",         "group": "AI Energy",           "threshold": 0.10, "region": "US"},
@@ -393,7 +425,16 @@ def main():
     }
 
     with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(output, f, ensure_ascii=False, indent=2)
+        def _clean(x):
+            if isinstance(x, float) and (math.isnan(x) or math.isinf(x)):
+                return None
+            if isinstance(x, dict):
+                return {k: _clean(v) for k, v in x.items()}
+            if isinstance(x, list):
+                return [_clean(v) for v in x]
+            return x
+        # NaN is not valid JSON — browsers reject it; sanitize before writing
+        json.dump(_clean(output), f, ensure_ascii=False, indent=2, allow_nan=False)
 
     print(f"\n✓ Done. {len(spikes)} spike events written to {output_path}")
     print(f"  Tickers tracked: {len(STOCKS)}")
