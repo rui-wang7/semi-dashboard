@@ -380,6 +380,7 @@
       </div>
     </div>
     <div id="stockSummaryRow" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px"></div>
+    <div id="liveSpikesPanel" style="margin-bottom:16px"></div>
     <div id="stockSpikeTable"></div>
     <div id="stockPriceGrid" style="margin-top:20px"></div>
     <div id="stockPriceGridYTD" style="margin-top:20px"></div>
@@ -2825,9 +2826,73 @@ async function fetchLiveQuotes() {
     const dt = new Date(stockData.generated_at);
     el.textContent = `Weekly data: ${dt.toLocaleDateString()} · ⚡ Live quotes: ${new Date(liveAsOf).toLocaleString()} (${j.count} tickers · ${j.provider})`;
     renderStockPanel();
+    renderLiveSpikes();
   } catch(e) {
     const dt = new Date(stockData.generated_at);
     el.textContent = `Last updated: ${dt.toLocaleString()} · ${stockData.total_tickers} tickers · ${stockData.spike_count} spikes · (live quotes unavailable here — works on the Vercel deployment)`;
+  }
+}
+
+// Detect today's spikes from live quotes (client-side, using per-ticker thresholds
+// from stock_events.json) and render them with on-demand AI analysis buttons.
+function renderLiveSpikes() {
+  const panel = document.getElementById('liveSpikesPanel');
+  if (!panel || !liveQuotes || !stockData) return;
+  const meta = stockData.tickers || {};
+  const movers = Object.entries(liveQuotes)
+    .map(([tk, q]) => ({ tk, ...q, ...(meta[tk] || {}) }))
+    .filter(m => m.changePct != null && Math.abs(m.changePct) >= ((m.threshold || 0.10) * 100))
+    .sort((a, b) => Math.abs(b.changePct) - Math.abs(a.changePct));
+
+  if (!movers.length) {
+    panel.innerHTML = `<div style="background:#f8fafc;border:1px dashed #cbd5e1;border-radius:10px;padding:10px 14px;font-size:12px;color:#64748b">
+      ⚡ Live check (${new Date(liveAsOf).toLocaleTimeString()}): no tickers past their spike threshold today.</div>`;
+    return;
+  }
+
+  const rows = movers.map(m => {
+    const up = m.changePct >= 0;
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 12px;border-bottom:1px solid #f1f5f9">
+      <strong style="min-width:80px;font-size:12px">${m.tk}</strong>
+      <span style="min-width:130px;font-size:12px;color:#475569">${m.name || ''}</span>
+      <span style="min-width:70px;font-weight:700;font-size:12px;color:${up ? '#16a34a' : '#dc2626'}">${up ? '+' : ''}${m.changePct}%</span>
+      <span style="font-size:11px;color:#94a3b8">${m.group || ''}</span>
+      <button onclick="explainLiveSpike('${m.tk}', this)" style="margin-left:auto;padding:4px 12px;background:#8b5cf6;color:#fff;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer">🤖 AI 解读</button>
+    </div>
+    <div id="liveExplain-${m.tk.replace(/[^A-Za-z0-9]/g,'_')}" style="display:none;padding:8px 14px;background:#faf5ff;border-bottom:1px solid #f1f5f9;font-size:12px;color:#475569;line-height:1.55"></div>`;
+  }).join('');
+
+  panel.innerHTML = `
+    <div style="background:#fff;border:2px solid #8b5cf6;border-radius:12px;overflow:hidden">
+      <div style="padding:10px 14px;background:#8b5cf618;font-size:12px;font-weight:700;color:#7c3aed">
+        ⚡ LIVE SPIKES TODAY — ${movers.length} ticker${movers.length > 1 ? 's' : ''} past threshold (as of ${new Date(liveAsOf).toLocaleTimeString()})
+      </div>
+      ${rows}
+    </div>`;
+}
+
+async function explainLiveSpike(tk, btn) {
+  const q = liveQuotes[tk] || {};
+  const meta = (stockData.tickers || {})[tk] || {};
+  const box = document.getElementById('liveExplain-' + tk.replace(/[^A-Za-z0-9]/g, '_'));
+  if (!box) return;
+  box.style.display = 'block';
+  box.innerHTML = '⏳ Fetching news + AI analysis…';
+  if (btn) btn.disabled = true;
+  try {
+    const r = await fetch(`api/analyze?ticker=${encodeURIComponent(tk)}&name=${encodeURIComponent(meta.name || tk)}&move=${q.changePct ?? 0}`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    const heads = (j.headlines || []).slice(0, 4).map(h =>
+      `<li style="margin:2px 0"><a href="${h.link || '#'}" target="_blank" style="color:#6d28d9">${h.title}</a> <span style="color:#94a3b8">— ${h.publisher}${h.age_hours != null ? `, ${h.age_hours}h ago` : ''}</span></li>`).join('');
+    box.innerHTML = `
+      ${j.analysis ? `<div style="margin-bottom:6px">🤖 ${j.analysis}</div>` : ''}
+      ${j.error ? `<div style="color:#b45309;margin-bottom:6px">⚠️ ${j.error}</div>` : ''}
+      ${heads ? `<div style="font-weight:600;color:#7c3aed;font-size:11px;margin-bottom:2px">RECENT HEADLINES</div><ul style="margin:0;padding-left:18px">${heads}</ul>` : ''}`;
+  } catch (e) {
+    box.innerHTML = `⚠️ Analysis unavailable (${e.message}) — works on the Vercel deployment.`;
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 

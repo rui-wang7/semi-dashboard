@@ -4,6 +4,704 @@
   "week_end": "2026-07-04",
   "total_tickers": 116,
   "spike_count": 101,
+  "tickers": {
+    "NVDA": {
+      "name": "Nvidia",
+      "group": "Cloud & CSP (Mag7)",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "MSFT": {
+      "name": "Microsoft",
+      "group": "Cloud & CSP (Mag7)",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "GOOGL": {
+      "name": "Alphabet",
+      "group": "Cloud & CSP (Mag7)",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "AMZN": {
+      "name": "Amazon",
+      "group": "Cloud & CSP (Mag7)",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "META": {
+      "name": "Meta",
+      "group": "Cloud & CSP (Mag7)",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "AAPL": {
+      "name": "Apple",
+      "group": "Cloud & CSP (Mag7)",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "TSLA": {
+      "name": "Tesla",
+      "group": "Cloud & CSP (Mag7)",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "AMD": {
+      "name": "AMD",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "INTC": {
+      "name": "Intel",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "QCOM": {
+      "name": "Qualcomm",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "AVGO": {
+      "name": "Broadcom",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "MRVL": {
+      "name": "Marvell",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "SNPS": {
+      "name": "Synopsys",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "CDNS": {
+      "name": "Cadence",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "MPWR": {
+      "name": "Monolithic Power",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "SMCI": {
+      "name": "Super Micro",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "CEVA": {
+      "name": "CEVA",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "2454.TW": {
+      "name": "MediaTek 聯發科",
+      "group": "AI Chip / Fabless",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "TSM": {
+      "name": "TSMC (ADR)",
+      "group": "Foundry & IDM",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "2330.TW": {
+      "name": "TSMC 台積電",
+      "group": "Foundry & IDM",
+      "threshold": 0.05,
+      "region": "TW"
+    },
+    "GFS": {
+      "name": "GlobalFoundries",
+      "group": "Foundry & IDM",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "UMC": {
+      "name": "UMC (ADR)",
+      "group": "Foundry & IDM",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "2303.TW": {
+      "name": "UMC 聯電",
+      "group": "Foundry & IDM",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "STM": {
+      "name": "STMicro",
+      "group": "Foundry & IDM",
+      "threshold": 0.1,
+      "region": "EU"
+    },
+    "NXPI": {
+      "name": "NXP Semi",
+      "group": "Foundry & IDM",
+      "threshold": 0.1,
+      "region": "EU"
+    },
+    "ON": {
+      "name": "onsemi",
+      "group": "Foundry & IDM",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "WOLF": {
+      "name": "Wolfspeed",
+      "group": "Foundry & IDM",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "TSEM": {
+      "name": "Tower Semi",
+      "group": "Foundry & IDM",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "005930.KS": {
+      "name": "Samsung 삼성전자",
+      "group": "Foundry & IDM",
+      "threshold": 0.05,
+      "region": "KR"
+    },
+    "ASML": {
+      "name": "ASML",
+      "group": "Equipment",
+      "threshold": 0.05,
+      "region": "EU"
+    },
+    "AMAT": {
+      "name": "Applied Materials",
+      "group": "Equipment",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "LRCX": {
+      "name": "Lam Research",
+      "group": "Equipment",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "KLAC": {
+      "name": "KLA",
+      "group": "Equipment",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "ONTO": {
+      "name": "Onto Innovation",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "ACLS": {
+      "name": "Axcelis",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "8035.T": {
+      "name": "東京エレクトロン (TEL)",
+      "group": "Equipment",
+      "threshold": 0.05,
+      "region": "JP"
+    },
+    "6920.T": {
+      "name": "レーザーテック Lasertec",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "7735.T": {
+      "name": "SCREEN Holdings",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "6857.T": {
+      "name": "Advantest",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "6525.T": {
+      "name": "Kokusai Electric",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "BESI.AS": {
+      "name": "Besi Semi",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "EU"
+    },
+    "ENTG": {
+      "name": "Entegris",
+      "group": "Materials",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "MKSI": {
+      "name": "MKS Instruments",
+      "group": "Materials",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "AZTA": {
+      "name": "Azenta",
+      "group": "Materials",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "4063.T": {
+      "name": "信越化学 Shin-Etsu",
+      "group": "Materials",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "3436.T": {
+      "name": "SUMCO",
+      "group": "Materials",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "7741.T": {
+      "name": "Hoya",
+      "group": "Materials",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "7912.T": {
+      "name": "大日本印刷 DNP",
+      "group": "Materials",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "AMKR": {
+      "name": "Amkor",
+      "group": "OSAT / Packaging",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "ASX": {
+      "name": "ASE Group (ADR)",
+      "group": "OSAT / Packaging",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "3711.TW": {
+      "name": "日月光 ASE",
+      "group": "OSAT / Packaging",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "COHU": {
+      "name": "Cohu",
+      "group": "OSAT / Packaging",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "FORM": {
+      "name": "FormFactor",
+      "group": "OSAT / Packaging",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "ANET": {
+      "name": "Arista Networks",
+      "group": "Networking / Optical",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "COHR": {
+      "name": "Coherent",
+      "group": "Networking / Optical",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "LITE": {
+      "name": "Lumentum",
+      "group": "Networking / Optical",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "VIAV": {
+      "name": "Viavi Solutions",
+      "group": "Networking / Optical",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "AAOI": {
+      "name": "Applied Opto",
+      "group": "Networking / Optical",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "300308.SZ": {
+      "name": "中际旭创",
+      "group": "Networking / Optical",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "MU": {
+      "name": "Micron",
+      "group": "Memory",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "WDC": {
+      "name": "Western Digital",
+      "group": "Memory",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "SNDK": {
+      "name": "SanDisk",
+      "group": "Memory",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "STX": {
+      "name": "Seagate",
+      "group": "Memory",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "000660.KS": {
+      "name": "SK Hynix",
+      "group": "Memory",
+      "threshold": 0.05,
+      "region": "KR"
+    },
+    "0981.HK": {
+      "name": "中芯国际 SMIC",
+      "group": "HK Listed",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "1347.HK": {
+      "name": "华虹半导体",
+      "group": "HK Listed",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "0522.HK": {
+      "name": "ASM Pacific",
+      "group": "HK Listed",
+      "threshold": 0.1,
+      "region": "HK"
+    },
+    "0992.HK": {
+      "name": "联想 Lenovo",
+      "group": "HK Listed",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "9988.HK": {
+      "name": "阿里巴巴 Alibaba",
+      "group": "HK Listed",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "0700.HK": {
+      "name": "腾讯 Tencent",
+      "group": "HK Listed",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "002371.SZ": {
+      "name": "北方华创 NAURA",
+      "group": "A Shares",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "688012.SH": {
+      "name": "中微公司 AMEC",
+      "group": "A Shares",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "688256.SH": {
+      "name": "寒武纪 Cambricon",
+      "group": "A Shares",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "688041.SH": {
+      "name": "海光信息",
+      "group": "A Shares",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "600584.SS": {
+      "name": "长电科技 JCET",
+      "group": "A Shares",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "002129.SZ": {
+      "name": "中环股份",
+      "group": "A Shares",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "002384.SZ": {
+      "name": "东山精密",
+      "group": "A Shares",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "002463.SZ": {
+      "name": "沪电股份",
+      "group": "A Shares",
+      "threshold": 0.1,
+      "region": "CN"
+    },
+    "6488.TW": {
+      "name": "環球晶 GlobalWafers",
+      "group": "Taiwan Listed",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "2382.TW": {
+      "name": "廣達 Quanta",
+      "group": "Taiwan Listed",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "2317.TW": {
+      "name": "鴻海 Foxconn",
+      "group": "Taiwan Listed",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "3037.TW": {
+      "name": "欣興 Unimicron",
+      "group": "Taiwan Listed",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "6501.T": {
+      "name": "日立 Hitachi",
+      "group": "Japan (Non-Equip)",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "6758.T": {
+      "name": "ソニー Sony",
+      "group": "Japan (Non-Equip)",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "7911.T": {
+      "name": "凸版印刷 Toppan",
+      "group": "Japan (Non-Equip)",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "VRT": {
+      "name": "Vertiv",
+      "group": "Server & Cooling",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "DELL": {
+      "name": "Dell",
+      "group": "Server & Cooling",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "HPE": {
+      "name": "HPE",
+      "group": "Server & Cooling",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "TXN": {
+      "name": "Texas Instruments",
+      "group": "Analog & Power",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "ADI": {
+      "name": "Analog Devices",
+      "group": "Analog & Power",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "MCHP": {
+      "name": "Microchip",
+      "group": "Analog & Power",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "SWKS": {
+      "name": "Skyworks",
+      "group": "Analog & Power",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "QRVO": {
+      "name": "Qorvo",
+      "group": "Analog & Power",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "IFX.DE": {
+      "name": "Infineon",
+      "group": "Analog & Power",
+      "threshold": 0.1,
+      "region": "EU"
+    },
+    "6963.T": {
+      "name": "ローム Rohm",
+      "group": "Analog & Power",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "6503.T": {
+      "name": "三菱電機 Mitsubishi",
+      "group": "Analog & Power",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "6504.T": {
+      "name": "富士電機 Fuji Elec",
+      "group": "Analog & Power",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "NVTS": {
+      "name": "Navitas (GaN)",
+      "group": "Analog & Power",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "6981.T": {
+      "name": "村田製作所 Murata",
+      "group": "Passives & Materials",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "009150.KS": {
+      "name": "Samsung 전기 SEMCO",
+      "group": "Passives & Materials",
+      "threshold": 0.1,
+      "region": "KR"
+    },
+    "6976.T": {
+      "name": "太陽誘電 Taiyo Yuden",
+      "group": "Passives & Materials",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "2327.TW": {
+      "name": "國巨 Yageo",
+      "group": "Passives & Materials",
+      "threshold": 0.1,
+      "region": "TW"
+    },
+    "6762.T": {
+      "name": "TDK",
+      "group": "Passives & Materials",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "2802.T": {
+      "name": "味の素 Ajinomoto (ABF)",
+      "group": "Passives & Materials",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "CAMT": {
+      "name": "Camtek",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "NVMI": {
+      "name": "Nova",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "7731.T": {
+      "name": "ニコン Nikon",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "7751.T": {
+      "name": "キヤノン Canon",
+      "group": "Equipment",
+      "threshold": 0.1,
+      "region": "JP"
+    },
+    "CRWV": {
+      "name": "CoreWeave",
+      "group": "New Cloud",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "NBIS": {
+      "name": "Nebius",
+      "group": "New Cloud",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "ORCL": {
+      "name": "Oracle",
+      "group": "New Cloud",
+      "threshold": 0.05,
+      "region": "US"
+    },
+    "GEV": {
+      "name": "GE Vernova",
+      "group": "AI Energy",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "CEG": {
+      "name": "Constellation Energy",
+      "group": "AI Energy",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "VST": {
+      "name": "Vistra",
+      "group": "AI Energy",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "SMR": {
+      "name": "NuScale Power",
+      "group": "AI Energy",
+      "threshold": 0.1,
+      "region": "US"
+    },
+    "BWXT": {
+      "name": "BWX Technologies",
+      "group": "AI Energy",
+      "threshold": 0.1,
+      "region": "US"
+    }
+  },
   "all_prices": {
     "NVDA": [
       {

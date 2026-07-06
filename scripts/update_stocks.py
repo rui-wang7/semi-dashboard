@@ -419,6 +419,8 @@ def main():
         "week_end": week_end,
         "total_tickers": len(STOCKS),
         "spike_count": len(spikes),
+        # ticker metadata so the front-end can detect live spikes client-side
+        "tickers": STOCKS,
         "all_prices": all_prices,
         "all_prices_ytd": all_prices_ytd,
         "spikes": spikes,
